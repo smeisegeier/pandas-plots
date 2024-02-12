@@ -4,29 +4,29 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pandas-plots"
-version = "0.0.1"
+version = "0.0.2"
 requires-python = ">=3.10"
 description = "A collection of helper for pandas n plots"
 readme = "README.md"
 authors = [{ name = "smeisegeier", email = "dsexterDSDo@googlemail.com" }]
 license = { file = "LICENSE" }
-# classifiers = [
-#     "License :: OSI Approved :: MIT License",
-#     "Programming Language :: Python",
-#     "Programming Language :: Python :: 3",
-# ]
-# keywords = ["feed", "reader", "tutorial"]
-# dependencies = [
-#     "feedparser >= 5.2.0",
-#     "html2text",
-#     'tomli; python_version < "3.11"',
-# ]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["tables", "pivot", "plotly"]
+dependencies = [
+    "pandas >= 2.0.0",
+    "plotly",
+    "matplotlib",
+    "seaborn",
+]
 
-[project.optional-dependencies]
+# [project.optional-dependencies]
 # dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/smeisegeier/pandas-plots"
 
-[project.scripts]
+# [project.scripts]
 # realpython = "reader.__main__:main"
