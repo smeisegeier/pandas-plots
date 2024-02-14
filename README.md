@@ -45,7 +45,7 @@ It is subdivided into:
   - `plot_stacked_bars()` shortcut to stacked bars 😄
   - `plot_quadrants()` quickly show a 2x2 heatmap
 
-- `sql` is added as convienient wrapper for fetching data from sql databases
+- `sql` is added as convienience wrapper for fetching data from sql databases
   - `connect_sql` get data from `['mssql', 'sqlite','postgres']` 
 
 ## dependencies
