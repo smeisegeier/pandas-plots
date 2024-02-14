@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pandas-plots"
-version = "0.3.1"
+version = "0.7.0"
 requires-python = ">=3.10"
-description = "A collection of helper for pandas n plots"
+description = "A collection of helper for table handling and vizualization"
 readme = "README.md"
 authors = [{ name = "smeisegeier", email = "dsexterDSDo@googlemail.com" }]
 license = { file = "LICENSE" }

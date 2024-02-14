@@ -46,6 +46,21 @@ It is subdivided into:
   - `plot_quadrants()` quickly show a 2x2 heatmap
 
 - `sql` is added as convienience wrapper for fetching data from sql databases
-  - `connect_sql` get data from `['mssql', 'sqlite','postgres']` 
+  - `connect_sql` get data from `['mssql', 'sqlite','postgres']`
+
+## another example
+
+```python
+# quick and exhaustive description of any table
+tbl.describe_df(df, 'taxi', top_n_uniques=5)
+```
+![describe_df](img/2024-02-14-20-49-00.png)
+
+```python
+# show pivoted values for selected columns
+tbl.pivot_df(df[['color', 'payment', 'fare']])
+```
+![pivot_df](img/2024-02-14-20-45-45.png)
+
 
 ## dependencies
