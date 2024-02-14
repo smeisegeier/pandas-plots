@@ -54,13 +54,14 @@ It is subdivided into:
 # quick and exhaustive description of any table
 tbl.describe_df(df, 'taxi', top_n_uniques=5)
 ```
-![describe_df](img/2024-02-14-20-49-00.png)
+
+![describe_df](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-14-20-49-00.png?raw=true)
 
 ```python
 # show pivoted values for selected columns
 tbl.pivot_df(df[['color', 'payment', 'fare']])
 ```
-![pivot_df](img/2024-02-14-20-45-45.png)
 
+![pivot_df](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-14-20-45-45.png?raw=true)
 
 ## dependencies
