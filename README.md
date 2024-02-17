@@ -52,6 +52,9 @@ It is subdivided into:
 - `sql` is added as convienience wrapper for retrieving data from sql databases
   - `connect_sql` get data from `['mssql', 'sqlite','postgres']`
 
+- `txt` includes some text based utilities
+  - `wrap` formats strings or lists to a given width to fit nicely on the screen
+
 ## more examples
 
 ```python

@@ -11,6 +11,7 @@ import math
 import os
 from plotly.subplots import make_subplots
 # pd.options.mode.chained_assignment = None
+from . import txt
 
 # ! check pandas version
 assert pd.__version__ > '2.0.0', 'pandas version must be >= 2.0.0'
@@ -76,7 +77,8 @@ def describe_df(
         if df[col].dtype=='object':
             df[col]=df[col].astype(str)
         # * get unique values
-        unis = df[col].sort_values().unique()
+        # unis = df[col].sort_values().unique()
+        unis = list(df[col].value_counts().sort_index().index)
         # * get header
         header = f"🟠 {col}({len(unis):_}|{df[col].dtype})"
         return unis, header
@@ -85,8 +87,11 @@ def describe_df(
     for col in df.columns[:]:
         _u, _h = get_uniques_header(col)
         if use_columns:
-            # * limit output to 100 items
-            print(f"{_h} {_u[:top_n_uniques]}")
+            # * check col type
+            is_str=df.loc[:,col].dtype.kind == 'O'
+            # * wrap output
+            print(f"{_h} {txt.wrap(_u[:top_n_uniques], max_items_in_line=70, apo=is_str)}")
+            # print(f"{_h} {_u[:top_n_uniques]}")
         else:
             print(f"{_h}")
 
