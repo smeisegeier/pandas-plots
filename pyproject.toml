@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pandas-plots"
-version = "0.7.1"
+version = "0.8.0"
 requires-python = ">=3.10"
 description = "A collection of helper for table handling and vizualization"
 readme = "README.md"
@@ -19,12 +19,13 @@ classifiers = [
     'Operating System :: OS Independent',
     'Topic :: Scientific/Engineering'    
 ]
-keywords = ["tables", "pivot", "plotly"]
+keywords = ["tables", "pivot", "plotly", "venn", "plot", "vizualization"]
 dependencies = [
     "pandas >= 2.0.0",
-    "plotly",
-    "matplotlib",
-    "seaborn",
+    "plotly >= 5.18.0",
+    "matplotlib >= 3.8.2",
+    "matplotlib-venn >= 0.11.10",
+    "seaborn >= 0.13.2",
     "sqlalchemy < 2.0.0",
 ]
 

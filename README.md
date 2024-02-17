@@ -13,7 +13,7 @@ pip install pandas-plots -U
 include in python
 
 ```python
-from pandas_plots import tbl, viz
+from pandas_plots import tbl, plt, ven
 ```
 
 ## example
@@ -23,7 +23,7 @@ from pandas_plots import tbl, viz
 import seaborn as sb
 df = sb.load_dataset('taxis')
 
-viz.plot_box(df['fare'], height=400, violin=True)
+plt.plot_box(df['fare'], height=400, violin=True)
 ```
 
 ![plot_box](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-13-00-40-27.png?raw=true)
@@ -38,21 +38,25 @@ It is subdivided into:
   - `describe_df()` an alternative version of pandas `describe()` function
   - `pivot_df()` gets a pivot table of a 3 column dataframe
 
-- `viz` utilities for plotly visualizations
+- `plt` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
   - `plot_boxes()` multiple boxplots _(annotation is experimental)_
   - `plots_bars()` a standardized bar plot
   - `plot_stacked_bars()` shortcut to stacked bars 😄
-  - `plot_quadrants()` quickly show a 2x2 heatmap
+  - `plot_quadrants()` quickly shows a 2x2 heatmap
 
-- `sql` is added as convienience wrapper for fetching data from sql databases
+- `ven` offers functions for _venn diagrams_
+  - `show_venn2()` displays a venn diagram for 2 sets
+  - `show_venn3()` displays a venn diagram for 3 sets
+
+- `sql` is added as convienience wrapper for retrieving data from sql databases
   - `connect_sql` get data from `['mssql', 'sqlite','postgres']`
 
-## another example
+## more examples
 
 ```python
 # quick and exhaustive description of any table
-tbl.describe_df(df, 'taxi', top_n_uniques=5)
+tbl.describe_df(df, 'taxis', top_n_uniques=5)
 ```
 
 ![describe_df](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-14-20-49-00.png?raw=true)
@@ -63,5 +67,27 @@ tbl.pivot_df(df[['color', 'payment', 'fare']])
 ```
 
 ![pivot_df](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-14-20-45-45.png?raw=true)
+
+```python
+# show venn diagram for 3 sets
+from pandas_plots import ven
+
+set_a = set(df.pickup_zone)
+set_b = set(df.dropoff_zone)
+set_c = set(df['pickup_borough'])
+_df, _details = ven.show_venn3(
+    "taxis",
+    set_a,
+    "pick",
+    set_b,
+    "drop",
+    c_set=set_c,
+    c_label="borough",
+    verbose=0,
+    size=8,
+)
+```
+
+![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-17-11-43-46.png?raw=true)
 
 ## dependencies

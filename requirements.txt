@@ -1,6 +1,7 @@
 appnope==0.1.4
 asttokens==2.4.1
 attrs==23.2.0
+build==1.0.3
 certifi==2024.2.2
 charset-normalizer==3.3.2
 comm==0.2.1
@@ -29,6 +30,7 @@ kiwisolver==1.4.5
 markdown-it-py==3.0.0
 matplotlib==3.8.2
 matplotlib-inline==0.1.6
+matplotlib-venn==0.11.10
 mdurl==0.1.2
 more-itertools==10.2.0
 nbformat==5.9.2
@@ -51,6 +53,7 @@ ptyprocess==0.7.0
 pure-eval==0.2.2
 Pygments==2.17.2
 pyparsing==3.1.1
+pyproject_hooks==1.0.0
 python-dateutil==2.8.2
 pytz==2024.1
 pyzmq==25.1.2
@@ -67,6 +70,7 @@ six==1.16.0
 stack-data==0.6.3
 statsmodels==0.14.1
 tenacity==8.2.3
+tomli==2.0.1
 tornado==6.4
 traitlets==5.14.1
 twine==4.0.2
