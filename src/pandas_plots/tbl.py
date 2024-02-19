@@ -66,7 +66,7 @@ def describe_df(
     if len(df) == 0:
         print(f"DataFrame is empty!")
         return
-    
+    # todo maybe show col list only once
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}")
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
     print(f"🟣 duplicates: {df.duplicated().sum():_}")
@@ -166,7 +166,7 @@ def describe_df(
     fig.update_layout(template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly")
     fig.show(renderer)
 
-
+# todo rebuild into using show_df, this also affects api
 def pivot_df(
     df: pd.DataFrame,
     dropna: bool = False,
@@ -327,7 +327,116 @@ def pivot_df(
             # dict(selector="th:nth-child(1)", props=_props),
         ]
     )
-
+    # todo return out
     display(out)
     return
 
+# todo check if date col can be included
+def show_num_df(
+    df,
+    axis: Literal["x", "all", None] = None,
+    show_totals: bool = False,
+    show_bars: bool = False,
+    show_pct: bool = False,
+    swap: bool = False,
+    precision=0,
+):
+    """
+    Generate a styled display of a DataFrame, including options for axis, totals, bars, percentages, and precision.
+    Table must contain numeric data only (int / float).
+
+    Parameters:
+    - df: DataFrame to display
+    - axis: Axis to show additional information on ("x", "all", None)
+    - show_totals: Whether to show totals
+    - show_bars: Whether to show data bars
+    - show_pct: Whether to show percentages
+    - swap: Whether to transpose the DataFrame
+    - precision: Number of decimal places for formatting
+
+    Returns:
+    - out: Styled display of the DataFrame
+    """
+    # * ensure arguments match parameter definition
+    if any([df[col].dtype.kind not in ['i','u','f'] for col in df.columns]) == True:
+        print(f"❌ table must contain numeric data only")
+        return
+    
+    if axis not in ["x", "all"]:
+        print(f"❌ axis '{axis}' not supported")
+        return
+
+    theme = os.getenv("THEME") or "light"
+    
+    # * copy df, do not reference original
+    df_ = df.copy() if not swap else df.T.copy()
+    
+    # * alter _df, add totals
+    if show_totals and axis:
+        df_.loc["Total"] = df_.sum(axis=0)
+    if show_totals and axis == "all":
+        df_.loc[:, "Total"] = df_.sum(axis=1)
+
+    # * derive style
+    out = df_.style
+
+    color_highlight = "lightblue" if theme == "light" else "darkgrey"
+    color_zeros = "grey" if theme == "light" else "grey"
+    color_pct = "grey" if theme == "light" else "yellow"
+    color_values = "black" if theme == "light" else "white"
+    color_minus = "red" if theme == "light" else "red"
+
+    # * apply data bar coloring
+    if show_bars and axis:
+        out.bar(
+            color=f"{color_highlight}",
+            axis= 0 if axis == "x" else None,
+        )
+
+    # * all cell formatting in one place
+    # hack call hierarchy is not very well organized. all options land here, even if no cellwise formatting is applied
+    def format_cell(cell, sum, show_pct):
+        if cell == 0:
+            return f'<span style="color: {color_zeros}">{cell:.0f}</span>'
+        if cell < 0:
+            return f'<span style="color: {color_minus}">{cell:_.{precision}f}</span>'
+        # * here cell > 0
+        if show_pct:
+            return f'{cell:_.{precision}f} <span style="color: {color_pct}">({(cell /sum):.1%})</span>'
+        return f'{cell:_.{precision}f}'
+
+    # * build pct formatting
+    
+    if axis =='x':
+        # * totals on either axis influence the sum
+        divider = 2 if show_totals and axis in(['x','all']) else 1
+        # * cell formatting to each column instead of altering values w/ df.apply
+        # * uses dictionary comprehension, and a lambda function with two input variables
+        col_sums = df_.sum() / divider
+        formatter = {
+            col: lambda x, col=col: format_cell(x, col_sums[col], show_pct) for col in df_.columns
+        }
+
+    # ? y is not implemented, needs row wise formatting
+    # elif axis=='y':
+    #     row_sums = _df.sum(axis=1) / divider
+    #     formatter = {
+    #         row: lambda x, row=row: format_cell(x, row_sums[row]) for row in _df.index
+    #     }
+
+    elif axis=='all':
+        divider = 2 if show_totals and axis in(['x']) else 4 if show_totals and axis == 'all' else 1
+        n = df_.sum().sum() / divider
+        formatter = {
+            col: lambda x, col=col: format_cell(x, n, show_pct) for col in df_.columns
+        }
+    else:
+        # * 
+        formatter = {
+            col: lambda x, col=col: format_cell(x, x, False) for col in df_.columns
+        }
+
+    out.format(formatter=formatter)
+    return out
+
+# display(test(df1_1_tum, axis="x", show_totals=True, show_bars=True, show_pct=False, swap=False, precision=0))
