@@ -271,13 +271,23 @@ def plot_stacked_bars(
     _fig.update_xaxes(
         showgrid=True, 
         gridwidth=1,
-        dtick=.05 if orientation == "h" and normalize else 5 if orientation == "h" and relative else None,
         )
     _fig.update_yaxes(
         showgrid=True, 
         gridwidth=1,
-        dtick=.05 if orientation == "v" and normalize else 5 if orientation == "v" and relative else None,
         )
+    
+    # * set dtick
+    if orientation == "h":
+        if relative:
+            _fig.update_xaxes(dtick=5)
+        elif normalize:
+            _fig.update_xaxes(dtick=.05) 
+    else:
+        if relative:
+            _fig.update_yaxes(dtick=5)
+        elif normalize:
+            _fig.update_yaxes(dtick=.05)
 
     # * sorting is in a weird spot, do a 1:1 matrix
     if orientation == "v" and sort_values:
