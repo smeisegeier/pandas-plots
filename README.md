@@ -13,7 +13,7 @@ pip install pandas-plots -U
 include in python
 
 ```python
-from pandas_plots import tbl, plt, ven
+from pandas_plots import tbl, pls, ven
 ```
 
 ## example
@@ -23,7 +23,7 @@ from pandas_plots import tbl, plt, ven
 import seaborn as sb
 df = sb.load_dataset('taxis')
 
-plt.plot_box(df['fare'], height=400, violin=True)
+pls.plot_box(df['fare'], height=400, violin=True)
 ```
 
 ![plot_box](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-13-00-40-27.png?raw=true)
@@ -39,7 +39,7 @@ It is subdivided into:
   - `pivot_df()` gets a pivot table of a 3 column dataframe
   - 🆕 `show_num_df()` displays a table as styled version with additional information
 
-- `plt` for plotly visualizations
+- `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
   - `plot_boxes()` multiple boxplots _(annotation is experimental)_
   - `plots_bars()` a standardized bar plot
@@ -55,6 +55,8 @@ It is subdivided into:
 
 - `txt` includes some text based utilities
   - `wrap` formats strings or lists to a given width to fit nicely on the screen
+
+> note: theming can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 
 ## more examples
 
@@ -76,24 +78,22 @@ tbl.pivot_df(df[['color', 'payment', 'fare']])
 # show venn diagram for 3 sets
 from pandas_plots import ven
 
-set_a = set(df.pickup_zone)
-set_b = set(df.dropoff_zone)
-set_c = set(df['pickup_borough'])
+set_a = {'ford','ferrari','mercedes', 'bmw'}
+set_b = {'opel','bmw','bentley','audi'}
+set_c = {'ferrari','bmw','chrysler','renault','peugeot','fiat'}
 _df, _details = ven.show_venn3(
-    "taxis",
-    set_a,
-    "pick",
-    set_b,
-    "drop",
+    title="taxis",
+    a_set=set_a,
+    a_label="cars1",
+    b_set=set_b,
+    b_label="cars2",
     c_set=set_c,
-    c_label="borough",
+    c_label="cars3",
     verbose=0,
     size=8,
 )
 ```
 
-![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-17-11-43-46.png?raw=true)
+![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-19-20-49-52.png?raw=true)
 
 ## dependencies
-
-<!-- todo add themeing hint -->

@@ -27,7 +27,7 @@ def plot_quadrants(
                 columns axis
                 values (can be derived as cnt=1)
             df columns must contain 2 values
-        title (str, optional): The title for the heatmap. Defaults to None.
+        title (str, optional): The title for the heatmap to override the default. 
         caption (str, optional): The caption for the heatmap. Defaults to None.
 
     Returns:
@@ -61,7 +61,7 @@ def plot_quadrants(
     n = heat_wide.sum().sum()
     heat_label = heat_wide.map(lambda x: f'{x:_}\n({x/n*100:.1f}%)')
     
-    
+    # * seaborn. use less fancy stuff :)
     caption= f'#{caption.lower()}, ' if caption else 'heatmap, '
 
     # * plot
@@ -96,7 +96,8 @@ def plot_stacked_bars(
     top_n_color: int = 0,
     dropna: bool = False,
     swap: bool = False,
-    normalize: Literal['values','bars',False] = False,
+    normalize: bool = False,
+    relative: bool = False,
     orientation: Literal["h", "v"] = "v",
     height: int=500,
     width: int=2000,
@@ -119,7 +120,8 @@ def plot_stacked_bars(
     - top_n_index: int = 0 - The number of top colors to include in the plot. WARNING: this forces distribution to 100% on a subset
     - dropna: bool = False - Whether to include NULL values in the plot.
     - swap: bool = False - Whether to swap the x-axis and y-axis.
-    - normalize: Literal['values','bars',False] = False - The normalization method for the bars.
+    - normalize: bool = False - Whether to normalize the values.
+    - relative: bool = False - Whether to show relative values as bars instead of absolute.
     - orientation: Literal["h", "v"] = "v" - The orientation of the plot.
     - height: int = 500 - The height of the plot.
     - width: An optional integer indicating the width of the chart. Default is 2000.
@@ -246,7 +248,7 @@ def plot_stacked_bars(
     )
     
     # * ignore if bar mode is on 
-    if normalize != 'bars':
+    if not relative:
         if orientation == "v":
             _fig.update_yaxes(range=[0, bar_max])
         else:
@@ -269,12 +271,12 @@ def plot_stacked_bars(
     _fig.update_xaxes(
         showgrid=True, 
         gridwidth=1,
-        dtick=.05 if orientation == "h" and normalize == 'values' else 5 if orientation == "h" and normalize == 'bars' else None,
+        dtick=.05 if orientation == "h" and normalize else 5 if orientation == "h" and relative else None,
         )
     _fig.update_yaxes(
         showgrid=True, 
         gridwidth=1,
-        dtick=.05 if orientation == "v" and normalize == 'values' else 5 if orientation == "v" and normalize == 'bars' else None,
+        dtick=.05 if orientation == "v" and normalize else 5 if orientation == "v" and relative else None,
         )
 
     # * sorting is in a weird spot, do a 1:1 matrix
@@ -317,7 +319,7 @@ def plot_bars(
     - dropna: A boolean indicating whether to drop NaN values from the chart. Default is False.
     - orientation: A string indicating the orientation of the chart. It can be either "h" for horizontal or "v" for vertical. Default is "v".
     - sort_values: A boolean indicating whether to sort the values in the chart. Default is False.
-    - nomalize: A boolean indicating whether to inluce pct values in the chart. Default is False.
+    - nomalize: A boolean indicating whether to show pct values in the chart. Default is False.
     - height: An optional integer indicating the height of the chart. Default is 500.
     - width: An optional integer indicating the width of the chart. Default is 2000.
     - title: An optional string indicating the title of the chart. If not provided, the title will be the name of the index column.
@@ -467,7 +469,7 @@ def plot_bars(
 
 def plot_box(
     ser: pd.Series, 
-    points: Literal['all', 'outliers', 'suspectedoutlieres', False] = False,
+    points: Literal['all', 'outliers', 'suspectedoutlieres', None] = None,
     precision: int=2,
     height: int=200,
     width: int=1200,
@@ -481,7 +483,7 @@ def plot_box(
 
     Args:
         ser: The pandas Series to plot.
-        points: The type of points to plot on the box plot ('all', 'outliers', 'suspectedoutliers', False).
+        points: The type of points to plot on the box plot ('all', 'outliers', 'suspectedoutliers', None).
         precision: The precision of the annotations.
         height: The height of the plot.
         width: The width of the plot.
@@ -550,7 +552,7 @@ def plot_box(
 def plot_boxes(
     df: pd.DataFrame,
     caption: str=None,
-    points: Literal["all", "outliers", "suspectedoutliers", False] = False,
+    points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
     width: int = 800,
@@ -563,7 +565,7 @@ def plot_boxes(
     Args:
         df (pd.DataFrame): The input DataFrame with two columns, where the first column is string type and the second column is numeric.
         caption (str): The caption for the plot.
-        points (Literal["all", "outliers", "suspectedoutliers", True]): The points to be plotted.
+        points (Literal["all", "outliers", "suspectedoutliers", None]): The points to be plotted.
         precision (int): The precision for rounding the statistics.
         height (int): The height of the plot.
         width (int): The width of the plot.
