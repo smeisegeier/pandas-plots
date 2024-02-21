@@ -167,6 +167,7 @@ def describe_df(
     fig.update_layout(template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly")
     fig.show(renderer)
 
+
 def pivot_df(
     df: pd.DataFrame,
     dropna: bool = False,
@@ -177,6 +178,7 @@ def pivot_df(
     pct_axis: Literal["x", "xy", None] = "xy",
     precision: int = 0,
     show_totals: bool = True,
+    heatmap_axis: Literal["x","y","xy", None] = None,
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters and return the result as a new DataFrame.
@@ -191,6 +193,7 @@ def pivot_df(
         pct_axis (Literal["x", "xy", None], optional): The axis for displaying percentages. Defaults to None.
         precision (int, optional): The precision for displaying values. Defaults to 0.
         show_totals (bool, optional): Whether to show totals in the result. Defaults to False.
+        heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
         
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -208,8 +211,10 @@ def pivot_df(
         print("❌ 3rd column must be numeric")
         return
 
-    col_index = df.columns[0] if not swap else df.columns[1]
-    col_column = df.columns[1] if not swap else df.columns[0]
+    df = df.copy()
+
+    col_index = df.columns[0]
+    col_column = df.columns[1]
     col_value: str = df.columns[2]
 
     if not dropna:
@@ -252,11 +257,12 @@ def pivot_df(
     )
     df = df.fillna(0)  # .astype(_type)
 
-    return show_num_df(df, show_totals=show_totals, data_bar_axis=data_bar_axis, pct_axis=pct_axis, swap=swap, precision=precision)
+    return show_num_df(df, show_totals=show_totals, data_bar_axis=data_bar_axis, pct_axis=pct_axis, swap=swap, precision=precision, heatmap_axis=heatmap_axis)
 
 def show_num_df(
     df,
     show_totals: bool = False,
+    heatmap_axis: Literal["x","y","xy", None] = None,
     data_bar_axis: Literal["x","y","xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
     swap: bool = False,
@@ -268,6 +274,7 @@ def show_num_df(
     Parameters:
     - df: the DataFrame to display
     - show_totals: a boolean indicating whether to show totals
+    - heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
     - data_bar_axis: a Literal indicating the axis for applying data bar coloring ["x","y","xy", None]
     - pct_axis: a Literal indicating the directions for displaying percentages ["x","xy", None]. "x" means sum up pct per column
     - swap: a boolean indicating whether to swap the axes
@@ -280,7 +287,7 @@ def show_num_df(
         print(f"❌ table must contain numeric data only")
         return
     
-    if (pct_axis and pct_axis not in ["x", "xy"]) or (data_bar_axis and  data_bar_axis not in ["x","y","xy"]):
+    if (pct_axis and pct_axis not in ["x", "xy"]) or (data_bar_axis and  data_bar_axis not in ["x","y","xy"]) or (heatmap_axis and heatmap_axis not in ["x","y","xy"]):
         print(f"❌ axis not supported")
         return
 
@@ -302,6 +309,7 @@ def show_num_df(
     color_pct = "grey" if theme == "light" else "yellow"
     color_values = "black" if theme == "light" else "white"
     color_minus = "red" if theme == "light" else "red"
+    cmap_heat="Blues" if theme == "light" else "copper" 
 
     # * apply data bar coloring
     if data_bar_axis:
@@ -370,5 +378,8 @@ def show_num_df(
             # dict(selector="th:nth-child(1)", props=_props),
         ]
     )
+
+    if heatmap_axis:
+        out.background_gradient(cmap=cmap_heat, axis=None if heatmap_axis=="xy" else 0 if heatmap_axis=="y" else 1)
 
     return out
