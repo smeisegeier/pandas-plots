@@ -1,24 +1,27 @@
 import warnings
-warnings.filterwarnings('ignore')
 
-from scipy import stats
+warnings.filterwarnings("ignore")
+
+import math
+import os
 from typing import Literal
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import pandas as pd
-import math
-import os
 from plotly.subplots import make_subplots
+from scipy import stats
+
 # pd.options.mode.chained_assignment = None
 from . import txt
 
 # ! check pandas version
-assert pd.__version__ > '2.0.0', 'pandas version must be >= 2.0.0'
+assert pd.__version__ > "2.0.0", "pandas version must be >= 2.0.0"
+
 
 def describe_df(
     df: pd.DataFrame,
-    caption: str, 
+    caption: str,
     use_plot: bool = True,
     use_columns: bool = True,
     renderer: Literal["png", "svg", None] = "png",
@@ -44,7 +47,7 @@ def describe_df(
     sort_mode (Literal["value", "index"]): sort by value or index
     top_n_uniques (int): number of uniques to display
     top_n_chars_in_index (int): number of characters to display on plot axis
-    
+
     usage:
     describe_df(
         df=df,
@@ -56,12 +59,12 @@ def describe_df(
         fig_offset=None,
         sort_mode="value",
     )
-    
+
     hint: skewness may not properly work if the columns is float and/or has only 1 value
     """
     # * copy df, df col types are modified
     df = df.copy()
-    
+
     # * check if df is empty
     if len(df) == 0:
         print(f"DataFrame is empty!")
@@ -73,10 +76,11 @@ def describe_df(
     print(f"🟣 missings: {dict(df.isna().sum())}")
     print("--- column uniques (all)")
     print(f"🟠 index {txt.wrap(df.index.tolist()[:top_n_uniques])}")
+
     def get_uniques_header(col: str):
         # * sorting has issues when col is of mixed type (object)
-        if df[col].dtype=='object':
-            df[col]=df[col].astype(str)
+        if df[col].dtype == "object":
+            df[col] = df[col].astype(str)
         # * get unique values
         # unis = df[col].sort_values().unique()
         unis = list(df[col].value_counts().sort_index().index)
@@ -89,16 +93,18 @@ def describe_df(
         _u, _h = get_uniques_header(col)
         if use_columns:
             # * check col type
-            is_str=df.loc[:,col].dtype.kind == 'O'
+            is_str = df.loc[:, col].dtype.kind == "O"
             # * wrap output
-            print(f"{_h} {txt.wrap(_u[:top_n_uniques], max_items_in_line=70, apo=is_str)}")
+            print(
+                f"{_h} {txt.wrap(_u[:top_n_uniques], max_items_in_line=70, apo=is_str)}"
+            )
             # print(f"{_h} {_u[:top_n_uniques]}")
         else:
             print(f"{_h}")
 
     print("--- column stats (numeric)")
     # * only show numerics
-    for col in df.select_dtypes('number').columns:
+    for col in df.select_dtypes("number").columns:
         _u, _h = get_uniques_header(col)
 
         # * extra care for scipy metrics, these are very vulnarable to nan
@@ -117,7 +123,7 @@ def describe_df(
     cols = df.iloc[:, :fig_offset].columns
     cols_num = df.select_dtypes(np.number).columns.tolist()
     # cols_str = list(set(df.columns) - set(cols_num))
-    
+
     # * set constant column count, calc rows
     fig_rows = math.ceil(len(cols) / fig_cols)
 
@@ -145,17 +151,21 @@ def describe_df(
             figsub = px.box(df, x=col, points="outliers")
         else:
             # * only respect 100 items (fixed value)
-            x=span.iloc[:100].index
-            y=span.iloc[:100].values
+            x = span.iloc[:100].index
+            y = span.iloc[:100].values
             # * cut long strings
-            if x.dtype=='object' and top_n_chars_in_index > 0:
-                x=x.astype(str).tolist()
-                _cut = lambda s: s[:top_n_chars_in_index] + '..' if len(s) > top_n_chars_in_index else s[:top_n_chars_in_index]
-                x=[_cut(item) for item in x]
+            if x.dtype == "object" and top_n_chars_in_index > 0:
+                x = x.astype(str).tolist()
+                _cut = lambda s: (
+                    s[:top_n_chars_in_index] + ".."
+                    if len(s) > top_n_chars_in_index
+                    else s[:top_n_chars_in_index]
+                )
+                x = [_cut(item) for item in x]
             figsub = px.bar(
                 x=x,
                 y=y,
-                )
+            )
         # * grid position
         _row = math.floor((i) / fig_cols) + 1
         _col = i % fig_cols + 1
@@ -164,7 +174,9 @@ def describe_df(
         fig.add_trace(figsub["data"][0], row=_row, col=_col)
 
     # * set template
-    fig.update_layout(template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly")
+    fig.update_layout(
+        template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
+    )
     fig.show(renderer)
 
 
@@ -177,12 +189,12 @@ def pivot_df(
     data_bar_axis: Literal["x", "y", "xy", None] = "xy",
     pct_axis: Literal["x", "xy", None] = "xy",
     precision: int = 0,
-    show_totals: bool = True,
-    heatmap_axis: Literal["x","y","xy", None] = None,
+    show_total: bool = True,
+    heatmap_axis: Literal["x", "y", "xy", None] = None,
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters and return the result as a new DataFrame.
-    
+
     Args:
         df (pd.DataFrame): The input DataFrame to be pivoted.
         dropna (bool, optional): Whether to drop NaN values. Defaults to False.
@@ -192,14 +204,16 @@ def pivot_df(
         data_bar_axis (Literal["x", "y", "xy", None], optional): The axis for displaying data bars. Defaults to "xy".
         pct_axis (Literal["x", "xy", None], optional): The axis for displaying percentages. Defaults to None.
         precision (int, optional): The precision for displaying values. Defaults to 0.
-        show_totals (bool, optional): Whether to show totals in the result. Defaults to False.
+        show_total (bool, optional): Whether to show totals in the result. Defaults to False.
         heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
-        
+
     Returns:
         pd.DataFrame: The pivoted DataFrame.
     """
     # * ensure arguments match parameter definition
-    if (pct_axis and pct_axis not in ["x", "xy"]) or (data_bar_axis and  data_bar_axis not in ["x","y","xy"]):
+    if (pct_axis and pct_axis not in ["x", "xy"]) or (
+        data_bar_axis and data_bar_axis not in ["x", "y", "xy"]
+    ):
         print(f"❌ axis not supported")
         return
 
@@ -257,20 +271,31 @@ def pivot_df(
     )
     df = df.fillna(0)  # .astype(_type)
 
-    return show_num_df(df, show_totals=show_totals, data_bar_axis=data_bar_axis, pct_axis=pct_axis, swap=swap, precision=precision, heatmap_axis=heatmap_axis)
+    return show_num_df(
+        df,
+        show_total=show_total,
+        data_bar_axis=data_bar_axis,
+        pct_axis=pct_axis,
+        swap=swap,
+        precision=precision,
+        heatmap_axis=heatmap_axis,
+    )
+
 
 def show_num_df(
     df,
     show_total: bool = False,
-    total_mode: Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"] = "sum",
-    heatmap_axis: Literal["x","y","xy", None] = None,
-    data_bar_axis: Literal["x","y","xy", None] = None,
+    total_mode: Literal[
+        "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
+    ] = "sum",
+    heatmap_axis: Literal["x", "y", "xy", None] = None,
+    data_bar_axis: Literal["x", "y", "xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
     swap: bool = False,
-    precision: int=0,
+    precision: int = 0,
 ):
     """
-    A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision. 
+    A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
 
     Parameters:
     - df: the DataFrame to display
@@ -285,26 +310,40 @@ def show_num_df(
     The function returns a styled representation of the DataFrame.
     """
     # * ensure arguments match parameter definition
-    if any([df[col].dtype.kind not in ['i','u','f'] for col in df.columns]) == True:
+    if any([df[col].dtype.kind not in ["i", "u", "f"] for col in df.columns]) == True:
         print(f"❌ table must contain numeric data only")
         return
-    
-    if (pct_axis and pct_axis not in ["x", "xy"]) or (data_bar_axis and  data_bar_axis not in ["x","y","xy"]) or (heatmap_axis and heatmap_axis not in ["x","y","xy"]):
+
+    if (
+        (pct_axis and pct_axis not in ["x", "xy"])
+        or (data_bar_axis and data_bar_axis not in ["x", "y", "xy"])
+        or (heatmap_axis and heatmap_axis not in ["x", "y", "xy"])
+    ):
         print(f"❌ axis not supported")
         return
 
-    if (total_mode and total_mode not in ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]) :
+    if total_mode and total_mode not in [
+        "sum",
+        "mean",
+        "median",
+        "min",
+        "max",
+        "std",
+        "var",
+        "skew",
+        "kurt",
+    ]:
         print(f"❌ total mode '{total_mode}' not supported")
         return
 
     theme = os.getenv("THEME") or "light"
-    
+
     # * copy df, do not reference original
     df_ = df.copy() if not swap else df.T.copy()
-    
+
     # * alter _df, add totals
     if show_total:
-        df_.loc["Total"] = df_.agg(total_mode,axis=0)
+        df_.loc["Total"] = df_.agg(total_mode, axis=0)
         df_.loc[:, "Total"] = df_.agg(total_mode, axis=1)
 
     # * derive style
@@ -315,13 +354,13 @@ def show_num_df(
     color_pct = "grey" if theme == "light" else "yellow"
     color_values = "black" if theme == "light" else "white"
     color_minus = "red" if theme == "light" else "red"
-    cmap_heat="Blues" if theme == "light" else "copper" 
+    cmap_heat = "Blues" if theme == "light" else "copper"
 
     # * apply data bar coloring
     if data_bar_axis:
         out.bar(
             color=f"{color_highlight}",
-            axis= 0 if data_bar_axis == "x" else 1 if data_bar_axis == "y" else None,
+            axis=0 if data_bar_axis == "x" else 1 if data_bar_axis == "y" else None,
         )
 
     # * all cell formatting in one place
@@ -334,17 +373,18 @@ def show_num_df(
         # * here cell > 0
         if show_pct:
             return f'{cell:_.{precision}f} <span style="color: {color_pct}">({(cell /sum):.1%})</span>'
-        return f'{cell:_.{precision}f}'
+        return f"{cell:_.{precision}f}"
 
     # * build pct formatting
-    if pct_axis =='x':
+    if pct_axis == "x":
         # * totals on either axis influence the sum
         divider = 2 if show_total else 1
         # * cell formatting to each column instead of altering values w/ df.apply
         # * uses dictionary comprehension, and a lambda function with two input variables
         col_sums = df_.sum() / divider
         formatter = {
-            col: lambda x, col=col: format_cell(x, col_sums[col], pct_axis) for col in df_.columns
+            col: lambda x, col=col: format_cell(x, col_sums[col], pct_axis)
+            for col in df_.columns
         }
 
     # ? y is not implemented, needs row wise formatting
@@ -354,14 +394,14 @@ def show_num_df(
     #         row: lambda x, row=row: format_cell(x, row_sums[row]) for row in _df.index
     #     }
 
-    elif pct_axis=='xy':
+    elif pct_axis == "xy":
         divider = 4 if show_total else 1
         n = df_.sum().sum() / divider
         formatter = {
             col: lambda x, col=col: format_cell(x, n, pct_axis) for col in df_.columns
         }
     else:
-        # * 
+        # *
         formatter = {
             col: lambda x, col=col: format_cell(x, x, False) for col in df_.columns
         }
@@ -369,15 +409,15 @@ def show_num_df(
     out.format(formatter=formatter)
 
     # * apply fonts for cells
-    out.set_properties(**{'font-family': 'Courier'})
+    out.set_properties(**{"font-family": "Courier"})
 
     # * apply fonts for th (inkl. index)
-    _props=[
-                # ("font-size", "10pt"),
-                # ("font-weight", "bold"),
-                # ("font-family", "Courier"),
-                ("text-align", "right")
-                ]
+    _props = [
+        # ("font-size", "10pt"),
+        # ("font-weight", "bold"),
+        # ("font-family", "Courier"),
+        ("text-align", "right")
+    ]
     out.set_table_styles(
         [
             dict(selector="th", props=_props),
@@ -386,6 +426,9 @@ def show_num_df(
     )
 
     if heatmap_axis:
-        out.background_gradient(cmap=cmap_heat, axis=None if heatmap_axis=="xy" else 0 if heatmap_axis=="y" else 1)
+        out.background_gradient(
+            cmap=cmap_heat,
+            axis=None if heatmap_axis == "xy" else 0 if heatmap_axis == "y" else 1,
+        )
 
     return out
