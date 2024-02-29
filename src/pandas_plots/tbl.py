@@ -261,7 +261,8 @@ def pivot_df(
 
 def show_num_df(
     df,
-    show_totals: bool = False,
+    show_total: bool = False,
+    total_mode: Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"] = "sum",
     heatmap_axis: Literal["x","y","xy", None] = None,
     data_bar_axis: Literal["x","y","xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
@@ -273,7 +274,8 @@ def show_num_df(
 
     Parameters:
     - df: the DataFrame to display
-    - show_totals: a boolean indicating whether to show totals
+    - show_total: a boolean indicating whether to show totals
+    - total_mode: a Literal indicating the mode for aggregating totals ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
     - heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
     - data_bar_axis: a Literal indicating the axis for applying data bar coloring ["x","y","xy", None]
     - pct_axis: a Literal indicating the directions for displaying percentages ["x","xy", None]. "x" means sum up pct per column
@@ -291,15 +293,19 @@ def show_num_df(
         print(f"❌ axis not supported")
         return
 
+    if (total_mode and total_mode not in ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]) :
+        print(f"❌ total mode '{total_mode}' not supported")
+        return
+
     theme = os.getenv("THEME") or "light"
     
     # * copy df, do not reference original
     df_ = df.copy() if not swap else df.T.copy()
     
     # * alter _df, add totals
-    if show_totals:
-        df_.loc["Total"] = df_.sum(axis=0)
-        df_.loc[:, "Total"] = df_.sum(axis=1)
+    if show_total:
+        df_.loc["Total"] = df_.agg(total_mode,axis=0)
+        df_.loc[:, "Total"] = df_.agg(total_mode, axis=1)
 
     # * derive style
     out = df_.style
@@ -333,7 +339,7 @@ def show_num_df(
     # * build pct formatting
     if pct_axis =='x':
         # * totals on either axis influence the sum
-        divider = 2 if show_totals else 1
+        divider = 2 if show_total else 1
         # * cell formatting to each column instead of altering values w/ df.apply
         # * uses dictionary comprehension, and a lambda function with two input variables
         col_sums = df_.sum() / divider
@@ -349,7 +355,7 @@ def show_num_df(
     #     }
 
     elif pct_axis=='xy':
-        divider = 4 if show_totals else 1
+        divider = 4 if show_total else 1
         n = df_.sum().sum() / divider
         formatter = {
             col: lambda x, col=col: format_cell(x, n, pct_axis) for col in df_.columns
