@@ -4,20 +4,18 @@ warnings.filterwarnings("ignore")
 
 import math
 import os
-from typing import Literal
+from typing import Literal, get_args
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 from scipy import stats
-
 # pd.options.mode.chained_assignment = None
+
 from . import txt
 
-# ! check pandas version
-assert pd.__version__ > "2.0.0", "pandas version must be >= 2.0.0"
-
+AGG_FUNC=Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
 
 def describe_df(
     df: pd.DataFrame,
@@ -189,8 +187,9 @@ def pivot_df(
     data_bar_axis: Literal["x", "y", "xy", None] = "xy",
     pct_axis: Literal["x", "xy", None] = "xy",
     precision: int = 0,
-    show_total: bool = True,
     heatmap_axis: Literal["x", "y", "xy", None] = None,
+    total_mode: AGG_FUNC = "sum",
+    # total_mode: Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"] = "sum",
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters and return the result as a new DataFrame.
@@ -206,6 +205,7 @@ def pivot_df(
         precision (int, optional): The precision for displaying values. Defaults to 0.
         show_total (bool, optional): Whether to show totals in the result. Defaults to False.
         heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
+        total_mode (Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"], optional): The aggregation mode for displaying totals. Defaults to "sum".
 
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -223,6 +223,10 @@ def pivot_df(
 
     if not pd.api.types.is_numeric_dtype(df.iloc[:, 2]):
         print("❌ 3rd column must be numeric")
+        return
+    
+    if total_mode and total_mode not in get_args(AGG_FUNC):
+        print(f"❌ total_mode '{total_mode}' not supported")
         return
 
     df = df.copy()
@@ -273,7 +277,7 @@ def pivot_df(
 
     return show_num_df(
         df,
-        show_total=show_total,
+        total_mode=total_mode,
         data_bar_axis=data_bar_axis,
         pct_axis=pct_axis,
         swap=swap,
@@ -284,10 +288,7 @@ def pivot_df(
 
 def show_num_df(
     df,
-    show_total: bool = False,
-    total_mode: Literal[
-        "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
-    ] = "sum",
+    total_mode: AGG_FUNC = "sum",
     heatmap_axis: Literal["x", "y", "xy", None] = None,
     data_bar_axis: Literal["x", "y", "xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
@@ -322,18 +323,8 @@ def show_num_df(
         print(f"❌ axis not supported")
         return
 
-    if total_mode and total_mode not in [
-        "sum",
-        "mean",
-        "median",
-        "min",
-        "max",
-        "std",
-        "var",
-        "skew",
-        "kurt",
-    ]:
-        print(f"❌ total mode '{total_mode}' not supported")
+    if total_mode and total_mode not in get_args(AGG_FUNC):
+        print(f"❌ total_mode '{total_mode}' not supported")
         return
 
     theme = os.getenv("THEME") or "light"
@@ -342,7 +333,7 @@ def show_num_df(
     df_ = df.copy() if not swap else df.T.copy()
 
     # * alter _df, add totals
-    if show_total:
+    if total_mode:
         df_.loc["Total"] = df_.agg(total_mode, axis=0)
         df_.loc[:, "Total"] = df_.agg(total_mode, axis=1)
 
@@ -378,7 +369,7 @@ def show_num_df(
     # * build pct formatting
     if pct_axis == "x":
         # * totals on either axis influence the sum
-        divider = 2 if show_total else 1
+        divider = 2 if total_mode else 1
         # * cell formatting to each column instead of altering values w/ df.apply
         # * uses dictionary comprehension, and a lambda function with two input variables
         col_sums = df_.sum() / divider
@@ -395,7 +386,7 @@ def show_num_df(
     #     }
 
     elif pct_axis == "xy":
-        divider = 4 if show_total else 1
+        divider = 4 if total_mode else 1
         n = df_.sum().sum() / divider
         formatter = {
             col: lambda x, col=col: format_cell(x, n, pct_axis) for col in df_.columns
