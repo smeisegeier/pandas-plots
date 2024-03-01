@@ -189,7 +189,7 @@ def pivot_df(
     precision: int = 0,
     heatmap_axis: Literal["x", "y", "xy", None] = None,
     total_mode: AGG_FUNC = "sum",
-    # total_mode: Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"] = "sum",
+    total_axis: Literal["x", "y", "xy", None] = "xy",
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters and return the result as a new DataFrame.
@@ -203,9 +203,9 @@ def pivot_df(
         data_bar_axis (Literal["x", "y", "xy", None], optional): The axis for displaying data bars. Defaults to "xy".
         pct_axis (Literal["x", "xy", None], optional): The axis for displaying percentages. Defaults to None.
         precision (int, optional): The precision for displaying values. Defaults to 0.
-        show_total (bool, optional): Whether to show totals in the result. Defaults to False.
         heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
         total_mode (Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"], optional): The aggregation mode for displaying totals. Defaults to "sum".
+        total_axis (Literal["x", "y", "xy", None], optional): The axis for displaying totals. Defaults to "xy".
 
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -278,6 +278,7 @@ def pivot_df(
     return show_num_df(
         df,
         total_mode=total_mode,
+        total_axis=total_axis,
         data_bar_axis=data_bar_axis,
         pct_axis=pct_axis,
         swap=swap,
@@ -289,6 +290,7 @@ def pivot_df(
 def show_num_df(
     df,
     total_mode: AGG_FUNC = "sum",
+    total_axis: Literal["x", "y", "xy", None] = "xy",
     heatmap_axis: Literal["x", "y", "xy", None] = None,
     data_bar_axis: Literal["x", "y", "xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
@@ -300,8 +302,9 @@ def show_num_df(
 
     Parameters:
     - df: the DataFrame to display
-    - show_total: a boolean indicating whether to show totals
     - total_mode: a Literal indicating the mode for aggregating totals ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
+    - total_axis (Literal["x", "y", "xy", None], optional): The axis for displaying totals. Defaults to "xy".
+    
     - heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
     - data_bar_axis: a Literal indicating the axis for applying data bar coloring ["x","y","xy", None]
     - pct_axis: a Literal indicating the directions for displaying percentages ["x","xy", None]. "x" means sum up pct per column
@@ -332,9 +335,10 @@ def show_num_df(
     # * copy df, do not reference original
     df_ = df.copy() if not swap else df.T.copy()
 
-    # * alter _df, add totals
-    if total_mode:
+    # * alter df_, add totals
+    if total_mode and total_axis in ['x','xy']:
         df_.loc["Total"] = df_.agg(total_mode, axis=0)
+    if total_mode and total_axis in ['y','xy']:
         df_.loc[:, "Total"] = df_.agg(total_mode, axis=1)
 
     # * derive style
@@ -369,7 +373,7 @@ def show_num_df(
     # * build pct formatting
     if pct_axis == "x":
         # * totals on either axis influence the sum
-        divider = 2 if total_mode else 1
+        divider = 2 if total_axis in ['x','xy'] else 1
         # * cell formatting to each column instead of altering values w/ df.apply
         # * uses dictionary comprehension, and a lambda function with two input variables
         col_sums = df_.sum() / divider
@@ -386,7 +390,7 @@ def show_num_df(
     #     }
 
     elif pct_axis == "xy":
-        divider = 4 if total_mode else 1
+        divider = 4 if total_axis == 'xy' else 2 if total_axis in ['x','y'] else 1
         n = df_.sum().sum() / divider
         formatter = {
             col: lambda x, col=col: format_cell(x, n, pct_axis) for col in df_.columns
