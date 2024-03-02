@@ -69,6 +69,8 @@ rpds-py==0.17.1
 scipy==1.12.0
 seaborn==0.13.2
 six==1.16.0
+SQLAlchemy==1.4.51
+SQLAlchemy-Utils==0.41.1
 stack-data==0.6.3
 statsmodels==0.14.1
 tenacity==8.2.3

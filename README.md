@@ -13,7 +13,7 @@ pip install pandas-plots -U
 include in python
 
 ```python
-from pandas_plots import tbl, pls, ven
+from pandas_plots import tbl, pls, ven, sql, txt
 ```
 
 ## example
@@ -22,11 +22,23 @@ from pandas_plots import tbl, pls, ven
 # load sample dataset from seaborn
 import seaborn as sb
 df = sb.load_dataset('taxis')
-
-pls.plot_box(df['fare'], height=400, violin=True)
 ```
 
-![plot_box](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-13-00-40-27.png?raw=true)
+```python
+_df = df[["passengers", "distance", "fare"]][:5]
+tbl.show_num_df(
+    _df,
+    total_axis="xy",
+    total_mode="mean",
+    data_bar_axis="xy",
+    pct_axis="xy",
+    precision=0,
+    kpi_mode="max_min_x",
+    kpi_rag_list=(1,7),
+)
+```
+
+![show_num](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-03-02-17-33-43.png.png?raw=true)
 
 ## why use pandas-plots
 
@@ -59,6 +71,12 @@ It is subdivided into:
 > note: theming can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 
 ## more examples
+
+```python
+pls.plot_box(df['fare'], height=400, violin=True)
+```
+
+![plot_box](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-13-00-40-27.png?raw=true)
 
 ```python
 # quick and exhaustive description of any table
