@@ -4,6 +4,7 @@ warnings.filterwarnings("ignore")
 
 import math
 import os
+from collections import abc
 from typing import Literal, get_args
 
 import numpy as np
@@ -11,11 +12,17 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 from scipy import stats
-# pd.options.mode.chained_assignment = None
 
 from . import txt
 
-AGG_FUNC=Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
+# pd.options.mode.chained_assignment = None
+
+
+TOTAL_LITERAL = Literal[
+    "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
+]
+KPI_LITERAL = Literal["traffic", "min_max", "max_min"]
+
 
 def describe_df(
     df: pd.DataFrame,
@@ -188,7 +195,7 @@ def pivot_df(
     pct_axis: Literal["x", "xy", None] = "xy",
     precision: int = 0,
     heatmap_axis: Literal["x", "y", "xy", None] = None,
-    total_mode: AGG_FUNC = "sum",
+    total_mode: TOTAL_LITERAL = "sum",
     total_axis: Literal["x", "y", "xy", None] = "xy",
 ) -> pd.DataFrame:
     """
@@ -223,10 +230,6 @@ def pivot_df(
 
     if not pd.api.types.is_numeric_dtype(df.iloc[:, 2]):
         print("❌ 3rd column must be numeric")
-        return
-    
-    if total_mode and total_mode not in get_args(AGG_FUNC):
-        print(f"❌ total_mode '{total_mode}' not supported")
         return
 
     df = df.copy()
@@ -289,13 +292,16 @@ def pivot_df(
 
 def show_num_df(
     df,
-    total_mode: AGG_FUNC = "sum",
+    total_mode: TOTAL_LITERAL = "sum",
     total_axis: Literal["x", "y", "xy", None] = "xy",
     heatmap_axis: Literal["x", "y", "xy", None] = None,
     data_bar_axis: Literal["x", "y", "xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
     swap: bool = False,
     precision: int = 0,
+    kpi_traffic_list: list[float] = None,
+    kpi_mode: KPI_LITERAL = None,
+    kpi_shape: Literal["squad", "circle"] = "squad",
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
@@ -304,7 +310,7 @@ def show_num_df(
     - df: the DataFrame to display
     - total_mode: a Literal indicating the mode for aggregating totals ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
     - total_axis (Literal["x", "y", "xy", None], optional): The axis for displaying totals. Defaults to "xy".
-    
+
     - heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
     - data_bar_axis: a Literal indicating the axis for applying data bar coloring ["x","y","xy", None]
     - pct_axis: a Literal indicating the directions for displaying percentages ["x","xy", None]. "x" means sum up pct per column
@@ -326,8 +332,16 @@ def show_num_df(
         print(f"❌ axis not supported")
         return
 
-    if total_mode and total_mode not in get_args(AGG_FUNC):
+    if total_mode and total_mode not in get_args(TOTAL_LITERAL):
         print(f"❌ total_mode '{total_mode}' not supported")
+        return
+
+    if kpi_mode and kpi_mode not in get_args(KPI_LITERAL):
+        print(f"❌ kpi_mode '{kpi_mode}' not supported")
+        return
+
+    if not isinstance(kpi_traffic_list, abc.Iterable) or len(kpi_traffic_list) != 2:
+        print(f"❌ kpi_list must be a list of 2")
         return
 
     theme = os.getenv("THEME") or "light"
@@ -335,10 +349,15 @@ def show_num_df(
     # * copy df, do not reference original
     df_ = df.copy() if not swap else df.T.copy()
 
+    # * get minmax values before totals are added
+    min_val = df_.min().min()
+    max_val = df_.max().max()
+    n_val = df_.sum().sum()
+
     # * alter df_, add totals
-    if total_mode and total_axis in ['x','xy']:
+    if total_mode and total_axis in ["x", "xy"]:
         df_.loc["Total"] = df_.agg(total_mode, axis=0)
-    if total_mode and total_axis in ['y','xy']:
+    if total_mode and total_axis in ["y", "xy"]:
         df_.loc[:, "Total"] = df_.agg(total_mode, axis=1)
 
     # * derive style
@@ -360,20 +379,63 @@ def show_num_df(
 
     # * all cell formatting in one place
     # call hierarchy is not very well organized. all options land here, even if no cellwise formatting is applied
+    def get_kpi(cell: float):
+        if not kpi_mode:
+            return ""
+
+        dict_icons = {
+            "squad": ["🟩", "🟨", "🟥", "⬜"],
+            "circle": ["🟢", "🟡", "🔴", "⚪"],
+        }
+        icons = dict_icons[kpi_shape]
+
+        if kpi_mode == "traffic":
+            if kpi_traffic_list[0] < kpi_traffic_list[1]:
+                icon = (
+                    icons[0]
+                    if cell < kpi_traffic_list[0]
+                    else icons[1] if cell < kpi_traffic_list[1] else icons[2]
+                )
+            else:
+                icon = (
+                    icons[0]
+                    if cell > kpi_traffic_list[0]
+                    else icons[1] if cell > kpi_traffic_list[1] else icons[2]
+                )
+            return icon
+
+        if kpi_mode == "min_max":
+            return (
+                icons[0]
+                if cell == min_val
+                else icons[2] if cell == max_val else icons[3]
+            )
+        if kpi_mode == "max_min":
+            return (
+                icons[2]
+                if cell == min_val
+                else icons[0] if cell == max_val else icons[3]
+            )
+
+        return ""
+
     def format_cell(cell, sum, show_pct):
+        kpi = get_kpi(cell)
         if cell == 0:
-            return f'<span style="color: {color_zeros}">{cell:.0f}</span>'
+            return f'<span style="color: {color_zeros}">{cell:.0f} {kpi}</span>'
         if cell < 0:
-            return f'<span style="color: {color_minus}">{cell:_.{precision}f}</span>'
+            return (
+                f'<span style="color: {color_minus}">{cell:_.{precision}f} {kpi}</span>'
+            )
         # * here cell > 0
         if show_pct:
-            return f'{cell:_.{precision}f} <span style="color: {color_pct}">({(cell /sum):.1%})</span>'
-        return f"{cell:_.{precision}f}"
+            return f'{cell:_.{precision}f} <span style="color: {color_pct}">({(cell /sum):.1%}) {kpi}</span>'
+        return f"{cell:_.{precision}f} {kpi}"
 
     # * build pct formatting
     if pct_axis == "x":
         # * totals on either axis influence the sum
-        divider = 2 if total_axis in ['x','xy'] else 1
+        divider = 2 if total_axis in ["x", "xy"] else 1
         # * cell formatting to each column instead of altering values w/ df.apply
         # * uses dictionary comprehension, and a lambda function with two input variables
         col_sums = df_.sum() / divider
@@ -390,7 +452,7 @@ def show_num_df(
     #     }
 
     elif pct_axis == "xy":
-        divider = 4 if total_axis == 'xy' else 2 if total_axis in ['x','y'] else 1
+        divider = 4 if total_axis == "xy" else 2 if total_axis in ["x", "y"] else 1
         n = df_.sum().sum() / divider
         formatter = {
             col: lambda x, col=col: format_cell(x, n, pct_axis) for col in df_.columns
