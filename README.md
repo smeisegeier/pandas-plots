@@ -38,7 +38,7 @@ tbl.show_num_df(
 )
 ```
 
-![show_num](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-03-02-17-33-43.png.png?raw=true)
+![show_num](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-03-02-17-33-43.png?raw=true)
 
 ## why use pandas-plots
 
