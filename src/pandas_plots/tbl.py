@@ -516,7 +516,7 @@ def show_num_df(
         """
         # * calc sum depending on pct_axis
         sum_=tbl_sum if pct_axis=="xy" else col_sum[col] if pct_axis=="x" else val
-        val_rel= val / sum_
+        val_rel= 0 if sum_== 0 else val / sum_
 
         # * get kpi icon
         kpi = get_kpi(val, col=col)
