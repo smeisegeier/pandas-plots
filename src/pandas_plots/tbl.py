@@ -364,7 +364,7 @@ def show_num_df(
         print(f"❌ kpi_mode '{kpi_mode}' not supported")
         return
 
-    if kpi_mode and (not isinstance(kpi_rag_list, abc.Iterable) 
+    if kpi_mode.startswith("rag") and (not isinstance(kpi_rag_list, abc.Iterable) 
         or len(kpi_rag_list) != 2
         ):
         print(f"❌ kpi_rag_list must be a list of 2 if kpi_mode is set")
