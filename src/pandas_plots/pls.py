@@ -581,7 +581,7 @@ def plot_boxes(
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
     
     Args:
-        df (pd.DataFrame): The input DataFrame with two columns, where the first column is string type and the second column is numeric.
+        df (pd.DataFrame): The input DataFrame with two columns, where the first column is string or bool type and the second column is numeric.
         caption (str): The caption for the plot.
         points (Literal["all", "outliers", "suspectedoutliers", None]): The points to be plotted.
         precision (int): The precision for rounding the statistics.
@@ -595,10 +595,10 @@ def plot_boxes(
 
     if (
         len(df.columns) != 2
-        or not pd.api.types.is_string_dtype(df.iloc[:, 0])
+        or not ((pd.api.types.is_string_dtype(df.iloc[:, 0])) or (pd.api.types.is_bool_dtype(df.iloc[:, 0])))
         or not pd.api.types.is_numeric_dtype(df.iloc[:, 1])
     ):
-        print(f"❌ df must have 2 columns: [0] str, [1] num")
+        print(f"❌ df must have 2 columns: [0] str or bool, [1] num")
         return
     # * layout gaps
     xlvl1 = -50
