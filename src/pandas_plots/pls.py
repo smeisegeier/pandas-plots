@@ -487,9 +487,11 @@ def plot_box(
     caption: str=None,
     title: str=None,
     violin: bool=False,
+    x_min: float=None,
+    x_max: float=None,
     ) -> None:
     """
-    Plots a box plot for the given pandas Series.
+    Plots a horizontal box plot for the given pandas Series.
 
     Args:
         ser: The pandas Series to plot.
@@ -499,6 +501,8 @@ def plot_box(
         width: The width of the plot.
         annotations: Whether to add annotations to the plot.
         violin: Use violin plot or not
+        x_min: The minimum value for the x-axis scale (max and min must be set)
+        x_max: The maximum value for the x-axis scale (max and min must be set)
 
     Returns:
         None
@@ -536,6 +540,9 @@ def plot_box(
         }
 
     fig=px.violin(**{**dict,'box':True}) if violin else px.box(**dict)
+    
+    if (x_min or x_min==0) and (x_max or x_max==0):
+        fig.update_xaxes(range=[x_min, x_max])
 
     # fig=px.violin(
     #     ser, 
@@ -556,6 +563,7 @@ def plot_box(
         fig.add_annotation(x=q75, text=f"q75: {round(q75,precision)}", showarrow=True, yshift=lvl2, y=-0)
         fig.add_annotation(x=fence1, text=f"upper: {round(fence1,precision)}", showarrow=True, yshift=lvl1, y=-0)
         fig.add_annotation(x=max, text=f"max: {round(max,precision)}", showarrow=True, yshift=lvl3, y=-0)
+
     fig.show('png')
     return
 
@@ -567,10 +575,10 @@ def plot_boxes(
     height: int = 600,
     width: int = 800,
     annotations: bool = True,
-    title: str=None
+    title: str=None,
 ) -> None:
     """
-    Plot boxes for each unique item in the DataFrame and add annotations for statistics.
+    [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
     
     Args:
         df (pd.DataFrame): The input DataFrame with two columns, where the first column is string type and the second column is numeric.
@@ -648,5 +656,7 @@ def plot_boxes(
 
     fig.update_xaxes(title_text=df.columns[0])
     fig.update_yaxes(title_text=df.columns[1])
+
+
     fig.show("png")
     return
