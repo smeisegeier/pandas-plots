@@ -13,7 +13,7 @@ pip install pandas-plots -U
 include in python
 
 ```python
-from pandas_plots import tbl, pls, ven, sql, txt
+from pandas_plots import tbl, pls, ven, txt
 ```
 
 ## example
@@ -61,9 +61,6 @@ It is subdivided into:
 - `ven` offers functions for _venn diagrams_
   - `show_venn2()` displays a venn diagram for 2 sets
   - `show_venn3()` displays a venn diagram for 3 sets
-
-- `sql` is added as convienience wrapper for retrieving data from sql databases
-  - `connect_sql` get data from `['mssql', 'sqlite','postgres']`
 
 - `txt` includes some text based utilities
   - `wrap` formats strings or lists to a given width to fit nicely on the screen
@@ -114,4 +111,3 @@ _df, _details = ven.show_venn3(
 
 ![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-19-20-49-52.png?raw=true)
 
-## dependencies
