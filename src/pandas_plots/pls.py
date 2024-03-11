@@ -142,7 +142,7 @@ def plot_stacked_bars(
         return
 
     # * check if first 2 columns are str
-    if list(set((df.iloc[:, [0,1]].dtypes)))[0].kind != 'O':
+    if list(set((df.iloc[:, [0,1]].dtypes)))[0].kind not in ['O','b']:
         print("❌ first 2 columns must be str")
         return
 
@@ -156,9 +156,11 @@ def plot_stacked_bars(
     else:
         df.dropna(inplace=True)
 
-    # * strip whitespaces
-    df.iloc[:,0] = df.iloc[:,0].str.strip()
-    df.iloc[:,1] = df.iloc[:,1].str.strip()
+    # * strip whitespaces if columns are str
+    if df.iloc[:,0].dtype.kind == "O":
+        df.iloc[:,0] = df.iloc[:,0].str.strip()
+    if df.iloc[:,1].dtype.kind == "O":
+        df.iloc[:,1] = df.iloc[:,1].str.strip()
 
     # * set index + color col
     col_index = df.columns[0] if not swap else df.columns[1]

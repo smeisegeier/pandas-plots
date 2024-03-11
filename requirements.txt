@@ -1,7 +1,6 @@
 appnope==0.1.4
 asttokens==2.4.1
 attrs==23.2.0
-build==1.0.3
 certifi==2024.2.2
 charset-normalizer==3.3.2
 comm==0.2.1
@@ -69,8 +68,6 @@ rpds-py==0.17.1
 scipy==1.12.0
 seaborn==0.13.2
 six==1.16.0
-SQLAlchemy==1.4.51
-SQLAlchemy-Utils==0.41.1
 stack-data==0.6.3
 statsmodels==0.14.1
 tenacity==8.2.3
