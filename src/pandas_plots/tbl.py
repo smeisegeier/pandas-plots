@@ -317,6 +317,7 @@ def show_num_df(
     kpi_rag_list: list[float] = None,
     kpi_mode: KPI_LITERAL = None,
     kpi_shape: Literal["squad", "circle"] = "squad",
+    show_as_pct: bool = False,
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
@@ -530,6 +531,8 @@ def show_num_df(
         # * here cell > 0
         if pct_axis:
             return f'{val:_.{precision}f} <span style="color: {color_pct}">({val_rel:.1%}) {kpi}</span>'
+        if show_as_pct:
+            return f'{val:.{precision}%} {kpi}'
         return f"{val:_.{precision}f} {kpi}"
 
     # * formatter is now unified, col wise
