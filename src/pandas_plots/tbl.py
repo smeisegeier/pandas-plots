@@ -13,8 +13,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 from scipy import stats
 
-from . import txt
-
+from .hlp import wrap_text
 # pd.options.mode.chained_assignment = None
 
 
@@ -80,7 +79,7 @@ def describe_df(
     print(f"🟣 duplicates: {df.duplicated().sum():_}")
     print(f"🟣 missings: {dict(df.isna().sum())}")
     print("--- column uniques (all)")
-    print(f"🟠 index {txt.wrap(df.index.tolist()[:top_n_uniques])}")
+    print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}")
 
     def get_uniques_header(col: str):
         # * sorting has issues when col is of mixed type (object)
@@ -101,7 +100,7 @@ def describe_df(
             is_str = df.loc[:, col].dtype.kind == "O"
             # * wrap output
             print(
-                f"{_h} {txt.wrap(_u[:top_n_uniques], max_items_in_line=70, apo=is_str)}"
+                f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, apo=is_str)}"
             )
             # print(f"{_h} {_u[:top_n_uniques]}")
         else:

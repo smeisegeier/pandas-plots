@@ -13,7 +13,7 @@ pip install pandas-plots -U
 include in python
 
 ```python
-from pandas_plots import tbl, pls, ven, txt
+from pandas_plots import tbl, pls, ven, hlp
 ```
 
 ## example
@@ -50,12 +50,13 @@ It is subdivided into:
   - 🌟`show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
   - `pivot_df()` gets a pivot table of a 3 column dataframe
-    - ⚠️ `pivot_df()` is depricated and wont get further updates
+    - _⚠️ `pivot_df()` is depricated and wont get further updates_
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
   - `plot_boxes()` multiple boxplots _(annotation is experimental)_
   - `plots_bars()` a standardized bar plot
+    - 🆕 now features convidence intervals via `use_ci` option
   - `plot_stacked_bars()` shortcut to stacked bars 😄
   - `plot_quadrants()` quickly shows a 2x2 heatmap
 
@@ -63,10 +64,13 @@ It is subdivided into:
   - `show_venn2()` displays a venn diagram for 2 sets
   - `show_venn3()` displays a venn diagram for 3 sets
 
-- `txt` includes some text based utilities
-  - `wrap` formats strings or lists to a given width to fit nicely on the screen
+- `hlp` contains some (variety) helper functions
+  - `df_to_series()` converts a dataframe to a series
+  - `mean_confidence_interval()` calculates mean and confidence interval for a series
+  - `wrap_text()` formats strings or lists to a given width to fit nicely on the screen
+  - `replace_delimiter_outside_quotes()` when manual import of csv files is needed: replaces delimiters only outside of quotes
 
-> note: theming can be controlled through all functions by setting the environment variable `THEME` to either light or dark
+> note: theme setting can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 
 ## more examples
 
@@ -111,4 +115,3 @@ _df, _details = ven.show_venn3(
 ```
 
 ![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-19-20-49-52.png?raw=true)
-
