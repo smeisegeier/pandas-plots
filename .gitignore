@@ -161,5 +161,8 @@ cython_debug/
 
 # **/.local/**
 # .env**
-
-.**
+.DS_Store
+.env
+.local
+src/csv.ipynb
+.notes.md

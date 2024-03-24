@@ -523,7 +523,7 @@ def plot_bars(
             },
         },
         showlegend=False,
-        uniformtext_minsize=14, uniformtext_mode='hide'
+        # uniformtext_minsize=14, uniformtext_mode='hide'
         
     )
     # * sorting

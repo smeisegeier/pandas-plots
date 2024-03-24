@@ -14,7 +14,7 @@ from plotly.subplots import make_subplots
 from scipy import stats
 
 from .hlp import wrap_text
-from devtools import debug
+# from devtools import debug
 # pd.options.mode.chained_assignment = None
 
 
@@ -36,6 +36,7 @@ def describe_df(
     sort_mode: Literal["value", "index"] = "value",
     top_n_uniques: int = 30,
     top_n_chars_in_index: int = 0,
+    top_n_chars_in_columns: int = 0,
 ):
     """
     This function takes a pandas DataFrame and a caption as input parameters and prints out the caption as a styled header, followed by the shape of the DataFrame and the list of column names. For each column, it prints out the column name, the number of unique values, and the column data type. If the column is a numeric column with more than 100 unique values, it also prints out the minimum, mean, maximum, and sum values. Otherwise, it prints out the first 100 unique values of the column.
@@ -52,6 +53,7 @@ def describe_df(
     sort_mode (Literal["value", "index"]): sort by value or index
     top_n_uniques (int): number of uniques to display
     top_n_chars_in_index (int): number of characters to display on plot axis
+    top_n_chars_in_columns (int): number of characters to display on plot axis. If set, minimum is 10.
 
     usage:
     describe_df(
@@ -74,6 +76,11 @@ def describe_df(
     if len(df) == 0:
         print(f"DataFrame is empty!")
         return
+
+    # ! fix bug(?) in plotly - empty float columns are not plotted, set these to str
+    for col in df.columns:
+        if df[col].notna().sum() == 0 and df[col].dtype == "float":
+            df[col] = df[col].astype(str)
 
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}")
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
@@ -123,6 +130,15 @@ def describe_df(
     # ! *** PLOTS ***
     if not use_plot:
         return
+    
+    # * reduce column names len if selected
+    if top_n_chars_in_columns > 0:
+        # * minumum 10 chars, or display is cluttered
+        top_n_chars_in_columns = 10 if top_n_chars_in_columns < 10 else top_n_chars_in_columns
+        col_list = []
+        for i, col in enumerate(df.columns):
+            col_list.append(col[:top_n_chars_in_columns]+"_"+str(i).zfill(3))
+        df.columns = col_list
 
     # * respect fig_offset to exclude unwanted plots from maintanance columns
     cols = df.iloc[:, :fig_offset].columns
@@ -167,6 +183,7 @@ def describe_df(
                     else s[:top_n_chars_in_index]
                 )
                 x = [_cut(item) for item in x]
+            
             figsub = px.bar(
                 x=x,
                 y=y,
