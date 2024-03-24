@@ -50,7 +50,7 @@ It is subdivided into:
   - 🌟`show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
   - `pivot_df()` gets a pivot table of a 3 column dataframe
-    - _⚠️ `pivot_df()` is depricated and wont get further updates_
+    - _⚠️ `pivot_df()` is depricated and wont get further updates. Its features are well covered in standard `pd.pivot_table()`_
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
@@ -88,11 +88,19 @@ tbl.describe_df(df, 'taxis', top_n_uniques=5)
 ![describe_df](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-14-20-49-00.png?raw=true)
 
 ```python
-# show pivoted values for selected columns
-tbl.pivot_df(df[['color', 'payment', 'fare']])
+# show bars with confidence intervals
+_df = df[["payment", "fare"]]
+pls.plot_bars(
+    _df,
+    dropna=False,
+    use_ci=True,
+    height=600,
+    width=800,
+    precision=1,
+)
 ```
 
-![pivot_df](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-14-20-45-45.png?raw=true)
+![bars_with_ci](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-03-24-09-59-32.png?raw=true)
 
 ```python
 # show venn diagram for 3 sets

@@ -462,7 +462,7 @@ def plot_bars(
     _title_str_minval = f"ALL >{top_n_minvalue}, " if top_n_minvalue > 0 else ""
 
     # * title str n
-    _title_str_n = f", n={n:_}" if not use_ci else f", n={len(ser):_}, ci(95) on means"
+    _title_str_n = f", n={n:_}" if not use_ci else f", n={len(ser):_}<br><sub>ci(95) on means<sub>"
 
     # * title str na
     _title_str_null = f", NULL excluded" if dropna else ""
@@ -523,7 +523,7 @@ def plot_bars(
             },
         },
         showlegend=False,
-        uniformtext_minsize=20, uniformtext_mode='hide'
+        uniformtext_minsize=14, uniformtext_mode='hide'
         
     )
     # * sorting

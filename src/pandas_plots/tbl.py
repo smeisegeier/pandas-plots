@@ -14,6 +14,7 @@ from plotly.subplots import make_subplots
 from scipy import stats
 
 from .hlp import wrap_text
+from devtools import debug
 # pd.options.mode.chained_assignment = None
 
 
@@ -489,20 +490,22 @@ def show_num_df(
 
         # * calculate order of icons
         if kpi_mode.startswith( "min_max"):
-            return (
+            result= (
                 icons[0]
                 if val == min_
                 else icons[2] if val == max_ else icons[3]
             )
-        if kpi_mode.startswith("max_min"):
-            return (
-                icons[2]
+        elif kpi_mode.startswith("max_min"):
+            result= (
+                icons[0]
                 if val == max_
-                else icons[0] if val == min_ else icons[3]
+                else icons[2] if val == min_ else icons[3]
             )
+        else:
+            # * no matching mode founf
+            result=""
 
-        # * no macthing mode founf
-        return ""
+        return result
 
     # * all cell formatting in one place
     def format_cell(val, col):
