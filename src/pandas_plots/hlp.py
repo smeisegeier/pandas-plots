@@ -212,21 +212,21 @@ def create_barcode_from_url(
         plt.show()
 
 def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFrame:
+    df_= df.copy()
     if not date_column:
-        date_column = [col for col in df.columns if pd.api.types.is_datetime64_any_dtype(df[col])][0]
+        date_column = [col for col in df_.columns if pd.api.types.is_datetime64_any_dtype(df_[col])][0]
+    else:
+        df_[date_column] = pd.to_datetime(df_[date_column])
 
-    if not date_column or not pd.api.types.is_datetime64_any_dtype(df[date_column]):
+    if not date_column or not pd.api.types.is_datetime64_any_dtype(df_[date_column]):
         print("❌ No datetime column found")
         return
     
-    if [col for col in df.columns if "YYYY-WW" in col]:
+    if [col for col in df_.columns if "YYYY-WW" in col]:
         print("❌ Added datetime columns already exist")
         return
     
     print(f"⏳ Adding datetime columns basing off of: {date_column}")
-    df_= df.copy()
-
-    df_[date_column] = pd.to_datetime(df_[date_column])
 
     df_["YYYY"] = df_[date_column].dt.year
     df_["MM"] = df_[date_column].dt.month
@@ -235,7 +235,7 @@ def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFr
     df_["YYYY-MM"] = df_[date_column].dt.to_period("M").astype(str)
     df_["YYYYQ"] = df_[date_column].dt.to_period("Q").astype(str)
     df_["YYYY-WW"] = (
-        df_[date_column].dt.isocalendar().year.astype(str) + "-" +
+        df_[date_column].dt.isocalendar().year.astype(str) + "-W" +
         df_[date_column].dt.isocalendar().week.astype(str).str.zfill(2)
     )
     df_["DDD"] = df_[date_column].dt.weekday.map({0: "Mon", 1: "Tue", 2: "Wed", 3: "Thu", 4: "Fri", 5: "Sat", 6: "Sun"})

@@ -442,6 +442,8 @@ def show_num_df(
         out.bar(
             color=f"{color_highlight}",
             axis=0 if data_bar_axis == "x" else 1 if data_bar_axis == "y" else None,
+            width=100,
+            # align="zero",
         )
 
     
