@@ -326,6 +326,7 @@ def show_num_df(
     df,
     total_mode: TOTAL_LITERAL = "sum",
     total_axis: Literal["x", "y", "xy", None] = "xy",
+    total_exclude: bool = False,
     heatmap_axis: Literal["x", "y", "xy", None] = None,
     data_bar_axis: Literal["x", "y", "xy", None] = None,
     pct_axis: Literal["x", "xy", None] = None,
@@ -343,7 +344,7 @@ def show_num_df(
     - df: the DataFrame to display
     - total_mode: a Literal indicating the mode for aggregating totals ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
     - total_axis (Literal["x", "y", "xy", None], optional): The axis for displaying totals. Defaults to "xy".
-
+    - total_exclude (bool, optional): Whether to exclude totals from the coloring in heatmap and data bar. Defaults to False.
     - heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
     - data_bar_axis: a Literal indicating the axis for applying data bar coloring ["x","y","xy", None]
     - pct_axis: a Literal indicating the directions for displaying percentages ["x","xy", None]. "x" means sum up pct per column
@@ -443,6 +444,8 @@ def show_num_df(
             color=f"{color_highlight}",
             axis=0 if data_bar_axis == "x" else 1 if data_bar_axis == "y" else None,
             width=100,
+            # * apply subset if total_exclude
+            subset=(df_orig.index, df_orig.columns) if total_exclude else None,
             # align="zero",
         )
 
@@ -592,6 +595,7 @@ def show_num_df(
         out.background_gradient(
             cmap=cmap_heat,
             axis=None if heatmap_axis == "xy" else 0 if heatmap_axis == "y" else 1,
+            subset=(df_orig.index, df_orig.columns) if total_exclude else None,
         )
 
     return out
