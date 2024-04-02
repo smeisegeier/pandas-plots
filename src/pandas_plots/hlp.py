@@ -179,15 +179,23 @@ def create_barcode_from_url(
     output_path: str | None = None,
     show_image: bool = False,
 ):
+    """
+    Create a barcode from the given URL. Uses "QR Code" from DENSO WAVE INCORPORATED.
+
+    Args:
+        url (str): The URL to encode in the barcode.
+        output_path (str | None, optional): The path to save the barcode image. Defaults to None.
+        show_image (bool, optional): Whether to display the barcode image. Defaults to False.
+    """
     WIDTH = 400
     HEIGHT = 400
 
     if not re.match(URL_REGEX, url):
-        print("❌ Not a valid URL")
-        return
+        print("💡 Not a valid URL")
 
     image = requests.get(
-        f"https://chart.googleapis.com/chart?chs={WIDTH}x{HEIGHT}&cht=qr&chl={url}"
+        # f"https://chart.googleapis.com/chart?chs={WIDTH}x{HEIGHT}&cht=qr&chl={url}"
+        f"https://api.qrserver.com/v1/create-qr-code/?size={WIDTH}x{HEIGHT}&data={url}"
     )
     image.raise_for_status()
 
@@ -202,3 +210,34 @@ def create_barcode_from_url(
         plt.imshow(img)
         # plt.axis('off')  # Turn off axis numbers
         plt.show()
+
+def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFrame:
+    if not date_column:
+        date_column = [col for col in df.columns if pd.api.types.is_datetime64_any_dtype(df[col])][0]
+
+    if not date_column or not pd.api.types.is_datetime64_any_dtype(df[date_column]):
+        print("❌ No datetime column found")
+        return
+    
+    if [col for col in df.columns if "YYYY-WW" in col]:
+        print("❌ Added datetime columns already exist")
+        return
+    
+    print(f"⏳ Adding datetime columns basing off of: {date_column}")
+    df_= df.copy()
+
+    df_[date_column] = pd.to_datetime(df_[date_column])
+
+    df_["YYYY"] = df_[date_column].dt.year
+    df_["MM"] = df_[date_column].dt.month
+    df_["Q"] = df_[date_column].dt.quarter
+
+    df_["YYYY-MM"] = df_[date_column].dt.to_period("M").astype(str)
+    df_["YYYYQ"] = df_[date_column].dt.to_period("Q").astype(str)
+    df_["YYYY-WW"] = (
+        df_[date_column].dt.isocalendar().year.astype(str) + "-" +
+        df_[date_column].dt.isocalendar().week.astype(str).str.zfill(2)
+    )
+    df_["DDD"] = df_[date_column].dt.weekday.map({0: "Mon", 1: "Tue", 2: "Wed", 3: "Thu", 4: "Fri", 5: "Sat", 6: "Sun"})
+    
+    return df_

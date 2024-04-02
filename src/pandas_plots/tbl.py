@@ -15,8 +15,8 @@ from scipy import stats
 
 from .hlp import wrap_text
 # from devtools import debug
+pd.options.display.colheader_justify = "right"
 # pd.options.mode.chained_assignment = None
-
 
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
@@ -363,7 +363,7 @@ def show_num_df(
     """
     # * ensure arguments match parameter definition
     if any([df[col].dtype.kind not in ["i", "u", "f"] for col in df.columns]) == True:
-        print(f"❌ table must contain numeric data only")
+        print(f"❌ table must contain numeric data only. Maybe you forgot to convert this table with pivot or pivot_table first?")
         return
 
     if (

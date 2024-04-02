@@ -111,6 +111,7 @@ def plot_stacked_bars(
     caption: str = None,
     sort_values: bool = False,
     show_total: bool = False,
+    precision: int = 0,
 ) -> None:
     """
     Generates a stacked bar plot using the provided DataFrame.
@@ -135,6 +136,7 @@ def plot_stacked_bars(
     - caption: An optional string indicating the caption for the chart.
     - sort_values: bool = False - Sort axis by index (default) or values
     - show_total: bool = False - Whether to show the total value
+    - precision: int = 0 - The number of decimal places to round to
 
     Returns:
     None
@@ -166,6 +168,9 @@ def plot_stacked_bars(
         df.iloc[:, 0] = df.iloc[:, 0].str.strip()
     if df.iloc[:, 1].dtype.kind == "O":
         df.iloc[:, 1] = df.iloc[:, 1].str.strip()
+    
+    # * apply precision
+    df.iloc[:,2] = df.iloc[:,2].round(precision)
 
     # * set index + color col
     col_index = df.columns[0] if not swap else df.columns[1]
