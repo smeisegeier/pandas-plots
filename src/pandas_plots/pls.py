@@ -571,7 +571,7 @@ def plot_bars(
 
 
 def plot_histogram(
-    df: pd.DataFrame,
+    df_ser: pd.DataFrame | pd.Series,
     histnorm: Literal[
         "probability", "probability density", "density", "percent", None
     ] = None,
@@ -587,10 +587,13 @@ def plot_histogram(
     title: str = None,
 ) -> None:
     """
-    A function to plot a histogram based on a numeric columns in a DataFrame.
+    A function to plot a histogram based on *numeric* columns in a DataFrame.
+    Accepts:
+        - a numeric series
+        - a dataframe with only numeric columns
 
     Parameters:
-        df (pd.DataFrame): The DataFrame containing the data to be plotted.
+        df_ser (pd.DataFrame | pd.Series): The input containing the data to be plotted.
         histnorm (Literal["probability", "probability density", "density", "percent", None]): The normalization mode for the histogram. Default is None.
         nbins (int): The number of bins in the histogram. Default is 0.
         orientation (Literal["h", "v"]): The orientation of the histogram. Default is "v".
@@ -606,6 +609,12 @@ def plot_histogram(
     Returns:
         None
     """
+    
+    # * convert to df if series
+    if isinstance(df_ser, pd.Series):
+        df = df_ser.to_frame()
+    else:
+        df=df_ser
 
     col_not_num = df.select_dtypes(exclude="number").columns
     if any(col_not_num):
@@ -660,7 +669,7 @@ def plot_joint(
     title: str = "",
 ) -> None:
     """
-    Generate a seaborn joint plot for two *numeric* columns of a given DataFrame.
+    Generate a seaborn joint plot for *two numeric* columns of a given DataFrame.
 
     Parameters:
         - df: The DataFrame containing the data to be plotted.
