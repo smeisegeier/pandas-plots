@@ -4,10 +4,12 @@ warnings.filterwarnings("ignore")
 
 import os
 from typing import Literal
-from matplotlib import pyplot as plt
-from plotly import express as px
+
 import pandas as pd
 import seaborn as sb
+from matplotlib import pyplot as plt
+from plotly import express as px
+
 from .hlp import *
 
 
@@ -168,9 +170,9 @@ def plot_stacked_bars(
         df.iloc[:, 0] = df.iloc[:, 0].str.strip()
     if df.iloc[:, 1].dtype.kind == "O":
         df.iloc[:, 1] = df.iloc[:, 1].str.strip()
-    
+
     # * apply precision
-    df.iloc[:,2] = df.iloc[:,2].round(precision)
+    df.iloc[:, 2] = df.iloc[:, 2].round(precision)
 
     # * set index + color col
     col_index = df.columns[0] if not swap else df.columns[1]
@@ -323,34 +325,36 @@ def plot_stacked_bars(
 
 
 def plot_bars(
-    ser: pd.Series | pd.DataFrame,
+    df_in: pd.Series | pd.DataFrame,
     caption: str = None,
     top_n_index: int = 0,
     top_n_minvalue: int = 0,
     dropna: bool = False,
     orientation: Literal["h", "v"] = "v",
     sort_values: bool = False,
-    normalize: bool = False,
+    normalize: bool = True,
     height: int = 500,
     width: int = 1600,
     title: str = None,
     use_ci: bool = False,
-    precision: int = 2,
+    precision: int = 0,
     renderer: Literal["png", "svg", None] = "png",
 ) -> None:
     """
-    A function to plot a bar chart based on a pandas Series.
-    Accepts series or dataframe w/ 2 columns (index, value)
+    A function to plot a bar chart based on a *categorical* column (must be string or bool) and a numerical value.
+    Accepts:
+        - a dataframe w/ exactly 2 columns: string and numerical OR
+        - a series, then value_counts() is applied upon to form the numercal, and use_ci is set to false
 
     Parameters:
-    - ser: The input pandas Series.
+    - df_in: df or series.
     - caption: An optional string indicating the caption for the chart.
     - top_n_index: An optional integer indicating the number of top indexes to include in the chart. Default is 0, which includes all indexes.
     - top_n_minvalue: An optional integer indicating the minimum value to be included in the chart. Default is 0, which includes all values.
     - dropna: A boolean indicating whether to drop NaN values from the chart. Default is False.
     - orientation: A string indicating the orientation of the chart. It can be either "h" for horizontal or "v" for vertical. Default is "v".
     - sort_values: A boolean indicating whether to sort the values in the chart. Default is False.
-    - nomalize: A boolean indicating whether to show pct values in the chart. Default is False.
+    - normalize: A boolean indicating whether to show pct values in the chart. Default is False.
     - height: An optional integer indicating the height of the chart. Default is 500.
     - width: An optional integer indicating the width of the chart. Default is 2000.
     - title: An optional string indicating the title of the chart. If not provided, the title will be the name of the index column.
@@ -359,41 +363,50 @@ def plot_bars(
         - enforces vertical orientation.
         - enforces nomalize=False
         - enforces dropna=True
+    - precision: An integer indicating the number of decimal places to round the values to. Default is 0.
     - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is "png".
 
     Returns:
     - None
     """
-
-    # * if a df is given, convert to series
-    if isinstance(ser, pd.DataFrame):
-        if len(ser.columns) != 2:
-            print("❌ df must have exactly 2 columns")
+    # * if series, apply value_counts, deselect use_ci
+    if isinstance(df_in, pd.Series):
+        if df_in.dtype.kind not in ["O", "b"]:
+            print("❌ for numeric series use plot_histogram().")
             return
         else:
-            # * save index name
-            _idx_name = ser.columns[0]
-            ser = pd.Series(
-                index=ser.iloc[:, 0].values,
-                data=ser.iloc[:, 1].values,
-                name=ser.columns[1],
-            )
-            # * restore index name, otherwise this gets lost during groupby
-            ser.index.name = _idx_name
+            df_in = df_in.value_counts(dropna=dropna).to_frame().reset_index()
+            use_ci = False
+
+    # * if df, check if valid
+    if isinstance(df_in, pd.DataFrame):
+        if len(df_in.columns) != 2:
+            print("❌ df must have exactly 2 columns")
+            return
+        elif not (df_in.iloc[:, 0].dtype.kind in ["O", "b"]) or not (
+            df_in.iloc[:, 1].dtype.kind in ["i", "f"]
+        ):
+            print("❌ df must have string and numeric columns (in that order).")
+            return
+    else:
+        print("❌ input must be series or dataframe.")
+        return
+
+    col_index = df_in.columns[0]
+    col_name = df_in.columns[1]
 
     # * ensure df is grouped to prevent false aggregations, reset index to return df
     if use_ci:
         # * grouping is smoother on df than on series
-        df = ser.reset_index()
         df = (
-            df.groupby(
-                df.iloc[:, 0],
+            df_in.groupby(
+                col_index,
                 dropna=False,
             )
             .agg(
-                mean=(df.columns[1], "mean"),
+                mean=(col_name, "mean"),
                 # * retrieve margin from custom func
-                margin=(df.columns[1], lambda x: mean_confidence_interval(x)[1]),
+                margin=(col_name, lambda x: mean_confidence_interval(x)[1]),
             )
             .reset_index()
         )
@@ -402,7 +415,9 @@ def plot_bars(
         normalize = False
         dropna = True
     else:
-        df = ser.groupby(ser.index, dropna=False).sum().reset_index()
+        df = df_in.groupby(col_index, dropna=dropna)[col_name].sum().reset_index()
+
+    # return df
 
     # * nulls are hidden by default in plotly etc, so give them a proper category
     if dropna:
@@ -410,8 +425,9 @@ def plot_bars(
     else:
         df = df.fillna("<NA>")
 
-    # * get n
+    # * get n, col1 now is always numeric
     n = df[df.columns[1]].sum()
+    n_len = len(df_in)
 
     # * after grouping add cols for pct and formatting
     df["pct"] = df[df.columns[1]] / n
@@ -425,14 +441,15 @@ def plot_bars(
         None
         if not use_ci
         else df.apply(
-            lambda row: f"{row['cnt_str']}{divider}[{row['mean']-row['margin']:_.{precision}f};{row['mean']+row['margin']:_.{precision}f}]", axis=1
+            lambda row: f"{row['cnt_str']}{divider}[{row['mean']-row['margin']:_.{precision}f};{row['mean']+row['margin']:_.{precision}f}]",
+            axis=1,
         )
     )
 
     # * set col vars according to config
-    col_index = df.columns[0]
     col_value = "pct" if not use_ci else df.columns[1]
     col_value_str = "ci_str" if use_ci else "cnt_pct_str" if normalize else "cnt_str"
+    # return df
 
     # * if top n selected
     if top_n_index > 0:
@@ -467,7 +484,9 @@ def plot_bars(
     _title_str_minval = f"ALL >{top_n_minvalue}, " if top_n_minvalue > 0 else ""
 
     # * title str n
-    _title_str_n = f", n={n:_}" if not use_ci else f", n={len(ser):_}<br><sub>ci(95) on means<sub>"
+    _title_str_n = (
+        f", n={n:_}" if not use_ci else f", n={n_len:_}<br><sub>ci(95) on means<sub>"
+    )
 
     # * title str na
     _title_str_null = f", NULL excluded" if dropna else ""
@@ -475,7 +494,7 @@ def plot_bars(
     # * layot caption if provided
     caption = _set_caption(caption)
 
-    # * plot
+    # ! plot
     _fig = px.bar(
         df.sort_values(
             col_value if sort_values else col_index,
@@ -486,7 +505,8 @@ def plot_bars(
         text=col_value_str,
         orientation=orientation,
         # * retrieve the original columns from series
-        title=title or f"{caption}{_title_str_minval}{_title_str_top}[{ser.name}] by [{ser.index.name}]{_title_str_null}{_title_str_n}",
+        title=title
+        or f"{caption}{_title_str_minval}{_title_str_top}[{df.columns[1]}] by [{col_index}]{_title_str_null}{_title_str_n}",
         # * retrieve theme from env (intro.set_theme) or default
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         width=width,
@@ -529,7 +549,6 @@ def plot_bars(
         },
         showlegend=False,
         # uniformtext_minsize=14, uniformtext_mode='hide'
-        
     )
     # * sorting
     if orientation == "v":
@@ -544,8 +563,181 @@ def plot_bars(
             _fig.update_layout(yaxis={"categoryorder": "category descending"})
 
     # * looks better on single bars
-    _fig.update_traces(textposition="outside" if not use_ci else "auto", error_y=dict(thickness=5))
+    _fig.update_traces(
+        textposition="outside" if not use_ci else "auto", error_y=dict(thickness=5)
+    )
     _fig.show(renderer)
+    return
+
+
+def plot_histogram(
+    df: pd.DataFrame,
+    histnorm: Literal[
+        "probability", "probability density", "density", "percent", None
+    ] = None,
+    nbins: int = 0,
+    orientation: Literal["h", "v"] = "v",
+    precision: int = 2,
+    height: int = 500,
+    width: int = 1600,
+    text_auto: bool = True,
+    barmode: Literal["group", "overlay", "relative"] = "relative",
+    renderer: Literal["png", "svg", None] = "png",
+    caption: str = None,
+    title: str = None,
+) -> None:
+    """
+    A function to plot a histogram based on a numeric columns in a DataFrame.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame containing the data to be plotted.
+        histnorm (Literal["probability", "probability density", "density", "percent", None]): The normalization mode for the histogram. Default is None.
+        nbins (int): The number of bins in the histogram. Default is 0.
+        orientation (Literal["h", "v"]): The orientation of the histogram. Default is "v".
+        precision (int): The precision for rounding the data. Default is 2.
+        height (int): The height of the plot. Default is 500.
+        width (int): The width of the plot. Default is 1600.
+        text_auto (bool): Whether to automatically display text on the plot. Default is True.
+        barmode (Literal["group", "overlay", "relative"]): The mode for the bars in the histogram. Default is "relative".
+        renderer (Literal["png", "svg", None]): The renderer for displaying the plot. Default is "png".
+        caption (str): The caption for the plot. Default is None.
+        title (str): The title of the plot. Default is None.
+
+    Returns:
+        None
+    """
+
+    col_not_num = df.select_dtypes(exclude="number").columns
+    if any(col_not_num):
+        print(
+            f"❌ all columns must be numeric, but the following are not: [{', '.join(col_not_num)}]. consider using plot_bars()."
+        )
+        return
+
+    # * rounding
+    df = df.applymap(lambda x: round(x, precision))
+
+    # ! plot
+    _caption=_set_caption(caption)
+    fig = px.histogram(
+        data_frame=df,
+        histnorm=histnorm,
+        nbins=nbins,
+        marginal="box",
+        barmode=barmode,
+        text_auto=text_auto,
+        height=height,
+        width=width,
+        orientation=orientation,
+        title=title or f"{_caption}[{', '.join(df.columns)}], n={df.shape[0]:_}",
+        template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
+    )
+    # * set title properties
+    fig.update_layout(
+        title={
+            # 'x': 0.1,
+            "y": 0.95,
+            "xanchor": "left",
+            "yanchor": "top",
+            "font": {
+                "size": 24,
+            },
+        },
+        showlegend=False if df.shape[1]==1 else True,
+    )
+
+    fig.show(renderer)
+    return
+
+
+def plot_joint(
+    df: pd.DataFrame,
+    kind: Literal["reg", "hist", "hex", "kde"] = "hex",
+    precision: int = 2,
+    size: int = 5,
+    dropna: bool = False,
+    caption: str = "",
+    title: str = "",
+) -> None:
+    """
+    Generate a seaborn joint plot for two *numeric* columns of a given DataFrame.
+
+    Parameters:
+        - df: The DataFrame containing the data to be plotted.
+        - kind: The type of plot to generate (default is "hex").
+        - precision: The number of decimal places to round the data to (default is 2).
+        - size: The size of the plot (default is 5).
+        - dropna: Whether to drop NA values before plotting (default is False).
+        - caption: A caption for the plot.
+        - title: The title of the plot.
+
+    Returns:
+        None
+    """
+
+    if df.shape[1] != 2:
+        print("❌ df must have 2 columns")
+        return
+
+    col_not_num = df.select_dtypes(exclude="number").columns
+    if any(col_not_num):
+        print(
+            f"❌ both columns must be numeric, but the following are not: [{', '.join(col_not_num)}]. consider using plot_bars()."
+        )
+        return
+
+    df = df.applymap(lambda x: round(x, precision))
+
+    # ! plot
+    # * set theme and palette
+    sb.set_theme(style="darkgrid", palette="tab10")
+    if os.getenv("THEME") == "dark":
+        _style = "dark_background" 
+        _cmap = "rocket"
+    else:
+        _style = "bmh"
+        _cmap = "bone_r"
+    plt.style.use(_style)
+
+    dict_base = {
+        "x": df.columns[0],
+        "y": df.columns[1],
+        "data": df,
+        "height": size,
+        "kind": kind,
+        "ratio": 10,
+        "marginal_ticks": False,
+        "dropna": dropna,
+        # "title": f"{caption}[{ser.name}], n = {len(ser):_}" if not title else title,
+    }
+    dict_hex={"cmap": _cmap}
+    dict_kde={"fill": True, "cmap": _cmap}
+    
+    if kind=="hex":
+        fig = sb.jointplot(**dict_base, **dict_hex)
+    elif kind=="kde":
+        fig = sb.jointplot(**dict_base, **dict_kde)
+    else:
+        fig = sb.jointplot(**dict_base)
+    
+    # * emojis dont work in good ol seaborn
+    _caption="" if not caption else f"#{caption}, "
+    fig.figure.suptitle(title or f"{_caption}[{df.columns[0]}] vs [{df.columns[1]}], n = {len(df):_}")
+    # * leave some room for the title
+    fig.figure.tight_layout()
+    fig.figure.subplots_adjust(top=0.90)
+
+    # sb.jointplot(
+    #     x=df.columns[0],
+    #     y=df.columns[1],
+    #     data=df,
+    #     height=size,
+    #     kind=kind,
+    #     ratio=10,
+    #     marginal_ticks=False,
+    #     dropna=dropna,
+    #     cmap=_cmap,
+    # )
     return
 
 

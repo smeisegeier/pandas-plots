@@ -42,22 +42,22 @@ tbl.show_num_df(
 
 ## why use pandas-plots
 
-`pandas-plots` is a package to help you examine and visualize data that are organized in a pandas DataFrame. It provides a high level api to pandas / plotly with some selected functions.
-
-It is subdivided into:
+`pandas-plots` is a package to help you examine and visualize data that are organized in a pandas DataFrame. It provides a high level api to pandas / plotly with some selected functions and predefined options:
 
 - `tbl` utilities for table descriptions
   - 🌟`show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
   - `pivot_df()` gets a pivot table of a 3 column dataframe
-    - _⚠️ `pivot_df()` is depricated and wont get further updates. Its features are well covered in standard `pd.pivot_table()`_
+    - >_⚠️ `pivot_df()` is depricated and wont get further updates. Its features are well covered in standard `pd.pivot_table()`_
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
   - `plot_boxes()` multiple boxplots _(annotation is experimental)_
-  - `plots_bars()` a standardized bar plot
-    - 🆕 now features convidence intervals via `use_ci` option
   - `plot_stacked_bars()` shortcut to stacked bars 😄
+  - `plots_bars()` a standardized bar plot for a **categorical** column
+    - features convidence intervals via `use_ci` option
+  - 🆕 `plot_histogram()` histogram for one or more **numerical** columns
+  - 🆕 `plot_joints()` a joint plot for **exactly two numerical** columns
   - `plot_quadrants()` quickly shows a 2x2 heatmap
 
 - `ven` offers functions for _venn diagrams_
@@ -69,6 +69,8 @@ It is subdivided into:
   - `mean_confidence_interval()` calculates mean and confidence interval for a series
   - `wrap_text()` formats strings or lists to a given width to fit nicely on the screen
   - `replace_delimiter_outside_quotes()` when manual import of csv files is needed: replaces delimiters only outside of quotes
+  - 🆕 `create_barcode_from_url()` creates a barcode from a given URL
+  - 🆕 `add_datetime_col()` adds a datetime columns to a dataframe
 
 > note: theme setting can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 
