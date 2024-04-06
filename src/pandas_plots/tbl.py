@@ -1,4 +1,5 @@
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import math
@@ -14,6 +15,7 @@ from plotly.subplots import make_subplots
 from scipy import stats
 
 from .hlp import wrap_text
+
 # from devtools import debug
 pd.options.display.colheader_justify = "right"
 # pd.options.mode.chained_assignment = None
@@ -21,7 +23,9 @@ pd.options.display.colheader_justify = "right"
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
 ]
-KPI_LITERAL = Literal["rag_abs","rag_rel", "min_max_xy", "max_min_xy", "min_max_x", "max_min_x"]
+KPI_LITERAL = Literal[
+    "rag_abs", "rag_rel", "min_max_xy", "max_min_xy", "min_max_x", "max_min_x"
+]
 
 
 def describe_df(
@@ -108,7 +112,7 @@ def describe_df(
             is_str = df.loc[:, col].dtype.kind == "O"
             # * wrap output
             print(
-                f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, apo=is_str)}"
+                f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}"
             )
             # print(f"{_h} {_u[:top_n_uniques]}")
         else:
@@ -130,14 +134,16 @@ def describe_df(
     # ! *** PLOTS ***
     if not use_plot:
         return
-    
+
     # * reduce column names len if selected
     if top_n_chars_in_columns > 0:
         # * minumum 10 chars, or display is cluttered
-        top_n_chars_in_columns = 10 if top_n_chars_in_columns < 10 else top_n_chars_in_columns
+        top_n_chars_in_columns = (
+            10 if top_n_chars_in_columns < 10 else top_n_chars_in_columns
+        )
         col_list = []
         for i, col in enumerate(df.columns):
-            col_list.append(col[:top_n_chars_in_columns]+"_"+str(i).zfill(3))
+            col_list.append(col[:top_n_chars_in_columns] + "_" + str(i).zfill(3))
         df.columns = col_list
 
     # * respect fig_offset to exclude unwanted plots from maintanance columns
@@ -183,7 +189,7 @@ def describe_df(
                     else s[:top_n_chars_in_index]
                 )
                 x = [_cut(item) for item in x]
-            
+
             figsub = px.bar(
                 x=x,
                 y=y,
@@ -318,7 +324,7 @@ def pivot_df(
         heatmap_axis=heatmap_axis,
         kpi_mode=kpi_mode,
         kpi_rag_list=kpi_rag_list,
-        kpi_shape=kpi_shape
+        kpi_shape=kpi_shape,
     )
 
 
@@ -364,7 +370,9 @@ def show_num_df(
     """
     # * ensure arguments match parameter definition
     if any([df[col].dtype.kind not in ["i", "u", "f"] for col in df.columns]) == True:
-        print(f"❌ table must contain numeric data only. Maybe you forgot to convert this table with pivot or pivot_table first?")
+        print(
+            f"❌ table must contain numeric data only. Maybe you forgot to convert this table with pivot or pivot_table first?"
+        )
         return
 
     if (
@@ -383,16 +391,16 @@ def show_num_df(
         print(f"❌ kpi_mode '{kpi_mode}' not supported")
         return
 
-    if (kpi_mode and kpi_mode.startswith("rag")) and (not isinstance(kpi_rag_list, abc.Iterable) 
-        or len(kpi_rag_list) != 2
-        ):
+    if (kpi_mode and kpi_mode.startswith("rag")) and (
+        not isinstance(kpi_rag_list, abc.Iterable) or len(kpi_rag_list) != 2
+    ):
         print(f"❌ kpi_rag_list must be a list of 2 if kpi_mode is set")
         return
-    
+
     if kpi_mode == "rag_rel":
         # * transform values into percentiles
         if all(i <= 1 and i >= 0 for i in kpi_rag_list):
-            kpi_rag_list = [int(i*100) for i in kpi_rag_list]
+            kpi_rag_list = [int(i * 100) for i in kpi_rag_list]
         else:
             print(f"❌ kpi_list for relative mode must be between 0 and 1")
             return
@@ -415,17 +423,21 @@ def show_num_df(
         df_.loc["Total"] = df_.agg(total_mode, axis=0)
     if total_mode and total_axis in ["y", "xy"]:
         df_.loc[:, "Total"] = df_.agg(total_mode, axis=1)
-    
+
     # hack
     # * column sum values are distorted by totals, these must be rendered out
-    col_divider = 2 if (total_axis in ["x", "xy"] and pct_axis == "x" and total_mode=="sum") else 1
+    col_divider = (
+        2
+        if (total_axis in ["x", "xy"] and pct_axis == "x" and total_mode == "sum")
+        else 1
+    )
     col_sum = df_.sum() / col_divider
-    
+
     # * min values are unaffected
     col_min = df_.min()
 
     # * max values are affected by totals, ignore total row if present
-    last_row = -1 if (total_axis in ["x", "xy"] and total_mode=="sum") else None
+    last_row = -1 if (total_axis in ["x", "xy"] and total_mode == "sum") else None
     col_max = df_[:last_row].max()
 
     # * derive style
@@ -449,15 +461,14 @@ def show_num_df(
             # align="zero",
         )
 
-    
     def get_kpi(val: float, col: str) -> str:
         """
         Function to calculate and return the appropriate icon based on the given value and key performance indicator (KPI) mode.
-        
+
         Parameters:
         val (float): The value to be evaluated.
         col (str): The column associated with the value.
-        
+
         Returns:
         str: The appropriate icon based on the value and KPI mode.
         """
@@ -466,24 +477,24 @@ def show_num_df(
 
         dict_icons = {
             "squad": {
-                "light":["🟩", "🟨", "🟥", "⬜"],
-                "dark":["🟩", "🟨", "🟥", "⬛"]
-                },
+                "light": ["🟩", "🟨", "🟥", "⬜"],
+                "dark": ["🟩", "🟨", "🟥", "⬛"],
+            },
             "circle": {
-                "light":["🟢", "🟡", "🔴", "⚪"],
-                "dark":["🟢", "🟡", "🔴", "⚫"]
-                },
+                "light": ["🟢", "🟡", "🔴", "⚪"],
+                "dark": ["🟢", "🟡", "🔴", "⚫"],
+            },
         }
         icons = dict_icons[kpi_shape][theme]
-        
+
         # * transform values into percentiles if relative mode
-        kpi_rag_list_= kpi_rag_list
-        if kpi_mode=="rag_rel":
+        kpi_rag_list_ = kpi_rag_list
+        if kpi_mode == "rag_rel":
             # * get both percentile thresholds
             pcntl_1 = np.percentile(df_orig, kpi_rag_list[0])
             pcntl_2 = np.percentile(df_orig, kpi_rag_list[1])
             kpi_rag_list_ = [pcntl_1, pcntl_2]
-        
+
         # * for rag mopde both rel and abs
         if kpi_mode.startswith("rag"):
             # * get fitting icon
@@ -500,39 +511,31 @@ def show_num_df(
                     else icons[1] if val > kpi_rag_list_[1] else icons[2]
                 )
             return icon
-        
+
         # * for min/max mode, get min and max either from table or column
         # ! care for max values
         min_ = tbl_min if kpi_mode.endswith("_xy") else col_min[col]
         max_ = tbl_max if kpi_mode.endswith("_xy") else col_max[col]
 
         # * omit Total column for min/max
-        if col=="Total":
+        if col == "Total":
             return ""
 
         # * calculate order of icons
-        if kpi_mode.startswith( "min_max"):
-            result= (
-                icons[0]
-                if val == min_
-                else icons[2] if val == max_ else icons[3]
-            )
+        if kpi_mode.startswith("min_max"):
+            result = icons[0] if val == min_ else icons[2] if val == max_ else icons[3]
         elif kpi_mode.startswith("max_min"):
-            result= (
-                icons[0]
-                if val == max_
-                else icons[2] if val == min_ else icons[3]
-            )
+            result = icons[0] if val == max_ else icons[2] if val == min_ else icons[3]
         else:
             # * no matching mode founf
-            result=""
+            result = ""
 
         return result
 
     # * all cell formatting in one place
     def format_cell(val, col):
         """
-        A function to format a cell value based on the sum and percentage axis. 
+        A function to format a cell value based on the sum and percentage axis.
         Parameters:
         - val: The value of the cell.
         - col: The column index of the cell.
@@ -540,8 +543,8 @@ def show_num_df(
         Returns a formatted string for the cell value.
         """
         # * calc sum depending on pct_axis
-        sum_=tbl_sum if pct_axis=="xy" else col_sum[col] if pct_axis=="x" else val
-        val_rel= 0 if sum_== 0 else val / sum_
+        sum_ = tbl_sum if pct_axis == "xy" else col_sum[col] if pct_axis == "x" else val
+        val_rel = 0 if sum_ == 0 else val / sum_
 
         # * get kpi icon
         kpi = get_kpi(val, col=col)
@@ -556,14 +559,11 @@ def show_num_df(
         if pct_axis:
             return f'{val:_.{precision}f} <span style="color: {color_pct}">({val_rel:.1%}) {kpi}</span>'
         if show_as_pct:
-            return f'{val:.{precision}%} {kpi}'
+            return f"{val:.{precision}%} {kpi}"
         return f"{val:_.{precision}f} {kpi}"
 
     # * formatter is now unified, col wise
-    formatter = {
-        col: lambda x, col=col: format_cell(x, col=col)
-        for col in df_.columns
-    }
+    formatter = {col: lambda x, col=col: format_cell(x, col=col) for col in df_.columns}
 
     # ? pct_axis y is not implemented, needs row wise formatting
     #     row_sums = _df.sum(axis=1) / divider

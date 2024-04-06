@@ -8,7 +8,7 @@ from PIL import Image
 import requests
 import re
 
-from tenacity import retry
+# from devtools import debug
 
 URL_REGEX = r"^(?:http|ftp)s?://"  # https://stackoverflow.com/a/1617386
 
@@ -125,53 +125,67 @@ def replace_delimiter_outside_quotes(
 
 
 def wrap_text(
-    text: str | list, max_items_in_line: int = 70, sep: bool = True, apo: bool = False
+    text: str | list,
+    max_items_in_line: int = 70,
+    use_sep: bool = True,
+    use_apo: bool = False,
 ):
     """
     A function that wraps text into lines with a maximum number of items per line.
+    Important: enclose this function in a print() statement to print the text
 
     Args:
         text (str | list): The input text or list of words to be wrapped.
         max_items_in_line (int): The maximum number of items allowed in each line.
-        sep (bool, optional): Whether to include a comma separator between items. Defaults to True.
-        apo (bool, optional): Whether to enclose each word in single quotes. Defaults to False.
+        use_sep (bool, optional): When list: Whether to include a comma separator between items. Defaults to True.
+        use_apo (bool, optional): When list: Whether to enclose each word in single quotes. Defaults to False.
+    Returns: the wrapped text
     """
 
-    # * check if text is string, then strip and build word list
+    # * check if text is string
     is_text = isinstance(text, str)
     if is_text:
+        # ! when splitting the text later by blanks, newlines are not correctly handled
+        # * to detect them, they must be followed by a blank:
+        pattern = r'(\n)(?=\S)' # *forward lookup for newline w/ no blank
+        # * add blank after these newlines
+        new_text = re.sub(pattern, r"\1 ", text)
+        text=new_text
+
+        # * then strip and build word list
         text = (
             text.replace(",", "")
             .replace("'", "")
             .replace("[", "")
             .replace("]", "")
+            # * use explicit blanks to prevent newline split
             .split(" ")
         )
 
-    # * start
+    # * loop setup
     i = 0
     line = ""
-
     # * loop through words
     out = ""
     for word in text:
-        apo_s = "'" if apo else ""
-        sep_s = "," if sep and not is_text else ""
+        apo_s = "'" if use_apo and not is_text else ""
+        sep_s = "," if use_sep and not is_text else ""
         word_s = f"{apo_s}{str(word)}{apo_s}{sep_s}"
         # * inc counter
         i = i + len(word_s)
         # * construct print line
         line = line + word_s + " "
-        # * reset if counter exceeds limit
-        if i >= max_items_in_line:
+        # * reset if counter exceeds limit, or if word ends with newline
+        if i >= max_items_in_line or str(word).endswith("\n"):
             out = out + line + "\n"
             line = ""
             i = 0
         # else:
-    # * on short lists no reset happens, trigger manually
-    out = line if not out else out
-    # * cut last newline
-    return f"[{out[:-1]}]"
+    # * on short lists no line reset happens, so just print the line
+    # * else add last line
+    out = line if not out else out + line
+    # * cut off last newline
+    return f"[{out[:-1].strip()}]"
 
 
 def create_barcode_from_url(
@@ -211,21 +225,24 @@ def create_barcode_from_url(
         # plt.axis('off')  # Turn off axis numbers
         plt.show()
 
+
 def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFrame:
-    df_= df.copy()
+    df_ = df.copy()
     if not date_column:
-        date_column = [col for col in df_.columns if pd.api.types.is_datetime64_any_dtype(df_[col])][0]
+        date_column = [
+            col for col in df_.columns if pd.api.types.is_datetime64_any_dtype(df_[col])
+        ][0]
     else:
         df_[date_column] = pd.to_datetime(df_[date_column])
 
     if not date_column or not pd.api.types.is_datetime64_any_dtype(df_[date_column]):
         print("❌ No datetime column found")
         return
-    
+
     if [col for col in df_.columns if "YYYY-WW" in col]:
         print("❌ Added datetime columns already exist")
         return
-    
+
     print(f"⏳ Adding datetime columns basing off of: {date_column}")
 
     df_["YYYY"] = df_[date_column].dt.year
@@ -235,9 +252,12 @@ def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFr
     df_["YYYY-MM"] = df_[date_column].dt.to_period("M").astype(str)
     df_["YYYYQ"] = df_[date_column].dt.to_period("Q").astype(str)
     df_["YYYY-WW"] = (
-        df_[date_column].dt.isocalendar().year.astype(str) + "-W" +
-        df_[date_column].dt.isocalendar().week.astype(str).str.zfill(2)
+        df_[date_column].dt.isocalendar().year.astype(str)
+        + "-W"
+        + df_[date_column].dt.isocalendar().week.astype(str).str.zfill(2)
     )
-    df_["DDD"] = df_[date_column].dt.weekday.map({0: "Mon", 1: "Tue", 2: "Wed", 3: "Thu", 4: "Fri", 5: "Sat", 6: "Sun"})
-    
+    df_["DDD"] = df_[date_column].dt.weekday.map(
+        {0: "Mon", 1: "Tue", 2: "Wed", 3: "Thu", 4: "Fri", 5: "Sat", 6: "Sun"}
+    )
+
     return df_

@@ -125,3 +125,7 @@ _df, _details = ven.show_venn3(
 ```
 
 ![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-19-20-49-52.png?raw=true)
+
+## tags
+
+#pandas, #plotly, #visualizations, #statistics
