@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy.stats
+import importlib.metadata as md
 
 from io import BytesIO
 from matplotlib import pyplot as plt
@@ -261,3 +262,24 @@ def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFr
     )
 
     return df_
+
+
+def show_package_version(packages: list[str] = ["pandas","numpy","duckdb","pandas-plots", "connection_helper"], sep: str = " | ") -> None:
+    """
+    Display the versions of the specified packages.
+
+    Parameters:
+        packages (list[str], optional): A list of package names. Defaults to ["pandas","numpy","duckdb","pandas-plots", "connection_helper"].
+        sep (str, optional): The separator to use when joining the package names and versions. Defaults to " | ".
+
+    Returns:
+        None
+    """
+    items = []
+    for item in packages:
+        try:
+            version = md.version(item)
+            items.append(f"📦 {item}: {version}")
+        except md.PackageNotFoundError:
+            items.append(f"❌ {item}: Package not found")
+    print(sep.join(items))

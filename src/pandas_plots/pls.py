@@ -125,7 +125,7 @@ def plot_stacked_bars(
     Parameters:
     - df: pd.DataFrame - The DataFrame containing the data to plot.
     - top_n_index: int = 0 - The number of top indexes to include in the plot.
-    - top_n_index: int = 0 - The number of top colors to include in the plot. WARNING: this forces distribution to 100% on a subset
+    - top_n_color: int = 0 - The number of top colors to include in the plot. WARNING: this forces distribution to 100% on a subset
     - dropna: bool = False - Whether to include NULL values in the plot.
     - swap: bool = False - Whether to swap the x-axis and y-axis.
     - normalize: bool = False - Whether to normalize the values.

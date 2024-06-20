@@ -17,6 +17,7 @@ from scipy import stats
 from .hlp import wrap_text
 
 # from devtools import debug
+
 pd.options.display.colheader_justify = "right"
 # pd.options.mode.chained_assignment = None
 
@@ -225,6 +226,7 @@ def pivot_df(
     kpi_shape: Literal["squad", "circle"] = "squad",
 ) -> pd.DataFrame:
     """
+    DEPR: This function is deprecated and will be removed in the future.
     A function to pivot a DataFrame based on specified parameters and return the result as a new DataFrame.
 
     Args:
@@ -365,6 +367,7 @@ def show_num_df(
         - max_min_x: max value green, min valued red for x axis
     - kpi_rag_list: a list of floats indicating the thresholds for rag lights. The list should have 2 elements.
     - kpi_shape: a Literal indicating the shape of the KPIs ["squad", "circle"]
+    - show_as_pct: a boolean indicating whether to show value as percentage (only advised on values ~1)
 
     The function returns a styled representation of the DataFrame.
     """
@@ -472,8 +475,13 @@ def show_num_df(
         Returns:
         str: The appropriate icon based on the value and KPI mode.
         """
+
+        # * no icon if no mode. (or Total column, but total index cannot be located)
         if not kpi_mode:
+        # if not kpi_mode or col == "Total":
             return ""
+        
+        
 
         dict_icons = {
             "squad": {
@@ -486,7 +494,6 @@ def show_num_df(
             },
         }
         icons = dict_icons[kpi_shape][theme]
-
         # * transform values into percentiles if relative mode
         kpi_rag_list_ = kpi_rag_list
         if kpi_mode == "rag_rel":
@@ -517,19 +524,14 @@ def show_num_df(
         min_ = tbl_min if kpi_mode.endswith("_xy") else col_min[col]
         max_ = tbl_max if kpi_mode.endswith("_xy") else col_max[col]
 
-        # * omit Total column for min/max
-        if col == "Total":
-            return ""
-
         # * calculate order of icons
         if kpi_mode.startswith("min_max"):
             result = icons[0] if val == min_ else icons[2] if val == max_ else icons[3]
         elif kpi_mode.startswith("max_min"):
             result = icons[0] if val == max_ else icons[2] if val == min_ else icons[3]
         else:
-            # * no matching mode founf
+            # * no matching mode found
             result = ""
-
         return result
 
     # * all cell formatting in one place
@@ -562,7 +564,7 @@ def show_num_df(
             return f"{val:.{precision}%} {kpi}"
         return f"{val:_.{precision}f} {kpi}"
 
-    # * formatter is now unified, col wise
+    # * formatter is a dict comprehension, only accepts column names
     formatter = {col: lambda x, col=col: format_cell(x, col=col) for col in df_.columns}
 
     # ? pct_axis y is not implemented, needs row wise formatting
@@ -572,6 +574,7 @@ def show_num_df(
     #     }
 
     # * apply formatter
+    # debug(formatter)
     out.format(formatter=formatter)
 
     # * apply fonts for cells

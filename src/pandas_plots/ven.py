@@ -231,7 +231,6 @@ def show_venn2(
     a_label: str,
     b_set: set,
     b_label: str,
-    # theme: Literal["light", "dark"] = "dark",
     max_set_len: int = 100,
     max_line_width: int = 120,
     alpha: float = 0.7,
