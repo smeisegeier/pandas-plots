@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 import importlib.metadata as md
+from platform import python_version
 
 from io import BytesIO
 from matplotlib import pyplot as plt
@@ -276,6 +277,7 @@ def show_package_version(packages: list[str] = ["pandas","numpy","duckdb","panda
         None
     """
     items = []
+    items.append(f"🐍 {python_version()}")
     for item in packages:
         try:
             version = md.version(item)
