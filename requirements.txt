@@ -1,7 +1,7 @@
 appnope==0.1.4
 asttokens==2.4.1
 attrs==23.2.0
-certifi==2024.2.2
+certifi>=2024.07.04
 charset-normalizer==3.3.2
 comm==0.2.1
 contourpy==1.2.0

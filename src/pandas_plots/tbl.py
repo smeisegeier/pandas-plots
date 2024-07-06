@@ -226,8 +226,9 @@ def pivot_df(
     kpi_shape: Literal["squad", "circle"] = "squad",
 ) -> pd.DataFrame:
     """
-    DEPR: This function is deprecated and will be removed in the future.
-    A function to pivot a DataFrame based on specified parameters and return the result as a new DataFrame.
+    A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
+    It does not provide much added value since the built-in pivot_table function does the same thing.
+    However, it can be useful in certain situations (applying top_n_index and top_n_columns).
 
     Args:
         df (pd.DataFrame): The input DataFrame to be pivoted.

@@ -48,7 +48,6 @@ tbl.show_num_df(
   - 🌟`show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
   - `pivot_df()` gets a pivot table of a 3 column dataframe
-    - >_⚠️ `pivot_df()` is depricated and wont get further updates. Its features are well covered in standard `pd.pivot_table()`_
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
