@@ -229,6 +229,10 @@ def pivot_df(
     A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
     It does not provide much added value since the built-in pivot_table function does the same thing.
     However, it can be useful in certain situations (applying top_n_index and top_n_columns).
+    
+    First two must be [index] and [columns]
+    If 3 columns are given, last one must be the weights column.
+    If 2 columns are given, column 3 will be added as flat count.
 
     Args:
         df (pd.DataFrame): The input DataFrame to be pivoted.
@@ -261,6 +265,10 @@ def pivot_df(
     ):
         print(f"❌ axis not supported")
         return
+
+    # * if only 2 are provided, add cnt col
+    if len(df.columns) == 2:
+        df = df.assign(cnt=1)
 
     if len(df.columns) != 3:
         print("❌ df must have exactly 3 columns")

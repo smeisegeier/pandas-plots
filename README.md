@@ -47,16 +47,16 @@ tbl.show_num_df(
 - `tbl` utilities for table descriptions
   - 🌟`show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
-  - `pivot_df()` gets a pivot table of a 3 column dataframe
+  - `pivot_df()` gets a pivot table of a 3 column dataframe (or 2 columns if no weights are given)
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
   - `plot_boxes()` multiple boxplots _(annotation is experimental)_
   - `plot_stacked_bars()` shortcut to stacked bars 😄
   - `plots_bars()` a standardized bar plot for a **categorical** column
-    - features convidence intervals via `use_ci` option
-  - 🆕 `plot_histogram()` histogram for one or more **numerical** columns
-  - 🆕 `plot_joints()` a joint plot for **exactly two numerical** columns
+    - features confidence intervals via `use_ci` option
+  - `plot_histogram()` histogram for one or more **numerical** columns
+  - `plot_joints()` a joint plot for **exactly two numerical** columns
   - `plot_quadrants()` quickly shows a 2x2 heatmap
 
 - `ven` offers functions for _venn diagrams_
@@ -70,7 +70,8 @@ tbl.show_num_df(
   - `replace_delimiter_outside_quotes()` when manual import of csv files is needed: replaces delimiters only outside of quotes
   - `create_barcode_from_url()` creates a barcode from a given URL
   - `add_datetime_col()` adds a datetime columns to a dataframe
-  - 🆕 `show_package_version` prints version of a list of packages
+  - `show_package_version` prints version of a list of packages
+  - `get_os` helps to identify and ensure operating system at runtime
 
 > note: theme setting can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 

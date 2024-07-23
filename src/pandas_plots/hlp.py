@@ -3,6 +3,11 @@ import numpy as np
 import scipy.stats
 import importlib.metadata as md
 from platform import python_version
+from typing import Literal
+
+from enum import Enum, auto
+import platform
+import os
 
 from io import BytesIO
 from matplotlib import pyplot as plt
@@ -285,3 +290,36 @@ def show_package_version(packages: list[str] = ["pandas","numpy","duckdb","panda
         except md.PackageNotFoundError:
             items.append(f"❌ {item}: Package not found")
     print(sep.join(items))
+
+class OperatingSystem(Enum):
+    WINDOWS = auto()
+    LINUX = auto()
+    MAC = auto()
+
+def get_os(desired_os: OperatingSystem = None) -> bool:
+    """
+    A function that checks the operating system and returns a boolean value based on the desired operating system.
+    
+    Parameters:
+        desired_os (OperatingSystem): The desired operating system to check against. Defaults to None.
+        Values are
+            - OperatingSystem.WINDOWS
+            - OperatingSystem.LINUX
+            - OperatingSystem.MAC
+
+    Returns:
+        bool: True if the desired operating system matches the current operating system, False otherwise. Returns None if desired_os is None.
+    """
+    print(f'💻 os: {os.name} | 🎯 system: {platform.system()} | 💽 release: {platform.release()}') 
+    
+    if desired_os is None:
+        return None
+    
+    if desired_os == OperatingSystem.WINDOWS and platform.system() == 'Windows':
+        return True
+    elif desired_os == OperatingSystem.LINUX and platform.system() == 'Linux':
+        return True
+    elif desired_os == OperatingSystem.MAC and platform.system() == 'Darwin':
+        return True
+    else:
+        return False
