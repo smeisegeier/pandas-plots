@@ -79,4 +79,4 @@ twine==4.0.2
 tzdata==2023.4
 urllib3>=2.2.2
 wcwidth==0.2.13
-zipp==3.17.0
+zipp>=3.19.1

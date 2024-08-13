@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats
 import importlib.metadata as md
 from platform import python_version
-from typing import Literal
+from typing import Literal, List
 
 from enum import Enum, auto
 import platform
@@ -154,10 +154,10 @@ def wrap_text(
     if is_text:
         # ! when splitting the text later by blanks, newlines are not correctly handled
         # * to detect them, they must be followed by a blank:
-        pattern = r'(\n)(?=\S)' # *forward lookup for newline w/ no blank
+        pattern = r"(\n)(?=\S)"  # *forward lookup for newline w/ no blank
         # * add blank after these newlines
         new_text = re.sub(pattern, r"\1 ", text)
-        text=new_text
+        text = new_text
 
         # * then strip and build word list
         text = (
@@ -270,36 +270,56 @@ def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFr
     return df_
 
 
-def show_package_version(packages: list[str] = ["pandas","numpy","duckdb","pandas-plots", "connection_helper"], sep: str = " | ") -> None:
+def show_package_version(
+    packages: list[str] = [],
+    sep: str = " | ",
+    include_demo_packages: bool = True,
+) -> None:
     """
     Display the versions of the specified packages.
 
     Parameters:
         packages (list[str], optional): A list of package names. Defaults to ["pandas","numpy","duckdb","pandas-plots", "connection_helper"].
         sep (str, optional): The separator to use when joining the package names and versions. Defaults to " | ".
+        include_demo_packages: If True, inlude all demo packages
 
     Returns:
         None
     """
+    if not isinstance(packages, List):
+        print(f"❌ A list of str must be provided")
+        return
+    demo = [
+        "pandas",
+        "numpy",
+        "duckdb",
+        "pandas-plots",
+        "connection_helper",
+    ]
     items = []
     items.append(f"🐍 {python_version()}")
+    if include_demo_packages:
+        packages.extend(demo)
+
     for item in packages:
         try:
             version = md.version(item)
             items.append(f"📦 {item}: {version}")
         except md.PackageNotFoundError:
-            items.append(f"❌ {item}: Package not found")
+            items.append(f"❌ {item}: Not found")
     print(sep.join(items))
+    return
 
 class OperatingSystem(Enum):
     WINDOWS = auto()
     LINUX = auto()
     MAC = auto()
 
+
 def get_os(desired_os: OperatingSystem = None) -> bool:
     """
     A function that checks the operating system and returns a boolean value based on the desired operating system.
-    
+
     Parameters:
         desired_os (OperatingSystem): The desired operating system to check against. Defaults to None.
         Values are
@@ -310,16 +330,18 @@ def get_os(desired_os: OperatingSystem = None) -> bool:
     Returns:
         bool: True if the desired operating system matches the current operating system, False otherwise. Returns None if desired_os is None.
     """
-    print(f'💻 os: {os.name} | 🎯 system: {platform.system()} | 💽 release: {platform.release()}') 
-    
+    print(
+        f"💻 os: {os.name} | 🎯 system: {platform.system()} | 💽 release: {platform.release()}"
+    )
+
     if desired_os is None:
         return None
-    
-    if desired_os == OperatingSystem.WINDOWS and platform.system() == 'Windows':
+
+    if desired_os == OperatingSystem.WINDOWS and platform.system() == "Windows":
         return True
-    elif desired_os == OperatingSystem.LINUX and platform.system() == 'Linux':
+    elif desired_os == OperatingSystem.LINUX and platform.system() == "Linux":
         return True
-    elif desired_os == OperatingSystem.MAC and platform.system() == 'Darwin':
+    elif desired_os == OperatingSystem.MAC and platform.system() == "Darwin":
         return True
     else:
         return False

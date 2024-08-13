@@ -73,6 +73,9 @@ tbl.show_num_df(
   - `show_package_version` prints version of a list of packages
   - `get_os` helps to identify and ensure operating system at runtime
 
+- `pii` has routines for handling of personally identifiable information
+  - `remove_pii()` logs and deletes pii from a series
+
 > note: theme setting can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 
 ## more examples
