@@ -67,8 +67,10 @@ def remove_pii(
         print(f"found {idx_all.__len__():_} pii items:")
         print(col.loc[idx_all].tolist())
 
-    if logging:
+    if logging:  # Assuming logging is defined and has the correct value
+        data = col.loc[idx_all]  # Assuming col and idx_all are defined
         with open(".pii.log", "w") as f:
-            f.write(str(col.loc[idx_all]))
+            # ! when using str(), it will give only a summary!
+            f.write(data.to_string(index=True))
 
     return idx_all
