@@ -14,11 +14,14 @@ def remove_pii(
     Parameters:
     - series: A pandas Series representing a column in a DataFrame.
     - verbose: If True, print pii items
-    - logging: If True, write pii items into .pii.log
+    - logging: If True, write pii items into the file .pii.log
     - custom_regex: Regex that is injected into detection
 
     Returns:
-    - the given series w/o detected pii elements
+    - index object with indexes of all pii items
+    
+    Remarks:
+    - df.drop(axis=0, index=result, inplace=True)
     """
 
     # * reject empty columns
@@ -68,4 +71,4 @@ def remove_pii(
         with open(".pii.log", "w") as f:
             f.write(str(col.loc[idx_all]))
 
-    return col.drop(idx_all)
+    return idx_all
