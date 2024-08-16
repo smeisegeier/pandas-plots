@@ -271,7 +271,7 @@ def add_datetime_columns(df: pd.DataFrame, date_column: str = None) -> pd.DataFr
 
 
 def show_package_version(
-    packages: list[str] = [],
+    packages: list[str] = None,
     sep: str = " | ",
     include_demo_packages: bool = True,
 ) -> None:
@@ -286,6 +286,10 @@ def show_package_version(
     Returns:
         None
     """
+    # ! avoid empty list in signature, it will NOT be empty in runtime
+    if packages is None:
+        packages = []
+    
     if not isinstance(packages, List):
         print(f"❌ A list of str must be provided")
         return
@@ -307,7 +311,7 @@ def show_package_version(
             items.append(f"📦 {item}: {version}")
         except md.PackageNotFoundError:
             items.append(f"❌ {item}: Not found")
-    print(sep.join(items))
+    print('\n',sep.join(items))
     return
 
 class OperatingSystem(Enum):
