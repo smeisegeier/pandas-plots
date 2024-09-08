@@ -34,6 +34,7 @@ def describe_df(
     caption: str,
     use_plot: bool = True,
     use_columns: bool = True,
+    use_missing: bool = True,
     renderer: Literal["png", "svg", None] = "png",
     fig_cols: int = 3,
     fig_offset: int = None,
@@ -51,6 +52,7 @@ def describe_df(
     caption (str): caption to describe dataframe
     use_plot (bool): display plot?
     use_columns (bool): display columns values?
+    use_missing (bool): display missing values? (looks better on light theme)
     renderer (Literal["png", "svg", None]): renderer for plot
     fig_cols (int): number of columns in plot
     fig_offset (int): offset for plots as iloc Argument. None = no offset, -1 = omit last plot
@@ -133,80 +135,82 @@ def describe_df(
     display(df[:3])
 
     # ! *** PLOTS ***
-    if not use_plot:
-        return
-
-    # * reduce column names len if selected
-    if top_n_chars_in_columns > 0:
-        # * minumum 10 chars, or display is cluttered
-        top_n_chars_in_columns = (
-            10 if top_n_chars_in_columns < 10 else top_n_chars_in_columns
-        )
-        col_list = []
-        for i, col in enumerate(df.columns):
-            col_list.append(col[:top_n_chars_in_columns] + "_" + str(i).zfill(3))
-        df.columns = col_list
-
-    # * respect fig_offset to exclude unwanted plots from maintanance columns
-    cols = df.iloc[:, :fig_offset].columns
-    cols_num = df.select_dtypes(np.number).columns.tolist()
-    # cols_str = list(set(df.columns) - set(cols_num))
-
-    # * set constant column count, calc rows
-    fig_rows = math.ceil(len(cols) / fig_cols)
-
-    fig = make_subplots(
-        rows=fig_rows,
-        cols=fig_cols,
-        shared_xaxes=False,
-        shared_yaxes=False,
-        subplot_titles=cols,
-    )
-    # * layout settings
-    fig.layout.height = fig_rowheight * fig_rows
-    fig.layout.width = 400 * fig_cols
-
-    # * construct subplots
-    for i, col in enumerate(cols):
-        # * get unique values as sorted list
-        if sort_mode == "value":
-            span = df[col].value_counts().sort_values(ascending=False)
-        else:
-            span = df[col].value_counts().sort_index()
-
-        # * check if num col w/ too many values (disabled)
-        if col in cols_num and len(span) > 100 and False:
-            figsub = px.box(df, x=col, points="outliers")
-        else:
-            # * only respect 100 items (fixed value)
-            x = span.iloc[:100].index
-            y = span.iloc[:100].values
-            # * cut long strings
-            if x.dtype == "object" and top_n_chars_in_index > 0:
-                x = x.astype(str).tolist()
-                _cut = lambda s: (
-                    s[:top_n_chars_in_index] + ".."
-                    if len(s) > top_n_chars_in_index
-                    else s[:top_n_chars_in_index]
-                )
-                x = [_cut(item) for item in x]
-
-            figsub = px.bar(
-                x=x,
-                y=y,
+    if use_plot:
+        # * reduce column names len if selected
+        if top_n_chars_in_columns > 0:
+            # * minumum 10 chars, or display is cluttered
+            top_n_chars_in_columns = (
+                10 if top_n_chars_in_columns < 10 else top_n_chars_in_columns
             )
-        # * grid position
-        _row = math.floor((i) / fig_cols) + 1
-        _col = i % fig_cols + 1
+            col_list = []
+            for i, col in enumerate(df.columns):
+                col_list.append(col[:top_n_chars_in_columns] + "_" + str(i).zfill(3))
+            df.columns = col_list
 
-        # * add trace to fig, only data not layout, only 1 series
-        fig.add_trace(figsub["data"][0], row=_row, col=_col)
+        # * respect fig_offset to exclude unwanted plots from maintanance columns
+        cols = df.iloc[:, :fig_offset].columns
+        cols_num = df.select_dtypes(np.number).columns.tolist()
+        # cols_str = list(set(df.columns) - set(cols_num))
 
-    # * set template
-    fig.update_layout(
-        template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
-    )
-    fig.show(renderer)
+        # * set constant column count, calc rows
+        fig_rows = math.ceil(len(cols) / fig_cols)
+
+        fig = make_subplots(
+            rows=fig_rows,
+            cols=fig_cols,
+            shared_xaxes=False,
+            shared_yaxes=False,
+            subplot_titles=cols,
+        )
+        # * layout settings
+        fig.layout.height = fig_rowheight * fig_rows
+        fig.layout.width = 400 * fig_cols
+
+        # * construct subplots
+        for i, col in enumerate(cols):
+            # * get unique values as sorted list
+            if sort_mode == "value":
+                span = df[col].value_counts().sort_values(ascending=False)
+            else:
+                span = df[col].value_counts().sort_index()
+
+            # * check if num col w/ too many values (disabled)
+            if col in cols_num and len(span) > 100 and False:
+                figsub = px.box(df, x=col, points="outliers")
+            else:
+                # * only respect 100 items (fixed value)
+                x = span.iloc[:100].index
+                y = span.iloc[:100].values
+                # * cut long strings
+                if x.dtype == "object" and top_n_chars_in_index > 0:
+                    x = x.astype(str).tolist()
+                    _cut = lambda s: (
+                        s[:top_n_chars_in_index] + ".."
+                        if len(s) > top_n_chars_in_index
+                        else s[:top_n_chars_in_index]
+                    )
+                    x = [_cut(item) for item in x]
+
+                figsub = px.bar(
+                    x=x,
+                    y=y,
+                )
+            # * grid position
+            _row = math.floor((i) / fig_cols) + 1
+            _col = i % fig_cols + 1
+
+            # * add trace to fig, only data not layout, only 1 series
+            fig.add_trace(figsub["data"][0], row=_row, col=_col)
+
+        # * set template
+        fig.update_layout(
+            template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
+        )
+        fig.show(renderer)
+    
+    if use_missing:
+        import missingno as msno
+        msno.matrix(df, figsize=(12, 5))
 
 
 def pivot_df(
