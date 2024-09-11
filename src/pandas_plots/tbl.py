@@ -34,7 +34,7 @@ def describe_df(
     caption: str,
     use_plot: bool = True,
     use_columns: bool = True,
-    use_missing: bool = True,
+    use_missing: bool = False,
     renderer: Literal["png", "svg", None] = "png",
     fig_cols: int = 3,
     fig_offset: int = None,
@@ -52,7 +52,7 @@ def describe_df(
     caption (str): caption to describe dataframe
     use_plot (bool): display plot?
     use_columns (bool): display columns values?
-    use_missing (bool): display missing values? (looks better on light theme)
+    use_missing (bool): display missing values? (no support for dark theme)
     renderer (Literal["png", "svg", None]): renderer for plot
     fig_cols (int): number of columns in plot
     fig_offset (int): offset for plots as iloc Argument. None = no offset, -1 = omit last plot
