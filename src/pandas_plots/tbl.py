@@ -1,6 +1,5 @@
-import warnings
-
-warnings.filterwarnings("ignore")
+# import warnings
+# warnings.filterwarnings("ignore")
 
 import math
 import os
@@ -16,6 +15,8 @@ from scipy import stats
 
 from .hlp import wrap_text
 
+import duckdb as ddb
+
 # from devtools import debug
 
 pd.options.display.colheader_justify = "right"
@@ -28,6 +29,10 @@ KPI_LITERAL = Literal[
     "rag_abs", "rag_rel", "min_max_xy", "max_min_xy", "min_max_x", "max_min_x"
 ]
 
+
+def descr_db(db: ddb.duckdb.DuckDBPyRelation, caption: str = "db")->None:
+    cols = ", ".join(db.columns)
+    print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
 
 def describe_df(
     df: pd.DataFrame,
@@ -77,7 +82,8 @@ def describe_df(
     hint: skewness may not properly work if the columns is float and/or has only 1 value
     """
     # * copy df, df col types are modified
-    df = df.copy()
+    df = df.fillna(pd.NA).copy()
+    df_ = df.copy()
 
     # * check if df is empty
     if len(df) == 0:
@@ -210,7 +216,7 @@ def describe_df(
     
     if use_missing:
         import missingno as msno
-        msno.matrix(df, figsize=(12, 5))
+        msno.matrix(df_, figsize=(12, 5))
 
 
 def pivot_df(

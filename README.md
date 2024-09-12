@@ -47,6 +47,7 @@ tbl.show_num_df(
 - `tbl` utilities for table descriptions
   - 🌟`show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
+  - `descr_db()` a very short descr for a `duckdb` relation
   - `pivot_df()` gets a pivot table of a 3 column dataframe (or 2 columns if no weights are given)
 
 - `pls` for plotly visualizations
