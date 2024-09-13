@@ -96,7 +96,8 @@ def describe_df(
             df[col] = df[col].astype(str)
 
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}")
-    print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
+    print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)} ")
+    # print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
     print(f"🟣 duplicates: {df.duplicated().sum():_}")
     print(f"🟣 missings: {dict(df.isna().sum())}")
     print("--- column uniques (all)")

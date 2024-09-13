@@ -311,7 +311,8 @@ def show_package_version(
             items.append(f"📦 {item}: {version}")
         except md.PackageNotFoundError:
             items.append(f"❌ {item}: Not found")
-    print('\n',sep.join(items))
+    out = sep.join(items).strip()
+    print(out)
     return
 
 class OperatingSystem(Enum):
@@ -320,7 +321,7 @@ class OperatingSystem(Enum):
     MAC = auto()
 
 
-def get_os(desired_os: OperatingSystem = None) -> bool:
+def get_os(desired_os: OperatingSystem = None, verbose: bool = False) -> bool | str:
     """
     A function that checks the operating system and returns a boolean value based on the desired operating system.
 
@@ -334,12 +335,13 @@ def get_os(desired_os: OperatingSystem = None) -> bool:
     Returns:
         bool: True if the desired operating system matches the current operating system, False otherwise. Returns None if desired_os is None.
     """
-    print(
-        f"💻 os: {os.name} | 🎯 system: {platform.system()} | 💽 release: {platform.release()}"
-    )
+    if verbose:
+        print(
+            f"💻 os: {os.name} | 🎯 system: {platform.system()} | 💽 release: {platform.release()}"
+        )
 
     if desired_os is None:
-        return None
+        return platform.system()
 
     if desired_os == OperatingSystem.WINDOWS and platform.system() == "Windows":
         return True
