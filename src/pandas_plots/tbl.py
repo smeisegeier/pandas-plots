@@ -100,8 +100,6 @@ def describe_df(
     # print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
     print(f"🟣 duplicates: {df.duplicated().sum():_}")
     print(f"🟣 missings: {dict(df.isna().sum())}")
-    print("--- column uniques (all)")
-    print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}")
 
     def get_uniques_header(col: str):
         # * sorting has issues when col is of mixed type (object)
@@ -115,18 +113,17 @@ def describe_df(
         return unis, header
 
     # * show all columns
-    for col in df.columns[:]:
-        _u, _h = get_uniques_header(col)
-        if use_columns:
+    if use_columns:
+        print("--- column uniques (all)")
+        print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}")
+        for col in df.columns[:]:
+            _u, _h = get_uniques_header(col)
             # * check col type
             is_str = df.loc[:, col].dtype.kind == "O"
             # * wrap output
             print(
                 f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}"
             )
-            # print(f"{_h} {_u[:top_n_uniques]}")
-        else:
-            print(f"{_h}")
 
     print("--- column stats (numeric)")
     # * only show numerics

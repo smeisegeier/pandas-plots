@@ -321,33 +321,34 @@ class OperatingSystem(Enum):
     MAC = auto()
 
 
-def get_os(desired_os: OperatingSystem = None, verbose: bool = False) -> bool | str:
+def get_os(is_os: OperatingSystem = None, verbose: bool = False) -> bool | str:
     """
-    A function that checks the operating system and returns a boolean value based on the desired operating system.
+    A function that checks the operating system and returns a boolean value based on the operating system to check.
 
     Parameters:
-        desired_os (OperatingSystem): The desired operating system to check against. Defaults to None.
+        is_os (OperatingSystem): The operating system to check against. Defaults to None.
         Values are
             - OperatingSystem.WINDOWS
             - OperatingSystem.LINUX
             - OperatingSystem.MAC
 
     Returns:
-        bool: True if the desired operating system matches the current operating system, False otherwise. Returns None if desired_os is None.
+        bool: True if the desired operating system matches the current operating system, False otherwise. 
+        str: Returns the current operating system (platform.system()) if is_os is None.
     """
     if verbose:
         print(
             f"💻 os: {os.name} | 🎯 system: {platform.system()} | 💽 release: {platform.release()}"
         )
 
-    if desired_os is None:
+    if is_os is None:
         return platform.system()
 
-    if desired_os == OperatingSystem.WINDOWS and platform.system() == "Windows":
+    if is_os == OperatingSystem.WINDOWS and platform.system() == "Windows":
         return True
-    elif desired_os == OperatingSystem.LINUX and platform.system() == "Linux":
+    elif is_os == OperatingSystem.LINUX and platform.system() == "Linux":
         return True
-    elif desired_os == OperatingSystem.MAC and platform.system() == "Darwin":
+    elif is_os == OperatingSystem.MAC and platform.system() == "Darwin":
         return True
     else:
         return False
