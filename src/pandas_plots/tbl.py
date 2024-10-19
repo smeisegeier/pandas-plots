@@ -112,18 +112,19 @@ def describe_df(
         header = f"🟠 {col}({len(unis):_}|{df[col].dtype})"
         return unis, header
 
-    # * show all columns
+    # hack this block somehow interferes with the plotly renderer. so its run even when use_columns=False
     if use_columns:
         print("--- column uniques (all)")
         print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}")
-        for col in df.columns[:]:
-            _u, _h = get_uniques_header(col)
-            # * check col type
-            is_str = df.loc[:, col].dtype.kind == "O"
-            # * wrap output
-            print(
-                f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}"
-            )
+    for col in df.columns[:]:
+        _u, _h = get_uniques_header(col)
+        # * check col type
+        is_str = df.loc[:, col].dtype.kind == "O"
+        # * wrap output
+        if use_columns:
+                print(
+                    f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}"
+                )
 
     print("--- column stats (numeric)")
     # * only show numerics
