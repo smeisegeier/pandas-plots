@@ -132,9 +132,10 @@ def describe_df(
         _u, _h = get_uniques_header(col)
 
         # * extra care for scipy metrics, these are very vulnarable to nan
-        print(
-            f"{_h} min: {round(df[col].min(),3):_} | max: {round(df[col].max(),3):_} | median: {round(df[col].median(),3):_} | mean: {round(df[col].mean(),3):_} | std: {round(df[col].std(),3):_} | cv: {round(df[col].std() / df[col].mean(),3):_} | sum: {round(df[col].sum(),3):_} | skew: {round(stats.skew(df[col].dropna().tolist()),3)} | kurto: {round(stats.kurtosis(df[col].dropna().tolist()),3)}"
-        )
+        # print(
+        #     f"{_h} min: {round(df[col].min(),3):_} | max: {round(df[col].max(),3):_} | median: {round(df[col].median(),3):_} | mean: {round(df[col].mean(),3):_} | std: {round(df[col].std(),3):_} | cv: {round(df[col].std() / df[col].mean(),3):_} | sum: {round(df[col].sum(),3):_} | skew: {round(stats.skew(df[col].dropna().tolist()),3)} | kurto: {round(stats.kurtosis(df[col].dropna().tolist()),3)}"
+        # )
+        print_summary(df[col], _h)
 
     #  * show first 3 rows
     display(df[:3])
@@ -620,3 +621,57 @@ def show_num_df(
         )
 
     return out
+
+def print_summary(df: pd.DataFrame | pd.Series, name: str="🟠 "):
+    """
+    Print statistical summary for a pandas DataFrame or Series.
+
+    The function computes and prints various statistics for each numeric column in a DataFrame 
+    or for a Series. Statistics include minimum, lower bound, 25th percentile (Q1), median, mean, 
+    75th percentile (Q3), upper bound, maximum, standard deviation, coefficient of variation, 
+    sum, skewness, and kurtosis. The interquartile range (IQR) is used to compute the lower 
+    and upper bounds, which are adjusted not to exceed the min and max of the data.
+
+    Args:
+        df (Union[pd.DataFrame, pd.Series]): Input DataFrame or Series. Only numeric columns 
+        in DataFrame are considered.
+    """
+    if df.empty:
+        return 
+
+    def print_summary_ser(ser: pd.Series, name: str=""):
+        # Calculate IQR and pass `rng=(25, 75)` to get the interquartile range
+        iqr_value = stats.iqr(ser)
+
+        # Using the iqr function, we still calculate the bounds manually
+        q1 = stats.scoreatpercentile(ser, 25)
+        q3 = stats.scoreatpercentile(ser, 75)
+
+        # Calculate upper bound directly
+        min = round(ser.min(),3)
+        med = round(ser.median(),3)
+        upper = round(q3 + 1.5 * iqr_value,3)
+        lower = round(q1 - 1.5 * iqr_value,3)
+        mean = round(ser.mean(),3)
+        std = round(ser.std(),3)
+        cv = round(ser.std() / ser.mean(),3)
+        max = round(ser.max(),3)
+        sum = round(ser.sum(),3)
+        skew = round(stats.skew(ser.dropna().tolist()),3)
+        kurto = round(stats.kurtosis(ser.dropna().tolist()),3)
+        
+        lower = min if lower < min else lower
+        upper = max if upper > max else upper
+
+        # * extra care for scipy metrics, these are very vulnarable to nan
+        print(
+            f"""{name} min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}""")
+
+    if isinstance(df, pd.Series):
+        print_summary_ser(df, name)
+        return
+    if isinstance(df, pd.DataFrame):
+        # * only show numerics
+        for col in df.select_dtypes("number").columns:
+            print_summary_ser(ser=df[col], name=col)
+    return

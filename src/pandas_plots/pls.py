@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 from plotly import express as px
 
 from .hlp import *
+from .tbl import print_summary
 
 
 def _set_caption(caption: str) -> str:
@@ -757,6 +758,7 @@ def plot_box(
     height: int = 200,
     width: int = 1200,
     annotations: bool = True,
+    summary: bool = True,
     caption: str = None,
     title: str = None,
     violin: bool = False,
@@ -776,6 +778,7 @@ def plot_box(
         violin: Use violin plot or not
         x_min: The minimum value for the x-axis scale (max and min must be set)
         x_max: The maximum value for the x-axis scale (max and min must be set)
+        summary: Whether to add a summary table to the plot
 
     Returns:
         None
@@ -885,6 +888,8 @@ def plot_box(
         )
 
     fig.show("png")
+    if summary:
+        print_summary(ser)
     return
 
 
@@ -896,6 +901,7 @@ def plot_boxes(
     height: int = 600,
     width: int = 800,
     annotations: bool = True,
+    summary: bool = True,
     title: str = None,
 ) -> None:
     """
@@ -909,6 +915,7 @@ def plot_boxes(
         height (int): The height of the plot.
         width (int): The width of the plot.
         annotations (bool): Whether to add annotations to the plot.
+        summary (bool): Whether to add a summary to the plot.
 
     Returns:
         None
@@ -1022,6 +1029,8 @@ def plot_boxes(
     fig.update_yaxes(title_text=df.columns[1])
 
     fig.show("png")
+    if summary:
+        print_summary(df)
     return
 
 

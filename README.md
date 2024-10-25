@@ -49,6 +49,7 @@ tbl.show_num_df(
   - `describe_df()` an alternative version of pandas `describe()` function
   - `descr_db()` a very short descr for a `duckdb` relation
   - `pivot_df()` gets a pivot table of a 3 column dataframe (or 2 columns if no weights are given)
+  - `print_summary()` shows statistics for a pandas DataFrame or Series
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
