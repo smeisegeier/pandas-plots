@@ -643,6 +643,9 @@ def print_summary(df: pd.DataFrame | pd.Series, name: str="🟠 "):
         # Calculate IQR and pass `rng=(25, 75)` to get the interquartile range
         iqr_value = stats.iqr(ser)
 
+        # * drop NA to keep scipy sane
+        ser.dropna(inplace=True)
+
         # Using the iqr function, we still calculate the bounds manually
         q1 = stats.scoreatpercentile(ser, 25)
         q3 = stats.scoreatpercentile(ser, 75)
