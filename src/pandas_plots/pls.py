@@ -786,7 +786,13 @@ def plot_box(
     ser = df_to_series(ser)
     if ser is None:
         return
+    
+    # * drop na to keep scipy sane
+    n_ = len(ser)
+    ser.dropna(inplace=True)
+    n = len(ser)
 
+    # hack
     median = ser.median()
     mean = ser.mean()
     q25 = ser.quantile(0.25)
@@ -811,7 +817,7 @@ def plot_box(
         "width": width,
         "points": points,
         # 'box':True,
-        "title": f"{caption}[{ser.name}], n = {len(ser):_}" if not title else title,
+        "title": f"{caption}[{ser.name}], n = {n_:_}({n:_})" if not title else title,
     }
 
     fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)
