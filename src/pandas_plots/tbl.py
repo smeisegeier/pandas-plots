@@ -142,6 +142,10 @@ def describe_df(
 
     # ! *** PLOTS ***
     if use_plot:
+        # * fix bug(?) in plotly/choreographer - datetime columns are not plotted, set these to str
+        datetime_cols = df.select_dtypes(include=['datetime64']).columns
+        df[datetime_cols] = df[datetime_cols].astype(str)
+
         # * reduce column names len if selected
         if top_n_chars_in_columns > 0:
             # * minumum 10 chars, or display is cluttered
