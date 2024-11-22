@@ -30,9 +30,33 @@ KPI_LITERAL = Literal[
 ]
 
 
-def descr_db(db: ddb.duckdb.DuckDBPyRelation, caption: str = "db")->None:
+def descr_db(
+    db: ddb.duckdb.DuckDBPyRelation, 
+    caption: str = "db",
+    use_preview: bool = True,
+)->None:
+    """
+    Print a short description of the given duckdb relation.
+
+    Parameters
+    ----------
+    db: ddb.duckdb.DuckDBPyRelation
+        The relation to be described
+    caption: str, optional
+        A caption to be printed left of the description. Defaults to "db".
+    use_preview: bool, optional
+        Whether to print a preview of the first 3 rows of the relation. Defaults to True.
+
+    Returns
+    -------
+    None
+    """
     cols = ", ".join(db.columns)
     print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
+
+    if use_preview:
+        db.limit(3).show()
+    return
 
 def describe_df(
     df: pd.DataFrame,
