@@ -123,7 +123,10 @@ def describe_df(
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)} ")
     # print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
     print(f"🟣 duplicates: {df.duplicated().sum():_}")
-    print(f"🟣 missings: {dict(df.isna().sum())}")
+    print(f"🟣 uniques: { {col: f'{df[col].nunique():_}' for col in df} }")
+    # print(f"🟣 uniques: {{ {', '.join(f'{col}: {df[col].nunique():_}' for col in df)} }}")
+    print(f"🟣 missings: { {col: f'{df[col].isna().sum():_}' for col in df} }")
+    # print(f"🟣 missings: {dict(df.isna().sum())}")
 
     def get_uniques_header(col: str):
         # * sorting has issues when col is of mixed type (object)
@@ -391,6 +394,7 @@ def show_num_df(
     kpi_mode: KPI_LITERAL = None,
     kpi_shape: Literal["squad", "circle"] = "squad",
     show_as_pct: bool = False,
+    alter_font: bool = True,
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
@@ -415,6 +419,7 @@ def show_num_df(
     - kpi_rag_list: a list of floats indicating the thresholds for rag lights. The list should have 2 elements.
     - kpi_shape: a Literal indicating the shape of the KPIs ["squad", "circle"]
     - show_as_pct: a boolean indicating whether to show value as percentage (only advised on values ~1)
+    - alter_font: a boolean indicating whether to alter the font family
 
     The function returns a styled representation of the DataFrame.
     """
@@ -625,7 +630,8 @@ def show_num_df(
     out.format(formatter=formatter)
 
     # * apply fonts for cells
-    out.set_properties(**{"font-family": "Courier"})
+    if alter_font:
+        out.set_properties(**{"font-family": "Courier"})
 
     # * apply fonts for th (inkl. index)
     _props = [
