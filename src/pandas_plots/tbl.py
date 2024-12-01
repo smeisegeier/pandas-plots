@@ -123,10 +123,13 @@ def describe_df(
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)} ")
     # print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
     print(f"🟣 duplicates: {df.duplicated().sum():_}")
-    print(f"🟣 uniques: { {col: f'{df[col].nunique():_}' for col in df} }")
+    print(f"🟣 uniques: {wrap_text(str({col: f'{df[col].nunique():_}' for col in df})) }")
+    # print(f"🟣 uniques: { {col: f'{df[col].nunique():_}' for col in df} }")
     # print(f"🟣 uniques: {{ {', '.join(f'{col}: {df[col].nunique():_}' for col in df)} }}")
-    print(f"🟣 missings: { {col: f'{df[col].isna().sum():_}' for col in df} }")
+    print(f"🟣 missings: {wrap_text(str({col: f'{df[col].isna().sum():_}' for col in df})) }")
+    # print(f"🟣 missings: { {col: f'{df[col].isna().sum():_}' for col in df} }")
     # print(f"🟣 missings: {dict(df.isna().sum())}")
+    
 
     def get_uniques_header(col: str):
         # * sorting has issues when col is of mixed type (object)
