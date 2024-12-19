@@ -66,14 +66,15 @@ tbl.show_num_df(
   - `show_venn3()` displays a venn diagram for 3 sets
 
 - `hlp` contains some (variety) helper functions
-  - `df_to_series()` converts a dataframe to a series
+  - `to_series()` converts a dataframe to a series (`🚨 breaking change`)
   - `mean_confidence_interval()` calculates mean and confidence interval for a series
   - `wrap_text()` formats strings or lists to a given width to fit nicely on the screen
   - `replace_delimiter_outside_quotes()` when manual import of csv files is needed: replaces delimiters only outside of quotes
   - `create_barcode_from_url()` creates a barcode from a given URL
-  - `add_datetime_col()` adds a datetime columns to a dataframe
+  - `add_datetime_col()` adds a datetime columns to a dataframe (chainable)
   - `show_package_version` prints version of a list of packages
   - `get_os` helps to identify and ensure operating system at runtime
+  - `🆕 add_bitmask_label()` adds a column to the data that resolves a bitmask column into human-readable labels
 
 - `pii` has routines for handling of personally identifiable information
   - `remove_pii()` logs and deletes pii from a series

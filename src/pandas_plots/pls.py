@@ -610,12 +610,12 @@ def plot_histogram(
     Returns:
         None
     """
-    
+
     # * convert to df if series
     if isinstance(df_ser, pd.Series):
         df = df_ser.to_frame()
     else:
-        df=df_ser
+        df = df_ser
 
     col_not_num = df.select_dtypes(exclude="number").columns
     if any(col_not_num):
@@ -628,7 +628,7 @@ def plot_histogram(
     df = df.applymap(lambda x: round(x, precision))
 
     # ! plot
-    _caption=_set_caption(caption)
+    _caption = _set_caption(caption)
     fig = px.histogram(
         data_frame=df,
         histnorm=histnorm,
@@ -653,7 +653,7 @@ def plot_histogram(
                 "size": 24,
             },
         },
-        showlegend=False if df.shape[1]==1 else True,
+        showlegend=False if df.shape[1] == 1 else True,
     )
 
     fig.show(renderer)
@@ -702,7 +702,7 @@ def plot_joint(
     # * set theme and palette
     sb.set_theme(style="darkgrid", palette="tab10")
     if os.getenv("THEME") == "dark":
-        _style = "dark_background" 
+        _style = "dark_background"
         _cmap = "rocket"
     else:
         _style = "bmh"
@@ -720,19 +720,21 @@ def plot_joint(
         "dropna": dropna,
         # "title": f"{caption}[{ser.name}], n = {len(ser):_}" if not title else title,
     }
-    dict_hex={"cmap": _cmap}
-    dict_kde={"fill": True, "cmap": _cmap}
-    
-    if kind=="hex":
+    dict_hex = {"cmap": _cmap}
+    dict_kde = {"fill": True, "cmap": _cmap}
+
+    if kind == "hex":
         fig = sb.jointplot(**dict_base, **dict_hex)
-    elif kind=="kde":
+    elif kind == "kde":
         fig = sb.jointplot(**dict_base, **dict_kde)
     else:
         fig = sb.jointplot(**dict_base)
-    
+
     # * emojis dont work in good ol seaborn
-    _caption="" if not caption else f"#{caption}, "
-    fig.figure.suptitle(title or f"{_caption}[{df.columns[0]}] vs [{df.columns[1]}], n = {len(df):_}")
+    _caption = "" if not caption else f"#{caption}, "
+    fig.figure.suptitle(
+        title or f"{_caption}[{df.columns[0]}] vs [{df.columns[1]}], n = {len(df):_}"
+    )
     # * leave some room for the title
     fig.figure.tight_layout()
     fig.figure.subplots_adjust(top=0.90)
@@ -783,10 +785,10 @@ def plot_box(
     Returns:
         None
     """
-    ser = df_to_series(ser)
+    ser = to_series(ser)
     if ser is None:
         return
-    
+
     # * drop na to keep scipy sane
     n_ = len(ser)
     ser.dropna(inplace=True)
