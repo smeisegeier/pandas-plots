@@ -1,3 +1,4 @@
+from pathlib import Path
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -22,7 +23,8 @@ def plot_quadrants(
     df: pd.DataFrame,
     title: str = None,
     caption: str = None,
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     Plot a heatmap for the given dataframe, with options for title and caption.
 
@@ -35,6 +37,7 @@ def plot_quadrants(
             df columns must contain 2 values
         title (str, optional): The title for the heatmap to override the default.
         caption (str, optional): The caption for the heatmap. Defaults to None.
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
         q1, q2, q3, q4, n: The values for each quadrant and the total count.
@@ -93,6 +96,10 @@ def plot_quadrants(
     q3 = heat_wide_out.iloc[0, 0]
     q4 = heat_wide_out.iloc[0, 1]
 
+    # * save to png if path is provided
+    if png_path is not None:
+        plt.savefig(Path(png_path).as_posix(), format='png')
+
     return q1, q2, q3, q4, n
     # * plotly express is not used for the heatmap, although it does not need the derived wide format.
     # * but theres no option to alter inner values in the heatmap
@@ -115,7 +122,8 @@ def plot_stacked_bars(
     sort_values: bool = False,
     show_total: bool = False,
     precision: int = 0,
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     Generates a stacked bar plot using the provided DataFrame.
     df *must* comprise the columns (order matters):
@@ -140,9 +148,10 @@ def plot_stacked_bars(
     - sort_values: bool = False - Sort axis by index (default) or values
     - show_total: bool = False - Whether to show the total value
     - precision: int = 0 - The number of decimal places to round to
+    - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
-    None
+    plot object
     """
     BAR_LENGTH_MULTIPLIER = 1.05
 
@@ -322,7 +331,12 @@ def plot_stacked_bars(
         _fig.update_layout(yaxis={"categoryorder": "category descending"})
 
     _fig.show(renderer)
-    return
+
+    # * save to png if path is provided
+    if png_path is not None:
+        _fig.write_image(Path(png_path).as_posix())
+
+    return _fig
 
 
 def plot_bars(
@@ -340,7 +354,8 @@ def plot_bars(
     use_ci: bool = False,
     precision: int = 0,
     renderer: Literal["png", "svg", None] = "png",
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     A function to plot a bar chart based on a *categorical* column (must be string or bool) and a numerical value.
     Accepts:
@@ -366,9 +381,10 @@ def plot_bars(
         - enforces dropna=True
     - precision: An integer indicating the number of decimal places to round the values to. Default is 0.
     - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is "png".
+    - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
-    - None
+    - plot object
     """
     # * if series, apply value_counts, deselect use_ci
     if isinstance(df_in, pd.Series):
@@ -568,7 +584,12 @@ def plot_bars(
         textposition="outside" if not use_ci else "auto", error_y=dict(thickness=5)
     )
     _fig.show(renderer)
-    return
+
+    # * save to png if path is provided
+    if png_path is not None:
+        _fig.write_image(Path(png_path).as_posix())
+
+    return _fig
 
 
 def plot_histogram(
@@ -586,7 +607,8 @@ def plot_histogram(
     renderer: Literal["png", "svg", None] = "png",
     caption: str = None,
     title: str = None,
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     A function to plot a histogram based on *numeric* columns in a DataFrame.
     Accepts:
@@ -606,9 +628,11 @@ def plot_histogram(
         renderer (Literal["png", "svg", None]): The renderer for displaying the plot. Default is "png".
         caption (str): The caption for the plot. Default is None.
         title (str): The title of the plot. Default is None.
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        
 
     Returns:
-        None
+        plot object
     """
 
     # * convert to df if series
@@ -657,7 +681,12 @@ def plot_histogram(
     )
 
     fig.show(renderer)
-    return
+    
+    # * save to png if path is provided
+    if png_path is not None:
+        fig.write_image(Path(png_path).as_posix())
+
+    return fig
 
 
 def plot_joint(
@@ -668,7 +697,8 @@ def plot_joint(
     dropna: bool = False,
     caption: str = "",
     title: str = "",
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     Generate a seaborn joint plot for *two numeric* columns of a given DataFrame.
 
@@ -680,9 +710,10 @@ def plot_joint(
         - dropna: Whether to drop NA values before plotting (default is False).
         - caption: A caption for the plot.
         - title: The title of the plot.
+        - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
-        None
+        plot object
     """
 
     if df.shape[1] != 2:
@@ -750,7 +781,11 @@ def plot_joint(
     #     dropna=dropna,
     #     cmap=_cmap,
     # )
-    return
+    # * save to png if path is provided
+    if png_path is not None:
+        fig.savefig(Path(png_path).as_posix())
+
+    return fig
 
 
 def plot_box(
@@ -766,7 +801,8 @@ def plot_box(
     violin: bool = False,
     x_min: float = None,
     x_max: float = None,
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     Plots a horizontal box plot for the given pandas Series.
 
@@ -781,9 +817,10 @@ def plot_box(
         x_min: The minimum value for the x-axis scale (max and min must be set)
         x_max: The maximum value for the x-axis scale (max and min must be set)
         summary: Whether to add a summary table to the plot
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
-        None
+        plot object
     """
     ser = to_series(ser)
     if ser is None:
@@ -896,9 +933,15 @@ def plot_box(
         )
 
     fig.show("png")
+
     if summary:
         print_summary(ser)
-    return
+
+    # * save to png if path is provided
+    if png_path is not None:
+        fig.write_image(Path(png_path).as_posix())
+
+    return fig
 
 
 def plot_boxes(
@@ -911,7 +954,8 @@ def plot_boxes(
     annotations: bool = True,
     summary: bool = True,
     title: str = None,
-) -> None:
+    png_path: Path | str = None,
+) -> object:
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
 
@@ -924,9 +968,10 @@ def plot_boxes(
         width (int): The width of the plot.
         annotations (bool): Whether to add annotations to the plot.
         summary (bool): Whether to add a summary to the plot.
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
-        None
+        plot object
     """
 
     if (
@@ -1039,7 +1084,12 @@ def plot_boxes(
     fig.show("png")
     if summary:
         print_summary(df)
-    return
+
+    # * save to png if path is provided
+    if png_path is not None:
+        fig.write_image(Path(png_path).as_posix())
+
+    return fig
 
 
 # def plot_ci_bars_DEPR(df: pd.DataFrame, dropna: bool = True, precision: int = 2) -> None:
