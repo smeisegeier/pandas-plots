@@ -4,6 +4,7 @@
 import math
 import os
 from collections import abc
+from pathlib import Path
 from typing import Literal, get_args
 import numpy as np
 
@@ -12,6 +13,7 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 from scipy import stats
+import dataframe_image as dfi
 
 from .hlp import wrap_text
 
@@ -268,6 +270,11 @@ def pivot_df(
     kpi_rag_list: list[float] = None,
     kpi_mode: KPI_LITERAL = None,
     kpi_shape: Literal["squad", "circle"] = "squad",
+    show_as_pct: bool = False,
+    alter_font: bool = True,
+    font_size_th: int = 0,
+    font_size_td: int = 0,
+    png_path: str | Path = None,
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
@@ -299,6 +306,11 @@ def pivot_df(
             max_min_x: max value green, min valued red for x axis
         kpi_rag_list: a list of floats indicating the thresholds for rag lights. The list should have 2 elements.
         kpi_shape: a Literal indicating the shape of the KPIs ["squad", "circle"]
+        show_as_pct (bool, optional): Whether to show values as percentages. Defaults to False.
+        alter_font (bool, optional): Whether to alter the font. Defaults to True.
+        font_size_th (int, optional): The font size for the header. Defaults to 0.
+        font_size_td (int, optional): The font size for the table data. Defaults to 0.
+        png_path (str | Path, optional): The path to save the output PNG file. Defaults to None.
 
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -380,6 +392,11 @@ def pivot_df(
         kpi_mode=kpi_mode,
         kpi_rag_list=kpi_rag_list,
         kpi_shape=kpi_shape,
+        show_as_pct=show_as_pct,
+        alter_font=alter_font,
+        font_size_th=font_size_th,
+        font_size_td=font_size_td,
+        png_path=png_path,
     )
 
 
@@ -398,6 +415,9 @@ def show_num_df(
     kpi_shape: Literal["squad", "circle"] = "squad",
     show_as_pct: bool = False,
     alter_font: bool = True,
+    font_size_th: int = 0,
+    font_size_td: int = 0,
+    png_path: str | Path = None,
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
@@ -423,6 +443,9 @@ def show_num_df(
     - kpi_shape: a Literal indicating the shape of the KPIs ["squad", "circle"]
     - show_as_pct: a boolean indicating whether to show value as percentage (only advised on values ~1)
     - alter_font: a boolean indicating whether to alter the font family
+    - font_size_th: an integer indicating the font size for the header
+    - font_size_td: an integer indicating the font size for the table data
+    - png_path: a string or Path indicating the path to save the PNG file
 
     The function returns a styled representation of the DataFrame.
     """
@@ -637,16 +660,23 @@ def show_num_df(
         out.set_properties(**{"font-family": "Courier"})
 
     # * apply fonts for th (inkl. index)
-    _props = [
-        # ("font-size", "10pt"),
+    _props_th = [
         # ("font-weight", "bold"),
-        # ("font-family", "Courier"),
         ("text-align", "right")
     ]
+
+    _props_td = [
+        ("text-align", "right")
+    ]
+    if font_size_th > 0:
+        _props_th.append(("font-size", f"{font_size_th}pt"))
+    if font_size_td > 0:
+        _props_td.append(("font-size", f"{font_size_td}pt"))
+    
     out.set_table_styles(
         [
-            dict(selector="th", props=_props),
-            # dict(selector="th:nth-child(1)", props=_props),
+            dict(selector="th", props=_props_th),
+            dict(selector="td", props=_props_td),
         ]
     )
 
@@ -656,6 +686,10 @@ def show_num_df(
             axis=None if heatmap_axis == "xy" else 0 if heatmap_axis == "y" else 1,
             subset=(df_orig.index, df_orig.columns) if total_exclude else None,
         )
+
+    if png_path is not None:
+        # * 72dpi default is too low for high res displays
+        dfi.export(obj=out, filename=png_path, dpi=120)
 
     return out
 
