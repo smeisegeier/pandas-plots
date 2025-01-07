@@ -275,6 +275,7 @@ def pivot_df(
     font_size_th: int = 0,
     font_size_td: int = 0,
     png_path: str | Path = None,
+    png_conversion: Literal["chrome", "selenium"] = "selenium",
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
@@ -311,6 +312,7 @@ def pivot_df(
         font_size_th (int, optional): The font size for the header. Defaults to 0.
         font_size_td (int, optional): The font size for the table data. Defaults to 0.
         png_path (str | Path, optional): The path to save the output PNG file. Defaults to None.
+        png_conversion (Literal["chrome", "selenium"], optional): The conversion method for the PNG file. Defaults to "selenium".
 
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -397,6 +399,8 @@ def pivot_df(
         font_size_th=font_size_th,
         font_size_td=font_size_td,
         png_path=png_path,
+        png_conversion=png_conversion,
+        
     )
 
 
@@ -418,6 +422,7 @@ def show_num_df(
     font_size_th: int = 0,
     font_size_td: int = 0,
     png_path: str | Path = None,
+    png_conversion: Literal["chrome", "selenium"] = "selenium",
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
@@ -446,6 +451,7 @@ def show_num_df(
     - font_size_th: an integer indicating the font size for the header
     - font_size_td: an integer indicating the font size for the table data
     - png_path: a string or Path indicating the path to save the PNG file
+    - png_conversion: a Literal indicating the conversion method for the PNG file ["chrome", "selenium"]
 
     The function returns a styled representation of the DataFrame.
     """
@@ -689,7 +695,7 @@ def show_num_df(
 
     if png_path is not None:
         # * 72dpi default is too low for high res displays
-        dfi.export(obj=out, filename=png_path, dpi=120)
+        dfi.export(obj=out, filename=png_path, dpi=150, table_conversion=png_conversion)
 
     return out
 
