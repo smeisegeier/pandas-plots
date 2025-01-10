@@ -4,12 +4,14 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import os
-from typing import Literal
+from typing import Optional, Literal
 
 import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 from plotly import express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from .hlp import *
 from .tbl import print_summary
@@ -1092,52 +1094,194 @@ def plot_boxes(
     return fig
 
 
-# def plot_ci_bars_DEPR(df: pd.DataFrame, dropna: bool = True, precision: int = 2) -> None:
-#     """
-#     Generate a bar plot with confidence intervals for a given DataFrame.
+def aggregate_data(df: pd.DataFrame, top_n_index: int, top_n_category: int, top_n_facet: int, null_label: str) -> pd.DataFrame:
+    """
+    Aggregates the data, ensuring each combination of 'index', 'col', and 'facet' is unique with summed 'value'.
+    
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+        top_n_index (int): Top N values of the first column to keep. 0 means take all.
+        top_n_category (int): Top N values of the second column to keep. 0 means take all.
+        top_n_facet (int): Top N values of the third column to keep. 0 means take all.
+        null_label (str): Label for null values.
 
-#     Args:
-#         df (pd.DataFrame): The DataFrame to generate the plot from.
-#         dropna (bool, optional): Whether to drop NaN values from the DataFrame before plotting. Defaults to False.
+    Returns:
+        pd.DataFrame: Aggregated and filtered dataset.
+    """
+    # Replace nulls with a placeholder for consistent handling
+    for col in ['index', 'col', 'facet']:  # Skip 'value' column (numeric)
+        df[col] = df[col].fillna(null_label)
 
-#     Returns:
-#         None
-#     """
-#     # * if a df is given, convert to series
-#     df = df_to_series(df)  # _df_to_ser(df)
-#     if df is None:
-#         return
-#     # display(df[df.index.isna()])
+    # Aggregate data to ensure unique combinations
+    aggregated_df = df.groupby(['index', 'col', 'facet'], as_index=False)['value'].sum()
 
-#     # * nulls are hidden by default in plotly etc, so give them a proper category
-#     if dropna:
-#         df = df.dropna()
-#     else:
-#         df.index = df.index.fillna("<NA>")
+    # Reduce data based on top_n parameters
+    if top_n_index > 0:
+        top_indexes = aggregated_df.groupby('index')['value'].sum().nlargest(top_n_index).index
+        aggregated_df = aggregated_df[aggregated_df['index'].isin(top_indexes)]
+    if top_n_category > 0:
+        top_categories = aggregated_df.groupby('col')['value'].sum().nlargest(top_n_category).index
+        aggregated_df = aggregated_df[aggregated_df['col'].isin(top_categories)]
+    if top_n_facet > 0:
+        top_facets = aggregated_df.groupby('facet')['value'].sum().nlargest(top_n_facet).index
+        aggregated_df = aggregated_df[aggregated_df['facet'].isin(top_facets)]
+    
+    return aggregated_df
 
-#     if os.getenv("THEME") == "dark":
-#         # sb.set_theme(style="darkgrid")
-#         # sb.set_theme(style="darkgrid")
-#         plt.style.use("dark_background")
-#     else:
-#         plt.style.use("ggplot")
 
-#     # * generate plot
-#     fig, ax = plt.subplots(figsize=(8, 6))
+def assign_column_colors(columns: pd.Series, color_palette: str, null_label: str) -> dict:
+    """
+    Assign colors to columns using the selected color palette and handle null columns separately.
+    
+    Args:
+        columns (pd.Series): The unique column categories.
+        color_palette (str): The name of the color palette.
+        null_label (str): The label to be used for null values.
 
-#     sb.barplot(
-#         data=df,
-#         palette="tab10",
-#         capsize=0.1,
-#         ax=ax,
-#         errorbar=("ci", 95),
-#     )
-#     # * add the annotation
-#     for bar in ax.containers:
-#         ax.bar_label(bar, fmt=f"%.{precision}f", label_type="center")
+    Returns:
+        dict: Mapping of column values to colors.
+    """
+    if hasattr(px.colors.qualitative, color_palette):
+        color_scale = px.colors.qualitative.__dict__.get(color_palette, px.colors.qualitative.Plotly)
+    else:
+        color_scale = px.colors.sequential.__dict__.get(color_palette, px.colors.sequential.Viridis)
 
-#     ax.set(title=f"[{df.name}] for [{df.index.name}] on 95% ci")
+    column_colors = {
+        column: color_scale[i % len(color_scale)] 
+        for i, column in enumerate(columns) if column != null_label
+    }
+    column_colors[null_label] = "gray"  # Assign gray to null columns
+    
+    return column_colors
 
-#     plt.show()
 
-#     return df
+def plot_facet_stacked_bars(
+    df: pd.DataFrame,
+    subplots_per_row: int = 4,
+    top_n_index: int = 0,
+    top_n_category: int = 0,
+    top_n_facet: int = 0,
+    null_label: str = "<NA>",
+    subplot_size: int = 300,
+    color_palette: str = "Plotly",
+    caption: str = "",
+    renderer: Optional[Literal["png", "svg"]] = "png",
+    annotations: bool = False,
+    precision: int = 0,
+    png_path: Optional[Path] = None,
+) -> pd.DataFrame:
+    """
+    Create a grid of stacked bar charts.
+
+    Args:
+        df (pd.DataFrame): DataFrame with 3 or 4 columns.
+        subplots_per_row (int): Number of subplots per row.
+        top_n_index (int): Top N index values to keep.
+        top_n_category (int): Top N category values to keep.
+        top_n_facet (int): Top N facet values to keep.
+        null_label (str): Label for null values.
+        subplot_size (int): Size of each subplot.
+        color_palette (str): Name of the color palette.
+        caption (str): Optional caption to prepend to the title.
+        renderer (Optional[Literal["png", "svg"]]): Renderer for saving the image.
+        annotations (bool): Whether to show annotations in the subplots.
+        precision (int): Decimal precision for annotations.
+        png_path (Optional[Path]): Path to save the image.
+
+    Returns:
+        pd.DataFrame: Aggregated dataset used for plotting.
+    """
+    # Validate input DataFrame
+    if not (df.shape[1] == 3 or df.shape[1] == 4):
+        raise ValueError("Input DataFrame must have 3 or 4 columns.")
+    
+    # Store original column names
+    original_column_names = df.columns.tolist()
+
+    # Rename columns to more concise names
+    if df.shape[1] == 3:
+        df.columns = ['index', 'col', 'facet']
+        df['value'] = 1  # Treat all rows as having a value of 1
+    elif df.shape[1] == 4:
+        df.columns = ['index', 'col', 'facet', 'value']
+
+    # Aggregate and filter data
+    aggregated_df = aggregate_data(df, top_n_index, top_n_category, top_n_facet, null_label)
+
+    # Get unique facets and columns
+    facets = aggregated_df['facet'].unique()
+    columns = aggregated_df['col'].unique()
+
+    # Assign colors to columns
+    column_colors = assign_column_colors(columns, color_palette, null_label)
+
+    # Create subplot grid
+    fig = make_subplots(
+        rows=-(-len(facets) // subplots_per_row),  # Ceiling division
+        cols=min(subplots_per_row, len(facets)),
+        subplot_titles=facets,
+    )
+
+    # Add traces for each facet
+    added_to_legend = set()  # Track which columns have been added to the legend
+    for i, facet in enumerate(facets):
+        facet_data = aggregated_df[aggregated_df['facet'] == facet]
+        row = (i // subplots_per_row) + 1
+        col = (i % subplots_per_row) + 1
+
+        for column in columns:
+            column_data = facet_data[facet_data['col'] == column]
+            show_legend = column not in added_to_legend
+            if show_legend:
+                added_to_legend.add(column)
+
+            fig.add_trace(
+                go.Bar(
+                    x=column_data['index'],
+                    y=column_data['value'],
+                    name=column,
+                    marker=dict(color=column_colors[column]),
+                    showlegend=show_legend,
+                ),
+                row=row,
+                col=col,
+            )
+
+            # Add annotations if annotations is True
+            if annotations:
+                for _, row_data in column_data.iterrows():
+                    fig.add_annotation(
+                        x=row_data['index'],
+                        y=row_data['value'],
+                        text=f"{row_data['value']:.{precision}f}",
+                        showarrow=False,
+                        row=row,
+                        col=col,
+                    )
+
+    # Create the dynamic title
+    unique_rows = len(aggregated_df)
+    title = f"{caption} [{original_column_names[0]}] by [{original_column_names[1]}] by [{original_column_names[2]}], n = {unique_rows:_}"
+
+    # Update layout for stacking, title, and theme
+    template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
+    fig.update_layout(
+        title=title,
+        barmode="stack",  # Enable stacking
+        height=subplot_size * (-(-len(facets) // subplots_per_row)),
+        width=subplot_size * min(subplots_per_row, len(facets)),
+        showlegend=True,
+        template=template,
+    )
+
+    # Save the figure if png_path is specified
+    if png_path:
+        png_path = Path(png_path)
+        fig.write_image(str(png_path))
+
+    # Show the figure with the renderer specified
+    fig.show(renderer)
+
+    # Return the aggregated dataset
+    return aggregated_df
+

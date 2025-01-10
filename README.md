@@ -50,6 +50,7 @@ tbl.show_num_df(
   - `descr_db()` a very short descr for a `duckdb` relation
   - `pivot_df()` gets a pivot table of a 3 column dataframe (or 2 columns if no weights are given)
   - `print_summary()` shows statistics for a pandas DataFrame or Series
+<br>
 
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
@@ -60,10 +61,13 @@ tbl.show_num_df(
   - `plot_histogram()` histogram for one or more **numerical** columns
   - `plot_joints()` a joint plot for **exactly two numerical** columns
   - `plot_quadrants()` quickly shows a 2x2 heatmap
+  - 🆕 `plot_stacked_bars()` shows stacked bars for a facet value as subplots 
+<br>
 
 - `ven` offers functions for _venn diagrams_
   - `show_venn2()` displays a venn diagram for 2 sets
   - `show_venn3()` displays a venn diagram for 3 sets
+<br>
 
 - `hlp` contains some (variety) helper functions
   - `to_series()` converts a dataframe to a series (`🚨 breaking change`)
@@ -75,6 +79,7 @@ tbl.show_num_df(
   - `show_package_version` prints version of a list of packages
   - `get_os` helps to identify and ensure operating system at runtime
   - `🆕 add_bitmask_label()` adds a column to the data that resolves a bitmask column into human-readable labels
+<br>
 
 - `pii` has routines for handling of personally identifiable information
   - `remove_pii()` logs and deletes pii from a series
