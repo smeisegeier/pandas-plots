@@ -699,7 +699,9 @@ def show_num_df(
 
     return out
 
-def print_summary(df: pd.DataFrame | pd.Series, name: str="🟠 "):
+
+
+def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="🟠 "):
     """
     Print statistical summary for a pandas DataFrame or Series.
 
@@ -712,11 +714,13 @@ def print_summary(df: pd.DataFrame | pd.Series, name: str="🟠 "):
     Args:
         df (Union[pd.DataFrame, pd.Series]): Input DataFrame or Series. Only numeric columns 
         in DataFrame are considered.
+        show (bool, optional): Whether to print the summary. Defaults to True.
+        name (str, optional): Prefix for the summary. Defaults to "🟠 "
     """
     if df.empty:
         return 
 
-    def print_summary_ser(ser: pd.Series, name: str=""):
+    def print_summary_ser(ser: pd.Series, show: bool=True, name: str=""):
         # Calculate IQR and pass `rng=(25, 75)` to get the interquartile range
         iqr_value = stats.iqr(ser)
 
@@ -744,14 +748,32 @@ def print_summary(df: pd.DataFrame | pd.Series, name: str="🟠 "):
         upper = max if upper > max else upper
 
         # * extra care for scipy metrics, these are very vulnarable to nan
-        print(
-            f"""{name} min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}""")
+        if show:
+            print(
+                f"""{name} min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}""")
+
+        summary = {
+            "min": min,
+            "lower": lower,
+            "q25": q1,
+            "median": med,
+            "mean": mean,
+            "q75": q3,
+            "upper": upper,
+            "max": max,
+            "std": std,
+            "cv": cv,
+            "sum": sum,
+            "skew": skew,
+            "kurto": kurto
+        }
+        return summary
 
     if isinstance(df, pd.Series):
-        print_summary_ser(df, name)
-        return
+        return print_summary_ser(df, show=show, name=name)
+
     if isinstance(df, pd.DataFrame):
         # * only show numerics
         for col in df.select_dtypes("number").columns:
-            print_summary_ser(ser=df[col], name=col)
-    return
+            summary = print_summary_ser(ser=df[col],show=show, name=col)
+    return summary
