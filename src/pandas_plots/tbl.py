@@ -162,12 +162,7 @@ def describe_df(
     # * only show numerics
     for col in df.select_dtypes("number").columns:
         _u, _h = get_uniques_header(col)
-
-        # * extra care for scipy metrics, these are very vulnarable to nan
-        # print(
-        #     f"{_h} min: {round(df[col].min(),3):_} | max: {round(df[col].max(),3):_} | median: {round(df[col].median(),3):_} | mean: {round(df[col].mean(),3):_} | std: {round(df[col].std(),3):_} | cv: {round(df[col].std() / df[col].mean(),3):_} | sum: {round(df[col].sum(),3):_} | skew: {round(stats.skew(df[col].dropna().tolist()),3)} | kurto: {round(stats.kurtosis(df[col].dropna().tolist()),3)}"
-        # )
-        print_summary(df[col], _h)
+        print_summary(df=df[col], name=_h)
 
     #  * show first 3 rows
     display(df[:3])
@@ -781,9 +776,5 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ðŸ
         # * only show numerics
         for col in df.select_dtypes("number").columns:
             summary = print_summary_ser(ser=df[col],show=show, name=col)
-
-    # enable chaining
-    pd.DataFrame.print_summary = print_summary
-    pd.Series.print_summary = print_summary
 
     return summary
