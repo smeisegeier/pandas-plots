@@ -16,10 +16,72 @@ from plotly.subplots import make_subplots
 from .hlp import *
 from .tbl import print_summary
 
+### helper functions
 
 def _set_caption(caption: str) -> str:
     return f"#️⃣{'-'.join(caption.split())}, " if caption else ""
 
+
+def aggregate_data(df: pd.DataFrame, top_n_index: int, top_n_columns: int, top_n_facet: int, null_label: str) -> pd.DataFrame:
+    """
+    Aggregates the data, ensuring each combination of 'index', 'col', and 'facet' is unique with summed 'value'.
+    
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+        top_n_index (int): top N values of the first column to keep. 0 means take all.
+        top_n_columns (int): top N values of the second column to keep. 0 means take all.
+        top_n_facet (int): top N values of the third column to keep. 0 means take all.
+        null_label (str): Label for null values.
+
+    Returns:
+        pd.DataFrame: Aggregated and filtered dataset.
+    """
+    for col in ['index', 'col', 'facet']:  # Skip 'value' column (numeric)
+        df[col] = df[col].fillna(null_label)
+
+    # Aggregate data to ensure unique combinations
+    aggregated_df = df.groupby(['index', 'col', 'facet'], as_index=False)['value'].sum()
+
+    # Reduce data based on top_n parameters
+    if top_n_index > 0:
+        top_indexes = aggregated_df.groupby('index')['value'].sum().nlargest(top_n_index).index
+        aggregated_df = aggregated_df[aggregated_df['index'].isin(top_indexes)]
+    if top_n_columns > 0:
+        top_columns = aggregated_df.groupby('col')['value'].sum().nlargest(top_n_columns).index
+        aggregated_df = aggregated_df[aggregated_df['col'].isin(top_columns)]
+    if top_n_facet > 0:
+        top_facets = aggregated_df.groupby('facet')['value'].sum().nlargest(top_n_facet).index
+        aggregated_df = aggregated_df[aggregated_df['facet'].isin(top_facets)]
+    
+    # Ensure facets are sorted alphabetically
+    aggregated_df['facet'] = pd.Categorical(aggregated_df['facet'], sorted(aggregated_df['facet'].unique()))
+    aggregated_df = aggregated_df.sort_values(by='facet')
+
+    return aggregated_df
+
+
+def assign_column_colors(columns, color_palette, null_label):
+    """
+    Assigns colors to columns, with a special gray color for null values.
+
+    Args:
+        columns (list): List of column values.
+        color_palette (str): Name of the color palette.
+        null_label (str): Label for null values.
+
+    Returns:
+        dict: Mapping of column values to colors.
+    """
+    if hasattr(px.colors.qualitative, color_palette):
+        palette = getattr(px.colors.qualitative, color_palette)
+    else:
+        raise ValueError(f"Invalid color palette: {color_palette}")
+    
+    colors = {col: palette[i % len(palette)] for i, col in enumerate(sorted(columns))}
+    colors[null_label] = "gray"
+    return colors
+
+### main functions
 
 def plot_quadrants(
     df: pd.DataFrame,
@@ -125,35 +187,17 @@ def plot_stacked_bars(
     show_total: bool = False,
     precision: int = 0,
     png_path: Path | str = None,
+    color_palette: str = "Plotly",
+    null_label: str = "<NA>",
 ) -> object:
     """
     Generates a stacked bar plot using the provided DataFrame.
-    df *must* comprise the columns (order matters):
-    - index axis
-    - color axis (legend)
-    - values (optional, if absent a simple count is applied)
+    Updated to assign colors using `assign_column_colors` with nulls colored grey.
 
     Parameters:
-    - df: pd.DataFrame - The DataFrame containing the data to plot.
-    - top_n_index: int = 0 - The number of top indexes to include in the plot.
-    - top_n_color: int = 0 - The number of top colors to include in the plot. WARNING: this forces distribution to 100% on a subset
-    - dropna: bool = False - Whether to include NULL values in the plot.
-    - swap: bool = False - Whether to swap the x-axis and y-axis.
-    - normalize: bool = False - Whether to normalize the values.
-    - relative: bool = False - Whether to show relative values as bars instead of absolute.
-    - orientation: Literal["h", "v"] = "v" - The orientation of the plot.
-    - height: int = 500 - The height of the plot.
-    - width: An optional integer indicating the width of the chart. Default is 2000.
-    - title: str = None - The title of the plot.
-    - renderer: Literal["png", "svg",None] = "png" - The renderer for the plot.
-    - caption: An optional string indicating the caption for the chart.
-    - sort_values: bool = False - Sort axis by index (default) or values
-    - show_total: bool = False - Whether to show the total value
-    - precision: int = 0 - The number of decimal places to round to
-    - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
-
-    Returns:
-    plot object
+    All parameters are similar to the original function, with the addition of:
+    - color_palette: str - Name of the color palette.
+    - null_label: str - Label for null values.
     """
     BAR_LENGTH_MULTIPLIER = 1.05
 
@@ -171,9 +215,9 @@ def plot_stacked_bars(
     if len(df.columns) == 2:
         df["cnt"] = 1
 
-    # * create seperate section for na values if selected
+    # * handle null values
     if not dropna:
-        df = df.fillna("<NA>")
+        df = df.fillna(null_label)
     else:
         df.dropna(inplace=True)
 
@@ -190,6 +234,10 @@ def plot_stacked_bars(
     col_index = df.columns[0] if not swap else df.columns[1]
     col_color = df.columns[1] if not swap else df.columns[0]
 
+    # * assign colors to columns
+    unique_colors = sorted(df[col_color].unique())
+    column_colors = assign_column_colors(unique_colors, color_palette, null_label)
+
     # * add total as aggregation of df
     if show_total:
         df_total = df.copy()
@@ -198,12 +246,8 @@ def plot_stacked_bars(
 
     # * ensure df is grouped to prevent false aggregations
     df = (
-        df.groupby(
-            [
-                df.columns[0],
-                df.columns[1],
-            ]
-        )[df.columns[2]]
+        df.groupby([df.columns[0], df.columns[1]])
+        [df.columns[2]]
         .sum()
         .reset_index()
     )
@@ -212,133 +256,41 @@ def plot_stacked_bars(
     divider = 2 if show_total else 1
     n = int(df[df.columns[2]].sum() / divider)
 
-    # * after grouping add cols for pct and formatting
-    df["cnt_pct"] = df[df.columns[2]] / n  # * col[3]
-    df["cnt_str"] = df[df.columns[2]].apply(lambda x: f"{x:_}")  # * col[4]
-    df["cnt_pct_str"] = df["cnt_pct"].apply(lambda x: f"{x:.2%}")  # * col[5]
-
-    # * now set calculated col
-    col_value = df.columns[2] if not normalize else df.columns[3]
-    col_value_str = df.columns[4] if not normalize else df.columns[5]
-
-    if top_n_index > 0:
-        # * get top n -> series
-        # * on pivot tables (all cells are values) you can also use sum for each column[df.sum(axis=1) > n]
-        ser_top_n = (
-            df.groupby(col_index)[col_value]
-            .sum()
-            .sort_values(ascending=False)[:top_n_index]
-        )
-        # * only process top n indexes. this does not change pct values
-        df = df[df[col_index].isin(ser_top_n.index)]
-
-    if top_n_color > 0:
-        # * get top n -> series
-        # * on pivot tables (all cells are values) you can also use sum for each column[df.sum(axis=1) > n]
-        ser_top_n_col = (
-            df.groupby(col_color)[col_value]
-            .sum()
-            .sort_values(ascending=False)[:top_n_color]
-        )
-        # * only process top n colors. this does not change pct values
-        df = df[df[col_color].isin(ser_top_n_col.index)]
-
-    # * get longest bar
-    bar_max = (
-        df.groupby(col_index)[col_value].sum().sort_values(ascending=False).iloc[0]
-        * BAR_LENGTH_MULTIPLIER
-    )
-
-    # * are TOP n selected? include in default title
+    # * title str
     _title_str_top_index = f"TOP{top_n_index} " if top_n_index > 0 else ""
     _title_str_top_color = f"TOP{top_n_color} " if top_n_color > 0 else ""
-
-    # * title str na
     _title_str_null = f", NULL excluded" if dropna else ""
-
-    # * title str n
     _title_str_n = f", n={n:_}"
-
     caption = _set_caption(caption)
 
     # * plot
     _fig = px.bar(
         df,
-        x=col_index if orientation == "v" else col_value,
-        y=col_value if orientation == "v" else col_index,
+        x=col_index if orientation == "v" else df.columns[2],
+        y=df.columns[2] if orientation == "v" else col_index,
         color=col_color,
-        text=col_value_str,
-        # barmode="stack",
+        text=df.columns[2],
         orientation=orientation,
         title=title
         or f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}",
-        # * retrieve theme from env (intro.set_theme) or default
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         width=width,
         height=height,
-    )
-
-    # * ignore if bar mode is on
-    if not relative:
-        if orientation == "v":
-            _fig.update_yaxes(range=[0, bar_max])
-        else:
-            _fig.update_xaxes(range=[0, bar_max])
-    else:
-        _fig.update_layout(barnorm="percent")
-
-    # * set title properties
-    _fig.update_layout(
-        title={
-            # 'x': 0.1,
-            "y": 0.95,
-            "xanchor": "left",
-            "yanchor": "top",
-            "font": {
-                "size": 24,
-            },
-        },
+        color_discrete_map=column_colors,  # Use assigned colors
     )
 
     # * show grids, set to smaller distance on pct scale
-    _fig.update_xaxes(
-        showgrid=True,
-        gridwidth=1,
-    )
-    _fig.update_yaxes(
-        showgrid=True,
-        gridwidth=1,
-    )
-
-    # * set dtick
-    if orientation == "h":
-        if relative:
-            _fig.update_xaxes(dtick=5)
-        elif normalize:
-            _fig.update_xaxes(dtick=0.05)
-    else:
-        if relative:
-            _fig.update_yaxes(dtick=5)
-        elif normalize:
-            _fig.update_yaxes(dtick=0.05)
-
-    # * sorting is in a weird spot, do a 1:1 matrix
-    if orientation == "v" and sort_values:
-        _fig.update_layout(xaxis={"categoryorder": "total descending"})
-    elif orientation == "v" and not sort_values:
-        _fig.update_layout(xaxis={"categoryorder": "category ascending"})
-    elif orientation == "h" and sort_values:
-        _fig.update_layout(yaxis={"categoryorder": "total ascending"})
-    elif orientation == "h" and not sort_values:
-        _fig.update_layout(yaxis={"categoryorder": "category descending"})
-
-    _fig.show(renderer)
+    _fig.update_xaxes(showgrid=True, gridwidth=1)
+    _fig.update_yaxes(showgrid=True, gridwidth=1)
 
     # * save to png if path is provided
     if png_path is not None:
         _fig.write_image(Path(png_path).as_posix())
 
+    _fig.show(renderer)
+
     return _fig
+
 
 
 def plot_bars(
@@ -1094,72 +1046,12 @@ def plot_boxes(
     return fig
 
 
-def aggregate_data(df: pd.DataFrame, top_n_index: int, top_n_category: int, top_n_facet: int, null_label: str) -> pd.DataFrame:
-    """
-    Aggregates the data, ensuring each combination of 'index', 'col', and 'facet' is unique with summed 'value'.
-    
-    Args:
-        df (pd.DataFrame): Input DataFrame.
-        top_n_index (int): Top N values of the first column to keep. 0 means take all.
-        top_n_category (int): Top N values of the second column to keep. 0 means take all.
-        top_n_facet (int): Top N values of the third column to keep. 0 means take all.
-        null_label (str): Label for null values.
-
-    Returns:
-        pd.DataFrame: Aggregated and filtered dataset.
-    """
-    # Replace nulls with a placeholder for consistent handling
-    for col in ['index', 'col', 'facet']:  # Skip 'value' column (numeric)
-        df[col] = df[col].fillna(null_label)
-
-    # Aggregate data to ensure unique combinations
-    aggregated_df = df.groupby(['index', 'col', 'facet'], as_index=False)['value'].sum()
-
-    # Reduce data based on top_n parameters
-    if top_n_index > 0:
-        top_indexes = aggregated_df.groupby('index')['value'].sum().nlargest(top_n_index).index
-        aggregated_df = aggregated_df[aggregated_df['index'].isin(top_indexes)]
-    if top_n_category > 0:
-        top_categories = aggregated_df.groupby('col')['value'].sum().nlargest(top_n_category).index
-        aggregated_df = aggregated_df[aggregated_df['col'].isin(top_categories)]
-    if top_n_facet > 0:
-        top_facets = aggregated_df.groupby('facet')['value'].sum().nlargest(top_n_facet).index
-        aggregated_df = aggregated_df[aggregated_df['facet'].isin(top_facets)]
-    
-    return aggregated_df
-
-
-def assign_column_colors(columns: pd.Series, color_palette: str, null_label: str) -> dict:
-    """
-    Assign colors to columns using the selected color palette and handle null columns separately.
-    
-    Args:
-        columns (pd.Series): The unique column categories.
-        color_palette (str): The name of the color palette.
-        null_label (str): The label to be used for null values.
-
-    Returns:
-        dict: Mapping of column values to colors.
-    """
-    if hasattr(px.colors.qualitative, color_palette):
-        color_scale = px.colors.qualitative.__dict__.get(color_palette, px.colors.qualitative.Plotly)
-    else:
-        color_scale = px.colors.sequential.__dict__.get(color_palette, px.colors.sequential.Viridis)
-
-    column_colors = {
-        column: color_scale[i % len(color_scale)] 
-        for i, column in enumerate(columns) if column != null_label
-    }
-    column_colors[null_label] = "gray"  # Assign gray to null columns
-    
-    return column_colors
-
 
 def plot_facet_stacked_bars(
     df: pd.DataFrame,
     subplots_per_row: int = 4,
     top_n_index: int = 0,
-    top_n_category: int = 0,
+    top_n_columns: int = 0,
     top_n_facet: int = 0,
     null_label: str = "<NA>",
     subplot_size: int = 300,
@@ -1169,16 +1061,16 @@ def plot_facet_stacked_bars(
     annotations: bool = False,
     precision: int = 0,
     png_path: Optional[Path] = None,
-) -> pd.DataFrame:
+) -> object:
     """
     Create a grid of stacked bar charts.
 
     Args:
         df (pd.DataFrame): DataFrame with 3 or 4 columns.
         subplots_per_row (int): Number of subplots per row.
-        top_n_index (int): Top N index values to keep.
-        top_n_category (int): Top N category values to keep.
-        top_n_facet (int): Top N facet values to keep.
+        top_n_index (int): top N index values to keep.
+        top_n_columns (int): top N column values to keep.
+        top_n_facet (int): top N facet values to keep.
         null_label (str): Label for null values.
         subplot_size (int): Size of each subplot.
         color_palette (str): Name of the color palette.
@@ -1189,41 +1081,39 @@ def plot_facet_stacked_bars(
         png_path (Optional[Path]): Path to save the image.
 
     Returns:
-        pd.DataFrame: Aggregated dataset used for plotting.
+        plot object
+    
+    Remarks:
+        If you need to include facets that have no data, fill up like this beforehand:
+        df.loc[len(df)]=[None, None, 12]
     """
-    # Validate input DataFrame
+    
+    df = df.copy()  # Copy the input DataFrame to avoid modifying the original
+
     if not (df.shape[1] == 3 or df.shape[1] == 4):
         raise ValueError("Input DataFrame must have 3 or 4 columns.")
     
-    # Store original column names
     original_column_names = df.columns.tolist()
 
-    # Rename columns to more concise names
     if df.shape[1] == 3:
         df.columns = ['index', 'col', 'facet']
-        df['value'] = 1  # Treat all rows as having a value of 1
+        df['value'] = 1
     elif df.shape[1] == 4:
         df.columns = ['index', 'col', 'facet', 'value']
 
-    # Aggregate and filter data
-    aggregated_df = aggregate_data(df, top_n_index, top_n_category, top_n_facet, null_label)
+    aggregated_df = aggregate_data(df, top_n_index, top_n_columns, top_n_facet, null_label)
 
-    # Get unique facets and columns
     facets = aggregated_df['facet'].unique()
-    columns = aggregated_df['col'].unique()
-
-    # Assign colors to columns
+    columns = sorted(aggregated_df['col'].unique())
     column_colors = assign_column_colors(columns, color_palette, null_label)
 
-    # Create subplot grid
     fig = make_subplots(
-        rows=-(-len(facets) // subplots_per_row),  # Ceiling division
+        rows=-(-len(facets) // subplots_per_row),
         cols=min(subplots_per_row, len(facets)),
         subplot_titles=facets,
     )
 
-    # Add traces for each facet
-    added_to_legend = set()  # Track which columns have been added to the legend
+    added_to_legend = set()
     for i, facet in enumerate(facets):
         facet_data = aggregated_df[aggregated_df['facet'] == facet]
         row = (i // subplots_per_row) + 1
@@ -1247,7 +1137,6 @@ def plot_facet_stacked_bars(
                 col=col,
             )
 
-            # Add annotations if annotations is True
             if annotations:
                 for _, row_data in column_data.iterrows():
                     fig.add_annotation(
@@ -1259,29 +1148,38 @@ def plot_facet_stacked_bars(
                         col=col,
                     )
 
-    # Create the dynamic title
     unique_rows = len(aggregated_df)
-    title = f"{caption} [{original_column_names[0]}] by [{original_column_names[1]}] by [{original_column_names[2]}], n = {unique_rows:_}"
+    axis_details = []
+    if top_n_index > 0:
+        axis_details.append(f"top {top_n_index} [{original_column_names[0]}]")
+    else:
+        axis_details.append(f"[{original_column_names[0]}]")
 
-    # Update layout for stacking, title, and theme
+    if top_n_columns > 0:
+        axis_details.append(f"top {top_n_columns} [{original_column_names[1]}]")
+    else:
+        axis_details.append(f"[{original_column_names[1]}]")
+
+    if top_n_facet > 0:
+        axis_details.append(f"top {top_n_facet} [{original_column_names[2]}]")
+    else:
+        axis_details.append(f"[{original_column_names[2]}]")
+
+    title = f"{caption} {', '.join(axis_details)}, n = {unique_rows:_}"
     template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
     fig.update_layout(
         title=title,
-        barmode="stack",  # Enable stacking
+        barmode="stack",
         height=subplot_size * (-(-len(facets) // subplots_per_row)),
         width=subplot_size * min(subplots_per_row, len(facets)),
         showlegend=True,
         template=template,
     )
 
-    # Save the figure if png_path is specified
     if png_path:
         png_path = Path(png_path)
         fig.write_image(str(png_path))
 
-    # Show the figure with the renderer specified
     fig.show(renderer)
 
-    # Return the aggregated dataset
-    return aggregated_df
-
+    return fig

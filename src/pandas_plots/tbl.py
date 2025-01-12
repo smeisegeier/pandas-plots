@@ -710,6 +710,8 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ðŸ
     75th percentile (Q3), upper bound, maximum, standard deviation, coefficient of variation, 
     sum, skewness, and kurtosis. The interquartile range (IQR) is used to compute the lower 
     and upper bounds, which are adjusted not to exceed the min and max of the data.
+    
+    df is being dropna() beforehand to ensure scipy results
 
     Args:
         df (Union[pd.DataFrame, pd.Series]): Input DataFrame or Series. Only numeric columns 
@@ -720,12 +722,15 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ðŸ
     if df.empty:
         return 
 
+    # * drop NA to keep scipy sane
+    df = df.dropna().copy()
+
     def print_summary_ser(ser: pd.Series, show: bool=True, name: str=""):
         # Calculate IQR and pass `rng=(25, 75)` to get the interquartile range
         iqr_value = stats.iqr(ser)
 
         # * drop NA to keep scipy sane
-        ser.dropna(inplace=True)
+        # ser.dropna(inplace=True)
 
         # Using the iqr function, we still calculate the bounds manually
         q1 = stats.scoreatpercentile(ser, 25)
@@ -776,4 +781,9 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ðŸ
         # * only show numerics
         for col in df.select_dtypes("number").columns:
             summary = print_summary_ser(ser=df[col],show=show, name=col)
+
+    # enable chaining
+    pd.DataFrame.print_summary = print_summary
+    pd.Series.print_summary = print_summary
+
     return summary
