@@ -278,6 +278,44 @@ def plot_stacked_bars(
         height=height,
         color_discrete_map=column_colors,  # Use assigned colors
     )
+        # * get longest bar
+    bar_max = (
+        df.groupby(col_index)[df.columns[2]].sum().sort_values(ascending=False).iloc[0]
+        * BAR_LENGTH_MULTIPLIER
+    )
+    # * ignore if bar mode is on
+    if not relative:
+        if orientation == "v":
+            _fig.update_yaxes(range=[0, bar_max])
+        else:
+            _fig.update_xaxes(range=[0, bar_max])
+    else:
+        _fig.update_layout(barnorm="percent")
+
+    # * set title properties
+    _fig.update_layout(
+        title={
+            # 'x': 0.1,
+            "y": 0.95,
+            "xanchor": "left",
+            "yanchor": "top",
+            "font": {
+                "size": 24,
+            },
+        },
+    )
+    
+    # * set dtick
+    if orientation == "h":
+        if relative:
+            _fig.update_xaxes(dtick=5)
+        elif normalize:
+            _fig.update_xaxes(dtick=0.05)
+    else:
+        if relative:
+            _fig.update_yaxes(dtick=5)
+        elif normalize:
+            _fig.update_yaxes(dtick=0.05)
 
     # * show grids, set to smaller distance on pct scale
     _fig.update_xaxes(showgrid=True, gridwidth=1)
