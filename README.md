@@ -61,7 +61,7 @@ tbl.show_num_df(
   - `plot_histogram()` histogram for one or more **numerical** columns
   - `plot_joints()` a joint plot for **exactly two numerical** columns
   - `plot_quadrants()` quickly shows a 2x2 heatmap
-  - 🆕 `plot_stacked_bars()` shows stacked bars for a facet value as subplots 
+  - 🆕 `plot_facet_stacked_bars()` shows stacked bars for a facet value as subplots 
 <br>
 
 - `ven` offers functions for _venn diagrams_

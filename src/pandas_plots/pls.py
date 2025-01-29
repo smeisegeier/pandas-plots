@@ -78,7 +78,7 @@ def assign_column_colors(columns, color_palette, null_label):
         raise ValueError(f"Invalid color palette: {color_palette}")
     
     colors = {col: palette[i % len(palette)] for i, col in enumerate(sorted(columns))}
-    colors[null_label] = "gray"
+    colors[null_label] = "lightgray"
     return colors
 
 ### main functions
@@ -192,12 +192,32 @@ def plot_stacked_bars(
 ) -> object:
     """
     Generates a stacked bar plot using the provided DataFrame.
-    Updated to assign colors using `assign_column_colors` with nulls colored grey.
 
     Parameters:
-    All parameters are similar to the original function, with the addition of:
-    - color_palette: str - Name of the color palette.
-    - null_label: str - Label for null values.
+    - df (pd.DataFrame): The input DataFrame with at least two categorical columns and one numerical column.
+    - top_n_index (int): Limit the number of categories displayed on the index axis.
+    - top_n_color (int): Limit the number of categories displayed in the color legend.
+    - dropna (bool): If True, removes rows with missing values; otherwise, replaces them with `null_label`.
+    - swap (bool): If True, swaps the first two columns.
+    - normalize (bool): If True, normalizes numerical values between 0 and 1.
+    - relative (bool): If True, normalizes the bars to a percentage scale.
+    - orientation (Literal["h", "v"]): Defines the orientation of the bars ("v" for vertical, "h" for horizontal).
+    - height (int): Height of the plot.
+    - width (int): Width of the plot.
+    - title (str): Custom title for the plot.
+    - renderer (Literal["png", "svg", None]): Defines the output format.
+    - caption (str): Optional caption for additional context.
+    - sort_values (bool): 
+        - If True, sorts bars by the sum of their values (descending).
+        - If False, sorts bars alphabetically.
+    - show_total (bool): If True, adds a row with the total sum of all categories.
+    - precision (int): Number of decimal places for numerical values.
+    - png_path (Path | str): If specified, saves the plot as a PNG file.
+    - color_palette (str): Name of the color palette to use.
+    - null_label (str): Label for null values.
+    
+    Returns:
+    - A Plotly figure object representing the stacked bar chart.
     """
     BAR_LENGTH_MULTIPLIER = 1.05
 
@@ -210,6 +230,8 @@ def plot_stacked_bars(
     if list(set((df.iloc[:, [0, 1]].dtypes)))[0].kind not in ["O", "b"]:
         print("❌ first 2 columns must be str")
         return
+
+    df = df.copy()  # Copy the input DataFrame to avoid modifying the original
 
     # * add count column[2] as a service if none is present
     if len(df.columns) == 2:
@@ -251,6 +273,18 @@ def plot_stacked_bars(
         .sum()
         .reset_index()
     )
+    
+    # * Sorting logic based on sort_values
+    if sort_values:
+        sort_order = (
+            df.groupby(col_index)[df.columns[2]].sum().sort_values(ascending=False).index
+        )
+    else:
+        sort_order = sorted(df[col_index].unique())  # Alphabetical order
+
+    # * Convert to categorical with explicit ordering
+    df[col_index] = pd.Categorical(df[col_index], categories=sort_order, ordered=True)
+
 
     # * calculate n
     divider = 2 if show_total else 1
@@ -264,7 +298,7 @@ def plot_stacked_bars(
     caption = _set_caption(caption)
 
     # * plot
-    _fig = px.bar(
+    fig = px.bar(
         df,
         x=col_index if orientation == "v" else df.columns[2],
         y=df.columns[2] if orientation == "v" else col_index,
@@ -277,6 +311,7 @@ def plot_stacked_bars(
         width=width,
         height=height,
         color_discrete_map=column_colors,  # Use assigned colors
+        category_orders={col_index: list(df[col_index].cat.categories)},  # <- Add this line
     )
         # * get longest bar
     bar_max = (
@@ -286,14 +321,14 @@ def plot_stacked_bars(
     # * ignore if bar mode is on
     if not relative:
         if orientation == "v":
-            _fig.update_yaxes(range=[0, bar_max])
+            fig.update_yaxes(range=[0, bar_max])
         else:
-            _fig.update_xaxes(range=[0, bar_max])
+            fig.update_xaxes(range=[0, bar_max])
     else:
-        _fig.update_layout(barnorm="percent")
+        fig.update_layout(barnorm="percent")
 
     # * set title properties
-    _fig.update_layout(
+    fig.update_layout(
         title={
             # 'x': 0.1,
             "y": 0.95,
@@ -308,27 +343,26 @@ def plot_stacked_bars(
     # * set dtick
     if orientation == "h":
         if relative:
-            _fig.update_xaxes(dtick=5)
+            fig.update_xaxes(dtick=5)
         elif normalize:
-            _fig.update_xaxes(dtick=0.05)
+            fig.update_xaxes(dtick=0.05)
     else:
         if relative:
-            _fig.update_yaxes(dtick=5)
+            fig.update_yaxes(dtick=5)
         elif normalize:
-            _fig.update_yaxes(dtick=0.05)
+            fig.update_yaxes(dtick=0.05)
 
     # * show grids, set to smaller distance on pct scale
-    _fig.update_xaxes(showgrid=True, gridwidth=1)
-    _fig.update_yaxes(showgrid=True, gridwidth=1)
+    fig.update_xaxes(showgrid=True, gridwidth=1)
+    fig.update_yaxes(showgrid=True, gridwidth=1)
 
     # * save to png if path is provided
     if png_path is not None:
-        _fig.write_image(Path(png_path).as_posix())
+        fig.write_image(Path(png_path).as_posix())
 
-    _fig.show(renderer)
+    fig.show(renderer=renderer)
 
-    return _fig
-
+    return fig
 
 
 def plot_bars(
@@ -1189,17 +1223,17 @@ def plot_facet_stacked_bars(
     unique_rows = len(aggregated_df)
     axis_details = []
     if top_n_index > 0:
-        axis_details.append(f"top {top_n_index} [{original_column_names[0]}]")
+        axis_details.append(f"TOP {top_n_index} [{original_column_names[0]}]")
     else:
         axis_details.append(f"[{original_column_names[0]}]")
 
     if top_n_columns > 0:
-        axis_details.append(f"top {top_n_columns} [{original_column_names[1]}]")
+        axis_details.append(f"TOP {top_n_columns} [{original_column_names[1]}]")
     else:
         axis_details.append(f"[{original_column_names[1]}]")
 
     if top_n_facet > 0:
-        axis_details.append(f"top {top_n_facet} [{original_column_names[2]}]")
+        axis_details.append(f"TOP {top_n_facet} [{original_column_names[2]}]")
     else:
         axis_details.append(f"[{original_column_names[2]}]")
 
@@ -1218,6 +1252,6 @@ def plot_facet_stacked_bars(
         png_path = Path(png_path)
         fig.write_image(str(png_path))
 
-    fig.show(renderer)
+    fig.show(renderer=renderer)
 
     return fig
