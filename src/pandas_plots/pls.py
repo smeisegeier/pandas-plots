@@ -256,16 +256,6 @@ def plot_stacked_bars(
     col_index = df.columns[0] if not swap else df.columns[1]
     col_color = df.columns[1] if not swap else df.columns[0]
 
-    # * assign colors to columns
-    unique_colors = sorted(df[col_color].unique())
-    column_colors = assign_column_colors(unique_colors, color_palette, null_label)
-
-    # * add total as aggregation of df
-    if show_total:
-        df_total = df.copy()
-        df_total[col_index] = " TOTAL"  # add space to make this item first
-        df = pd.concat([df, df_total])
-
     # * ensure df is grouped to prevent false aggregations
     df = (
         df.groupby([df.columns[0], df.columns[1]])
@@ -281,10 +271,31 @@ def plot_stacked_bars(
         )
     else:
         sort_order = sorted(df[col_index].unique())  # Alphabetical order
+    df[col_index] = pd.Categorical(df[col_index], categories=sort_order, ordered=True)
+
+    # * add total as aggregation of df
+    if show_total:
+        df_total = df.copy()
+        df_total[col_index] = " TOTAL"  # add space to make this item first
+        df = pd.concat([df, df_total])
 
     # * Convert to categorical with explicit ordering
     df[col_index] = pd.Categorical(df[col_index], categories=sort_order, ordered=True)
 
+    if top_n_index > 0 and len(sort_order) > top_n_index:
+        top_categories = sort_order[:top_n_index]
+        df[col_index] = df[col_index].apply(lambda x: x if x in top_categories else "<other>")
+
+    unique_colors = sorted(df[col_color].unique())
+    if top_n_color > 0 and len(unique_colors) > top_n_color:
+        top_colors = unique_colors[:top_n_color]
+        df[col_color] = df[col_color].apply(lambda x: x if x in top_colors else "<other>")
+    
+    column_colors = assign_column_colors(sorted(df[col_color].unique()), color_palette, null_label)
+
+    # # * assign colors to columns
+    # unique_colors = sorted(df[col_color].unique())
+    # column_colors = assign_column_colors(unique_colors, color_palette, null_label)
 
     # * calculate n
     divider = 2 if show_total else 1
@@ -312,6 +323,8 @@ def plot_stacked_bars(
         height=height,
         color_discrete_map=column_colors,  # Use assigned colors
         category_orders={col_index: list(df[col_index].cat.categories)},  # <- Add this line
+        # category_orders={col_index: df[col_index].categories.tolist() if isinstance(df[col_index].dtype, pd.CategoricalDtype) else sorted(df[col_index].unique())}
+
     )
         # * get longest bar
     bar_max = (
@@ -344,13 +357,14 @@ def plot_stacked_bars(
     if orientation == "h":
         if relative:
             fig.update_xaxes(dtick=5)
-        elif normalize:
-            fig.update_xaxes(dtick=0.05)
+        # bug dticks are ultra dense
+        # elif normalize:
+        #     fig.update_xaxes(dtick=0.05)
     else:
         if relative:
             fig.update_yaxes(dtick=5)
-        elif normalize:
-            fig.update_yaxes(dtick=0.05)
+        # elif normalize:
+        #     fig.update_yaxes(dtick=0.05)
 
     # * show grids, set to smaller distance on pct scale
     fig.update_xaxes(showgrid=True, gridwidth=1)
@@ -961,7 +975,8 @@ def plot_box(
     fig.show("png")
 
     if summary:
-        print_summary(ser)
+        # * if only series is provided, col name is None
+        print_summary(ser.to_frame())
 
     # * save to png if path is provided
     if png_path is not None:
@@ -1175,8 +1190,23 @@ def plot_facet_stacked_bars(
 
     aggregated_df = aggregate_data(df, top_n_index, top_n_columns, top_n_facet, null_label)
 
-    facets = aggregated_df['facet'].unique()
-    columns = sorted(aggregated_df['col'].unique())
+    # facets = aggregated_df['facet'].unique()
+    facets = sorted(aggregated_df['facet'].unique())  # Ensure facets are sorted consistently
+
+    if top_n_columns > 0:
+        top_columns = aggregated_df.groupby('col', observed=True)['value'].sum().nlargest(top_n_columns).index.tolist()
+        # aggregated_df['col'] = aggregated_df['col'].apply(lambda x: x if x in top_columns else "<other>")
+        # aggregated_df['col'] = pd.Categorical(aggregated_df['col'], categories=top_columns + ["<other>"], ordered=True)
+        # aggregated_df['col'] = pd.Categorical(
+        #     aggregated_df['col'].map(lambda x: x if x in top_columns else "<other>"),
+        #     categories=top_columns + ["<other>"],
+        #     ordered=True
+        # )
+        aggregated_df['col'] = aggregated_df['col'].apply(lambda x: x if x in top_columns else "<other>")
+
+
+    # columns = sorted(aggregated_df['col'].unique())
+    columns = aggregated_df.groupby('col', observed=True)['value'].sum().sort_values(ascending=False).index.tolist()
     column_colors = assign_column_colors(columns, color_palette, null_label)
 
     fig = make_subplots(
