@@ -28,12 +28,12 @@ def _set_caption(caption: str) -> str:
 def aggregate_data(
     df: pd.DataFrame,
     top_n_index: int,
-    top_n_columns: int,
+    top_n_color: int,
     top_n_facet: int,
     null_label: str,
     show_other: bool = False,
     sort_values_index: bool = False,
-    sort_values_columns: bool = False,
+    sort_values_color: bool = False,
     sort_values_facet: bool = False,
 ) -> pd.DataFrame:
     """
@@ -42,10 +42,10 @@ def aggregate_data(
     Args:
         df (pd.DataFrame): Input DataFrame.
         top_n_index (int): top N values of the first column to keep. 0 means take all.
-        top_n_columns (int): top N values of the second column to keep. 0 means take all.
+        top_n_color (int): top N values of the second column to keep. 0 means take all.
         top_n_facet (int): top N values of the third column to keep. 0 means take all.
         null_label (str): Label for null values.
-        show_other (bool): Whether to include "<other>" for columns not in top_n_columns. Defaults to False.
+        show_other (bool): Whether to include "<other>" for columns not in top_n_color. Defaults to False.
         sort_values (bool): Whether to sort values in descending order based on group sum. Defaults to False.
 
     Returns:
@@ -58,59 +58,73 @@ def aggregate_data(
     # Aggregate data to ensure unique combinations
     aggregated_df = df.groupby(["index", "col", "facet"], as_index=False)["value"].sum()
 
-    # Reduce data based on top_n parameters
-    if top_n_index > 0:
-        if sort_values_index:
-            top_indexes = (
-                aggregated_df.groupby("index")["value"]
-                .sum()
-                .nlargest(top_n_index)
-                .index
-            )
-        else:
-            top_indexes = aggregated_df["index"].sort_values().unique()[:top_n_index]
+    # * Reduce data based on top_n parameters
+    if sort_values_index:
+        top_indexes = (
+            aggregated_df.groupby("index")["value"]
+            .sum()
+            .sort_values(ascending=False)[:top_n_index or None]
+            .index
+        )
+    else:
+        top_indexes = aggregated_df["index"].sort_values().unique()[:top_n_index or None]
 
-            aggregated_df = aggregated_df[aggregated_df["index"].isin(top_indexes)]
+    aggregated_df = aggregated_df[aggregated_df["index"].isin(top_indexes)]
 
-    if top_n_columns > 0:
-        if sort_values_columns:
-            top_columns = (
-                aggregated_df.groupby("col")["value"]
-                .sum()
-                .nlargest(top_n_columns)
-                .index
-            )
-        else:
-            top_columns = aggregated_df["col"].sort_values().unique()[:top_n_columns]
+    if sort_values_color:
+        top_colors = (
+            aggregated_df.groupby("col")["value"]
+            .sum()
+            .sort_values(ascending=False)[:top_n_color or None]
+            .index
+        )
+    else:
+        top_colors = aggregated_df["col"].sort_values().unique()[:top_n_color or None]
 
-        others_df = df[~df["col"].isin(top_columns)]
-        aggregated_df = aggregated_df[aggregated_df["col"].isin(top_columns)]
-        if show_other and not others_df.empty:
-            other_agg = others_df.groupby(["index", "facet"], as_index=False)[
-                "value"
-            ].sum()
-            other_agg["col"] = "<other>"
-            other_agg = other_agg[["index", "col", "facet", "value"]]
-            aggregated_df = pd.concat([aggregated_df, other_agg], ignore_index=True)
+    others_df = df[~df["col"].isin(top_colors)]
+    aggregated_df = aggregated_df[aggregated_df["col"].isin(top_colors)]
+    if show_other and top_n_color > 0 and not others_df.empty:
+        other_agg = others_df.groupby(["index", "facet"], as_index=False)[
+            "value"
+        ].sum()
+        other_agg["col"] = "<other>"
+        other_agg = other_agg[["index", "col", "facet", "value"]]
+        aggregated_df = pd.concat([aggregated_df, other_agg], ignore_index=True)
+        top_colors = [*top_colors, "<other>"]
 
-    if top_n_facet > 0:
-        if sort_values_facet:
-            top_facets = (
-                aggregated_df.groupby("facet")["value"]
-                .sum()
-                .nlargest(top_n_facet)
-                .index
-            )
-        else:
-            top_facets = aggregated_df["facet"].sort_values().unique()[:top_n_facet]
+    if sort_values_facet:
+        top_facets = (
+            aggregated_df.groupby("facet")["value"]
+            .sum()
+            .sort_values(ascending=False)[:top_n_facet or None]
+            .index
+        )
+    else:
+        top_facets = aggregated_df["facet"].sort_values().unique()[:top_n_facet or None]
 
-        aggregated_df = aggregated_df[aggregated_df["facet"].isin(top_facets)]
+    aggregated_df = aggregated_df[aggregated_df["facet"].isin(top_facets)]
 
-    # Ensure facets are sorted alphabetically
+    # * Ensure facets are sorted alphabetically
     aggregated_df["facet"] = pd.Categorical(
-        aggregated_df["facet"], sorted(aggregated_df["facet"].unique())
+        values=aggregated_df["facet"],
+        categories=top_facets,
+        ordered=True,
     )
-    aggregated_df = aggregated_df.sort_values(by="facet")
+    
+    aggregated_df["index"] = pd.Categorical(
+        values=aggregated_df["index"],
+        categories=top_indexes,
+        ordered=True,
+    )
+    
+    aggregated_df["col"] = pd.Categorical(
+        values=aggregated_df["col"],
+        categories=top_colors,
+        ordered=True,
+    )
+
+    
+    # aggregated_df = aggregated_df.sort_values(by="facet")
 
     return aggregated_df
 
@@ -242,7 +256,7 @@ def plot_stacked_bars(
     caption: str = None,
     sort_values: bool = False,
     sort_values_index: bool = False,
-    sort_values_columns: bool = False,
+    sort_values_color: bool = False,
     show_total: bool = False,
     precision: int = 0,
     png_path: Path | str = None,
@@ -277,7 +291,7 @@ def plot_stacked_bars(
     - null_label (str): Label for null values.
     - show_other (bool): If True, shows the "Other" category in the legend.
     - sort_values_index (bool): If True, sorts the index categories by group sum
-    - sort_values_columns (bool): If True, sorts the columns categories by group sum
+    - sort_values_color (bool): If True, sorts the columns categories by group sum
 
     Returns:
     - A Plotly figure object representing the stacked bar chart.
@@ -360,12 +374,12 @@ def plot_stacked_bars(
     aggregated_df = aggregate_data(
         df=_df,
         top_n_index=top_n_index,
-        top_n_columns=top_n_color,
+        top_n_color=top_n_color,
         top_n_facet=0,
         null_label=null_label,
         show_other=show_other,
         sort_values_index=sort_values_index,
-        sort_values_columns=sort_values_columns,
+        sort_values_color=sort_values_color,
         sort_values_facet=False, # just a placeholder
     )
 
@@ -402,11 +416,11 @@ def plot_stacked_bars(
 
     # display(sort_order)
 
-    df["index"] = pd.Categorical(
-        values=df["index"],
-        # categories=sort_order,
-        ordered=True,
-    )
+    # df["index"] = pd.Categorical(
+    #     values=df["index"],
+    #     # categories=sort_order,
+    #     ordered=True,
+    # )
     df = (
         df.sort_values(by="index", ascending=False)
         if orientation == "h"
@@ -1249,7 +1263,7 @@ def plot_facet_stacked_bars(
     df: pd.DataFrame,
     subplots_per_row: int = 4,
     top_n_index: int = 0,
-    top_n_columns: int = 0,
+    top_n_color: int = 0,
     top_n_facet: int = 0,
     null_label: str = "<NA>",
     subplot_size: int = 300,
@@ -1262,7 +1276,7 @@ def plot_facet_stacked_bars(
     show_other: bool = False,
     sort_values: bool = True,
     sort_values_index: bool = False,
-    sort_values_columns: bool = False,
+    sort_values_color: bool = False,
     sort_values_facet: bool = False,
     
 ) -> object:
@@ -1273,7 +1287,7 @@ def plot_facet_stacked_bars(
         df (pd.DataFrame): DataFrame with 3 or 4 columns.
         subplots_per_row (int): Number of subplots per row.
         top_n_index (int): top N index values to keep.
-        top_n_columns (int): top N column values to keep.
+        top_n_color (int): top N column values to keep.
         top_n_facet (int): top N facet values to keep.
         null_label (str): Label for null values.
         subplot_size (int): Size of each subplot.
@@ -1283,9 +1297,9 @@ def plot_facet_stacked_bars(
         annotations (bool): Whether to show annotations in the subplots.
         precision (int): Decimal precision for annotations.
         png_path (Optional[Path]): Path to save the image.
-        show_other (bool): If True, adds an "<other>" bar for columns not in top_n_columns.
+        show_other (bool): If True, adds an "<other>" bar for columns not in top_n_color.
         sort_values_index (bool): If True, sorts index by group sum.
-        sort_values_columns (bool): If True, sorts columns by group sum.
+        sort_values_color (bool): If True, sorts columns by group sum.
         sort_values_facet (bool): If True, sorts facet by group sum.
         sort_values (bool): DEPRECATED
 
@@ -1304,6 +1318,7 @@ def plot_facet_stacked_bars(
         raise ValueError("Input DataFrame must have 3 or 4 columns.")
 
     original_column_names = df.columns.tolist()
+    original_rows = len(df)
 
     if df.shape[1] == 3:
         df.columns = ["index", "col", "facet"]
@@ -1314,12 +1329,12 @@ def plot_facet_stacked_bars(
     aggregated_df = aggregate_data(
         df,
         top_n_index,
-        top_n_columns,
+        top_n_color,
         top_n_facet,
         null_label,
         show_other=show_other,
         sort_values_index=sort_values_index,
-        sort_values_columns=sort_values_columns,
+        sort_values_color=sort_values_color,
         sort_values_facet=sort_values_facet,
     )
 
@@ -1397,8 +1412,8 @@ def plot_facet_stacked_bars(
     else:
         axis_details.append(f"[{original_column_names[0]}]")
 
-    if top_n_columns > 0:
-        axis_details.append(f"TOP {top_n_columns} [{original_column_names[1]}]")
+    if top_n_color > 0:
+        axis_details.append(f"TOP {top_n_color} [{original_column_names[1]}]")
     else:
         axis_details.append(f"[{original_column_names[1]}]")
 
@@ -1407,7 +1422,7 @@ def plot_facet_stacked_bars(
     else:
         axis_details.append(f"[{original_column_names[2]}]")
 
-    title = f"{caption} {', '.join(axis_details)}, n = {unique_rows:_}"
+    title = f"{caption} {', '.join(axis_details)}, n = {original_rows:_}"
     template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
     fig.update_layout(
         title=title,
