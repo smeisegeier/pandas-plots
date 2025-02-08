@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 from plotly import express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly # needed for return types
 
 from .hlp import *
 from .tbl import print_summary
@@ -189,7 +190,7 @@ def plot_stacked_bars(
     png_path: Path | str = None,
     color_palette: str = "Plotly",
     null_label: str = "<NA>",
-) -> object:
+) -> plotly.graph_objects:
     """
     Generates a stacked bar plot using the provided DataFrame.
 
@@ -220,7 +221,7 @@ def plot_stacked_bars(
     - A Plotly figure object representing the stacked bar chart.
     """
     BAR_LENGTH_MULTIPLIER = 1.05
-
+    
     # * 2 axis means at least 2 columns
     if len(df.columns) < 2 or len(df.columns) > 3:
         print("❌ df must have exactly 2 or 3 columns")
@@ -263,39 +264,47 @@ def plot_stacked_bars(
         .sum()
         .reset_index()
     )
+
+    # * add total as aggregation of df
+    if show_total:
+        df_total = df.groupby(df.columns[1], observed=True, as_index=False)[df.columns[2]].sum()
+        df_total[df.columns[0]] = " Total"
+        df = pd.concat([df, df_total], ignore_index=True)
+
+
+    # * apply top_n, reduce df
+    n_col = top_n_color if top_n_color > 0 else None
+    n_idx = top_n_index if top_n_index > 0 else None
+
+    unique_colors = sorted(
+        df.groupby(col_color)[df.columns[2]]
+        .sum()
+        .sort_values(ascending=False)
+        .index.tolist()[:n_col]
+    )
     
-    # * Sorting logic based on sort_values
+    unique_idx = df[col_index].sort_values().unique()[:n_idx]
+
+    df = df[df[col_color].isin(unique_colors)]#.sort_values(by=[col_index, col_color])
+    df = df[df[col_index].isin(unique_idx)]#.sort_values(by=[col_index, col_color])
+
+
+    # # * Sorting logic based on sort_values
     if sort_values:
         sort_order = (
             df.groupby(col_index)[df.columns[2]].sum().sort_values(ascending=False).index
         )
     else:
         sort_order = sorted(df[col_index].unique())  # Alphabetical order
+
+    # # * Convert to categorical with explicit ordering
     df[col_index] = pd.Categorical(df[col_index], categories=sort_order, ordered=True)
 
-    # * add total as aggregation of df
-    if show_total:
-        df_total = df.copy()
-        df_total[col_index] = " TOTAL"  # add space to make this item first
-        df = pd.concat([df, df_total])
-
-    # * Convert to categorical with explicit ordering
-    df[col_index] = pd.Categorical(df[col_index], categories=sort_order, ordered=True)
-
-    if top_n_index > 0 and len(sort_order) > top_n_index:
-        top_categories = sort_order[:top_n_index]
-        df[col_index] = df[col_index].apply(lambda x: x if x in top_categories else "<other>")
-
-    unique_colors = sorted(df[col_color].unique())
-    if top_n_color > 0 and len(unique_colors) > top_n_color:
-        top_colors = unique_colors[:top_n_color]
-        df[col_color] = df[col_color].apply(lambda x: x if x in top_colors else "<other>")
-    
-    column_colors = assign_column_colors(sorted(df[col_color].unique()), color_palette, null_label)
-
-    # # * assign colors to columns
-    # unique_colors = sorted(df[col_color].unique())
-    # column_colors = assign_column_colors(unique_colors, color_palette, null_label)
+    column_colors = assign_column_colors(
+        columns=unique_colors,
+        color_palette=color_palette, 
+        null_label=null_label
+        )
 
     # * calculate n
     divider = 2 if show_total else 1
@@ -307,6 +316,7 @@ def plot_stacked_bars(
     _title_str_null = f", NULL excluded" if dropna else ""
     _title_str_n = f", n={n:_}"
     caption = _set_caption(caption)
+
 
     # * plot
     fig = px.bar(
@@ -323,9 +333,9 @@ def plot_stacked_bars(
         height=height,
         color_discrete_map=column_colors,  # Use assigned colors
         category_orders={col_index: list(df[col_index].cat.categories)},  # <- Add this line
-        # category_orders={col_index: df[col_index].categories.tolist() if isinstance(df[col_index].dtype, pd.CategoricalDtype) else sorted(df[col_index].unique())}
 
     )
+    
         # * get longest bar
     bar_max = (
         df.groupby(col_index)[df.columns[2]].sum().sort_values(ascending=False).iloc[0]
