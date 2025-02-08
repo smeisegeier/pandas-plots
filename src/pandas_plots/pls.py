@@ -317,6 +317,16 @@ def plot_stacked_bars(
     _title_str_n = f", n={n:_}"
     caption = _set_caption(caption)
 
+        # * after grouping add cols for pct and formatting
+    df["pct"] = df[df.columns[2]].apply(lambda x: f"{(x / n) * 100:.{precision}f}%")
+
+    # * format output
+    df["cnt_str"] = df[df.columns[2]].apply(lambda x: f"{x:_.{precision}f}")
+
+    divider2 = "<br>" if orientation == "v" else " "
+    df["cnt_pct_str"] = df.apply(
+        lambda row: f"{row['cnt_str']}{divider2}({row['pct']})", axis=1
+    )
 
     # * plot
     fig = px.bar(
@@ -324,7 +334,7 @@ def plot_stacked_bars(
         x=col_index if orientation == "v" else df.columns[2],
         y=df.columns[2] if orientation == "v" else col_index,
         color=col_color,
-        text=df.columns[2],
+        text="cnt_pct_str" if normalize else "cnt_str",
         orientation=orientation,
         title=title
         or f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}",
@@ -498,7 +508,10 @@ def plot_bars(
 
     # * after grouping add cols for pct and formatting
     df["pct"] = df[df.columns[1]] / n
+
+    # * format output
     df["cnt_str"] = df[df.columns[1]].apply(lambda x: f"{x:_.{precision}f}")
+
     divider = "<br>" if orientation == "v" else " "
     df["cnt_pct_str"] = df.apply(
         lambda row: f"{row['cnt_str']}{divider}({row['pct']:.1%})", axis=1
