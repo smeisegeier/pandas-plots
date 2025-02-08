@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 from scipy import stats
 import dataframe_image as dfi
 
-from .hlp import wrap_text
+from .hlp import wrap_text, to_series
 
 import duckdb as ddb
 
@@ -696,7 +696,7 @@ def show_num_df(
 
 
 
-def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="üü† "):
+def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str=" ", precision: int=3):
     """
     Print statistical summary for a pandas DataFrame or Series.
 
@@ -712,15 +712,44 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ü
         df (Union[pd.DataFrame, pd.Series]): Input DataFrame or Series. Only numeric columns 
         in DataFrame are considered.
         show (bool, optional): Whether to print the summary. Defaults to True.
-        name (str, optional): Prefix for the summary. Defaults to "üü† "
+        name (str, optional): Prefix for the summary. Defaults to " ".
+        precision (int, optional): Number of digits to round the results to. Defaults to 3.
     """
     if df.empty:
         return 
 
     # * drop NA to keep scipy sane
-    df = df.dropna().copy()
+    df = df.dropna().copy()    
 
-    def print_summary_ser(ser: pd.Series, show: bool=True, name: str=""):
+    # display(df)
+
+    if len(df.columns) == 1:
+        df = df.to_series()
+    
+    pd.api.types.is_numeric_dtype(df) 
+
+
+    if not (
+        # * series must be numeric
+        (isinstance(df, pd.Series)
+            and pd.api.types.is_numeric_dtype(df)
+        )
+        or 
+        # * df must have 2 columns str num
+        (len(df.columns) == 2
+            and (
+                (pd.api.types.is_object_dtype(df.iloc[:, 0]))
+                or (pd.api.types.is_bool_dtype(df.iloc[:, 0]))
+                )
+            and pd.api.types.is_numeric_dtype(df.iloc[:, 1])
+        )
+    ):
+        print(f"‚ùå df must have 2 columns: [0] str or bool, [1] num, or be a series")
+        return
+
+
+
+    def print_summary_ser(ser: pd.Series, show: bool=True, name: str="", precision: int=3):
         # Calculate IQR and pass `rng=(25, 75)` to get the interquartile range
         iqr_value = stats.iqr(ser)
 
@@ -728,21 +757,21 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ü
         # ser.dropna(inplace=True)
 
         # Using the iqr function, we still calculate the bounds manually
-        q1 = stats.scoreatpercentile(ser, 25)
-        q3 = stats.scoreatpercentile(ser, 75)
+        q1 = round(stats.scoreatpercentile(ser, 25), precision)
+        q3 = round(stats.scoreatpercentile(ser, 75), precision)
 
         # Calculate upper bound directly
-        min = round(ser.min(),3)
-        med = round(ser.median(),3)
-        upper = round(q3 + 1.5 * iqr_value,3)
-        lower = round(q1 - 1.5 * iqr_value,3)
-        mean = round(ser.mean(),3)
-        std = round(ser.std(),3)
-        cv = round(ser.std() / ser.mean(),3)
-        max = round(ser.max(),3)
-        sum = round(ser.sum(),3)
-        skew = round(stats.skew(ser.dropna().tolist()),3)
-        kurto = round(stats.kurtosis(ser.dropna().tolist()),3)
+        min = round(ser.min(), precision)
+        med = round(ser.median(), precision)
+        upper = round(q3 + 1.5 * iqr_value, precision)
+        lower = round(q1 - 1.5 * iqr_value, precision)
+        mean = round(ser.mean(), precision)
+        std = round(ser.std(), precision)
+        cv = round(ser.std() / ser.mean(), precision)
+        max = round(ser.max(), precision)
+        sum = round(ser.sum(), precision)
+        skew = round(stats.skew(ser.dropna().tolist()), precision)
+        kurto = round(stats.kurtosis(ser.dropna().tolist()), precision)
         
         lower = min if lower < min else lower
         upper = max if upper > max else upper
@@ -750,7 +779,7 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ü
         # * extra care for scipy metrics, these are very vulnarable to nan
         if show:
             print(
-                f"""{name} min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}""")
+                f"""{name} -> min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}""")
 
         summary = {
             "min": min,
@@ -770,11 +799,22 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str="ü
         return summary
 
     if isinstance(df, pd.Series):
-        return print_summary_ser(df, show=show, name=name)
+        # * print serie
+        name = df.name if df.name else "series"
+        print_summary_ser(ser=df, show=show, name=name, precision=precision)
+        return
 
     if isinstance(df, pd.DataFrame):
-        # * only show numerics
-        for col in df.select_dtypes("number").columns:
-            summary = print_summary_ser(ser=df[col],show=show, name=col)
+        # * print for all values
+        print(f"üüß all data")
+        name = df.columns[-1]
+        summary = print_summary_ser(ser=df.iloc[:,1], show=show, name=name, precision=precision)
+
+        print(f"üüß boxes")
+        # * print for each value
+        for item in df.iloc[:,0].unique():
+            # display(df[df.iloc[:,0] == item])
+            print_summary_ser(ser=df[df.iloc[:,0] == item].iloc[:,1], show=show, name=item, precision=precision)
 
     return summary
+

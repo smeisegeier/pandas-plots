@@ -1001,7 +1001,7 @@ def plot_boxes(
     points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
-    width: int = 800,
+    width: int = 1200,
     annotations: bool = True,
     summary: bool = True,
     title: str = None,
@@ -1028,7 +1028,7 @@ def plot_boxes(
     if (
         len(df.columns) != 2
         or not (
-            (pd.api.types.is_string_dtype(df.iloc[:, 0]))
+            (pd.api.types.is_object_dtype(df.iloc[:, 0]))
             or (pd.api.types.is_bool_dtype(df.iloc[:, 0]))
         )
         or not pd.api.types.is_numeric_dtype(df.iloc[:, 1])
@@ -1134,7 +1134,7 @@ def plot_boxes(
 
     fig.show("png")
     if summary:
-        print_summary(df)
+        print_summary(df=df, precision=precision)
 
     # * save to png if path is provided
     if png_path is not None:
