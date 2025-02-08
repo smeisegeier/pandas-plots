@@ -1,4 +1,7 @@
 from pathlib import Path
+import warnings
+
+warnings.filterwarnings("ignore")
 
 import os
 from typing import Optional, Literal
@@ -417,10 +420,11 @@ def plot_stacked_bars(
     #     # categories=sort_order,
     #     ordered=True,
     # )
+
     df = (
-        df.sort_values(by="index", ascending=False)
+        df.sort_values(by=["col","index"], ascending=[True, False])
         if orientation == "h"
-        else df.sort_values(by="index", ascending=True)
+        else df.sort_values(by=["index","col"], ascending=[True, True])
     )
 
     # display(df)
