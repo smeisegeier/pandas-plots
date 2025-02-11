@@ -48,7 +48,7 @@ def aggregate_data(
         sort_values (bool): Whether to sort values in descending order based on group sum. Defaults to False.
 
     Returns:
-        pd.DataFrame: Aggregated and filtered dataset.
+        pd.DataFrame: Aggregated and filtered dataset (but not sorted!)
     """
 
     for col in ["index", "col", "facet"]:  # Skip 'value' column (numeric)
@@ -65,6 +65,7 @@ def aggregate_data(
             .sort_values(ascending=False)[:top_n_index or None]
             .index
         )
+    
     else:
         top_indexes = aggregated_df["index"].sort_values().unique()[:top_n_index or None]
 
@@ -102,28 +103,6 @@ def aggregate_data(
         top_facets = aggregated_df["facet"].sort_values().unique()[:top_n_facet or None]
 
     aggregated_df = aggregated_df[aggregated_df["facet"].isin(top_facets)]
-
-    # * Ensure facets are sorted alphabetically
-    aggregated_df["facet"] = pd.Categorical(
-        values=aggregated_df["facet"],
-        categories=top_facets,
-        ordered=True,
-    )
-    
-    aggregated_df["index"] = pd.Categorical(
-        values=aggregated_df["index"],
-        categories=top_indexes,
-        ordered=True,
-    )
-    
-    aggregated_df["col"] = pd.Categorical(
-        values=aggregated_df["col"],
-        categories=top_colors,
-        ordered=True,
-    )
-
-    
-    # aggregated_df = aggregated_df.sort_values(by="facet")
 
     return aggregated_df
 
@@ -384,14 +363,6 @@ def plot_stacked_bars(
 
     df = aggregated_df.copy()
 
-    columns = sorted(
-        df.groupby("col", observed=True)["value"]
-        .sum()
-        .sort_values(ascending=False)
-        .index.tolist()
-    )
-    column_colors = assign_column_colors(columns, color_palette, null_label)
-
     caption = _set_caption(caption)
 
     # * after grouping add cols for pct and formatting
@@ -405,35 +376,44 @@ def plot_stacked_bars(
         lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_only']})", axis=1
     )
 
-    # # # * Sorting logic based on sort_values
-    # if sort_values_index:
-    #     sort_order = (
-    #         df.groupby("index")["value"].sum().sort_values(ascending=False).index
-    #     )
-    # else:
-    #     sort_order = sorted(df["index"].unique(), reverse=False)  # Alphabetical order
+    if sort_values_color:
+        colors_unique = (df
+            .groupby("col", observed=True)["value"]
+            .sum()
+            .sort_values(ascending=False)
+            .index.tolist()
+        )
+    else:
+        colors_unique = sorted(df["col"].unique().tolist())
 
-    # display(sort_order)
+    if sort_values_index:
+        index_unique = (df
+            .groupby("index", observed=True)["value"]
+            .sum()
+            .sort_values(ascending=False)
+            .index.tolist()
+        )
+    else:
+        index_unique = sorted(df["index"].unique().tolist())
 
-    # df["index"] = pd.Categorical(
-    #     values=df["index"],
-    #     # categories=sort_order,
-    #     ordered=True,
-    # )
+    color_map = assign_column_colors(colors_unique, color_palette, null_label)
+    
 
-    df = (
-        df.sort_values(by=["col","index"], ascending=[True, False])
-        if orientation == "h"
-        else df.sort_values(by=["index","col"], ascending=[True, True])
-    )
+    cat_orders = {
+        "index": index_unique,
+        "col": colors_unique,
+    }
 
-    # display(df)
+    # Ensure bl is categorical with the correct order
+    df["index"] = pd.Categorical(df["index"], categories=cat_orders["index"], ordered=True)
+
 
     # * plot
     fig = px.bar(
         df,
         x="index" if orientation == "v" else "value",
         y="value" if orientation == "v" else "index",
+        # color=columns,
         color="col",
         text="cnt_pct_str" if normalize else "cnt_str",
         orientation=orientation,
@@ -442,12 +422,14 @@ def plot_stacked_bars(
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         width=width,
         height=height,
-        color_discrete_map=column_colors,  # Use assigned colors
-        category_orders={
-            col_index: list(df["index"].cat.categories)
-        },  # <- Add this line
+        color_discrete_map=color_map,  # Use assigned colors
+        category_orders= cat_orders,
     )
 
+
+    # print(cat_orders)
+    # print(color_map)
+    # display(df)
 
     # * get longest bar
     bar_max = (
@@ -475,6 +457,9 @@ def plot_stacked_bars(
             },
         },
     )
+    fig.update_layout(legend_traceorder="normal") 
+    fig.update_layout(legend_title_text=col_color)
+
 
     # * set dtick
     if orientation == "h":

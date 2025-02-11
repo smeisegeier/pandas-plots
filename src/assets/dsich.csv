@@ -1,0 +1,45 @@
+id;bl;label;cnt
+0;01-SH;7 - Histologie Primärtumor;14351
+22;01-SH;3 - Todesbescheinigung (DCO);1004
+23;01-SH;5 - Zytologie;146
+35;01-SH;6 - Histologie Metastase;419
+38;01-SH;1 - klinisch ohne spez. Diagnostik;65
+37;01-SH;;989
+1;01-SH;2 - klinische Diagnostik;100
+40;01-SH;4 - spez. Tumormaker;9
+39;02-HH;6 - Histologie Metastase;262
+15;02-HH;3 - Todesbescheinigung (DCO);735
+36;02-HH;4 - spez. Tumormaker;2
+3;02-HH;2 - klinische Diagnostik;35
+11;02-HH;;688
+2;02-HH;7 - Histologie Primärtumor;8692
+16;02-HH;5 - Zytologie;116
+41;03-NI;5 - Zytologie;1458
+42;03-NI;3 - Todesbescheinigung (DCO);3769
+43;03-NI;8 - Sonstige;5
+4;03-NI;;2969
+14;03-NI;0 - Obduktion;2
+13;03-NI;2 - klinische Diagnostik;151
+12;03-NI;7 - Histologie Primärtumor;34975
+5;03-NI;1 - klinisch ohne spez. Diagnostik;312
+17;03-NI;6 - Histologie Metastase;1
+21;06-HE;5 - Zytologie;289
+20;06-HE;3 - Todesbescheinigung (DCO);2103
+24;06-HE;4 - spez. Tumormaker;7
+27;06-HE;;804
+7;06-HE;7 - Histologie Primärtumor;19962
+8;06-HE;2 - klinische Diagnostik;104
+10;06-HE;0 - Obduktion;2
+6;08-BW;6 - Histologie Metastase;584
+18;08-BW;;25251
+31;08-BW;2 - klinische Diagnostik;641
+26;08-BW;5 - Zytologie;550
+25;08-BW;3 - Todesbescheinigung (DCO);3768
+19;08-BW;1 - klinisch ohne spez. Diagnostik;110
+30;08-BW;7 - Histologie Primärtumor;30655
+33;09-BY;5 - Zytologie;607
+34;09-BY;8 - Sonstige;24
+9;09-BY;;857
+29;09-BY;2 - klinische Diagnostik;1657
+28;09-BY;7 - Histologie Primärtumor;58788
+32;09-BY;3 - Todesbescheinigung (DCO);2021
