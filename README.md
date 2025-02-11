@@ -61,7 +61,7 @@ tbl.show_num_df(
   - `plot_histogram()` histogram for one or more **numerical** columns
   - `plot_joints()` a joint plot for **exactly two numerical** columns
   - `plot_quadrants()` quickly shows a 2x2 heatmap
-  - 🆕 `plot_facet_stacked_bars()` shows stacked bars for a facet value as subplots 
+  - `plot_facet_stacked_bars()` shows stacked bars for a facet value as subplots 
 <br>
 
 - `ven` offers functions for _venn diagrams_
@@ -78,7 +78,7 @@ tbl.show_num_df(
   - `add_datetime_col()` adds a datetime columns to a dataframe (chainable)
   - `show_package_version` prints version of a list of packages
   - `get_os` helps to identify and ensure operating system at runtime
-  - `🆕 add_bitmask_label()` adds a column to the data that resolves a bitmask column into human-readable labels
+  - `add_bitmask_label()` adds a column to the data that resolves a bitmask column into human-readable labels
 <br>
 
 - `pii` has routines for handling of personally identifiable information
