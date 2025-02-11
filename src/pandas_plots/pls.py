@@ -1263,6 +1263,7 @@ def plot_facet_stacked_bars(
     sort_values_index: bool = False,
     sort_values_color: bool = False,
     sort_values_facet: bool = False,
+    relative: bool = False,
     
 ) -> object:
     """
@@ -1286,6 +1287,7 @@ def plot_facet_stacked_bars(
         sort_values_index (bool): If True, sorts index by group sum.
         sort_values_color (bool): If True, sorts columns by group sum.
         sort_values_facet (bool): If True, sorts facet by group sum.
+        relative (bool): If True, show bars as relative proportions to 100%.
         sort_values (bool): DEPRECATED
 
 
@@ -1340,6 +1342,11 @@ def plot_facet_stacked_bars(
         cols=min(subplots_per_row, len(facets)),
         subplot_titles=facets,
     )
+
+    # * relative?
+    if relative:
+        aggregated_df["value"] = aggregated_df.groupby(["facet", "index"])["value"].transform(lambda x: x / x.sum())
+        fig.update_layout(yaxis_tickformat=".0%")  # Show as percentage
 
     # * Ensure all categories appear in the legend by adding an invisible trace
     for column in columns:
@@ -1409,6 +1416,7 @@ def plot_facet_stacked_bars(
 
     title = f"{caption} {', '.join(axis_details)}, n = {original_rows:_}"
     template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
+    
     fig.update_layout(
         title=title,
         barmode="stack",
