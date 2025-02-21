@@ -291,10 +291,10 @@ def plot_stacked_bars(
     #     # * overkill ^^
     # df.iloc[:, [0, 1]] = df.iloc[:, [0, 1]].astype(str)
 
-    # * but last col must be numeric
-    if df.iloc[:, -1].dtype.kind not in ("f", "i"):
-        print("❌ last column must be numeric")
-        return
+    # # * but last col must be numeric
+    # if df.iloc[:, -1].dtype.kind not in ("f", "i"):
+    #     print("❌ last column must be numeric")
+    #     return
 
     df = df.copy()  # Copy the input DataFrame to avoid modifying the original
 
