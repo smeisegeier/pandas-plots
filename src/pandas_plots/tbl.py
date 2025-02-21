@@ -723,7 +723,7 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str=" "
 
     # display(df)
 
-    if len(df.columns) == 1:
+    if isinstance(df, pd.DataFrame) and len(df.columns) == 1:
         df = df.to_series()
     
     pd.api.types.is_numeric_dtype(df) 

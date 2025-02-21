@@ -490,4 +490,4 @@ def find_cols(all_cols: list[str], stubs=list[str]):
     return [col for col in all_cols if any(match in col for match in stubs)]
 
 # * extend objects to enable chaining
-# pd.DataFrame.find_cols = find_cols
+pd.DataFrame.find_cols = find_cols
