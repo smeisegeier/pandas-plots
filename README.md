@@ -79,6 +79,7 @@ tbl.show_num_df(
   - `show_package_version` prints version of a list of packages
   - `get_os` helps to identify and ensure operating system at runtime
   - `add_bitmask_label()` adds a column to the data that resolves a bitmask column into human-readable labels
+  - `find_cols()` finds all columns in a list of columns that contain any of the given stubs
 <br>
 
 - `pii` has routines for handling of personally identifiable information

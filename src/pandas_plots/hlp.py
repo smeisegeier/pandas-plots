@@ -467,3 +467,27 @@ def add_bitmask_label(
 # * extend objects to enable chaining
 pd.DataFrame.add_bitmask_label = add_bitmask_label
 ddb.DuckDBPyRelation.add_bitmask_label = add_bitmask_label
+
+
+def find_cols(all_cols: list[str], stubs=list[str]):
+    """
+    Find all columns in a list of columns that contain any of the given stubs.
+
+    Parameters
+    ----------
+    all_cols : list[str]
+        List of columns to search in.
+    stubs : list[str]
+        List of strings to search for in column names.
+
+    Returns
+    -------
+    list[str]
+        List of columns that contain any of the given stubs.
+    """
+    if all_cols is None or not stubs:
+        return "❌ empty lists"
+    return [col for col in all_cols if any(match in col for match in stubs)]
+
+# * extend objects to enable chaining
+pd.DataFrame.find_cols = find_cols
