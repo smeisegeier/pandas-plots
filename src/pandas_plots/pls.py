@@ -1433,3 +1433,13 @@ def plot_facet_stacked_bars(
     fig.show(renderer=renderer)
 
     return fig
+
+# * extend objects to enable chaining
+pd.DataFrame.plot_bars = plot_bars
+pd.DataFrame.plot_stacked_bars = plot_stacked_bars
+pd.DataFrame.plot_facet_stacked_bars = plot_facet_stacked_bars
+pd.DataFrame.plot_stacked_box = plot_box
+pd.DataFrame.plot_stacked_boxes = plot_boxes
+pd.DataFrame.plot_quadrants = plot_quadrants
+pd.DataFrame.plot_histogram = plot_histogram
+pd.DataFrame.plot_joint = plot_joint
