@@ -6,6 +6,8 @@ from enum import Enum, auto
 from io import BytesIO
 from platform import python_version
 from typing import List, Literal
+import json
+import uuid
 
 import duckdb as ddb
 import numpy as np
@@ -491,3 +493,55 @@ def find_cols(all_cols: list[str], stubs=list[str]):
 
 # * extend objects to enable chaining
 pd.DataFrame.find_cols = find_cols
+
+def add_measures_to_pyg_config(json_path: str, nodes: list[tuple[str, str]]) -> None:
+    """
+    Reads a pygwalker json config file, adds new measures from given nodes if not already present, and writes back to the file.
+
+    Parameters
+    ----------
+    json_path : `str`
+        The path to the pyg_json config file.
+    nodes : `list[tuple[str, str]]`
+        A list of tuples, where the first element in the tuple is the name of the measure and the second element is the SQL expression that defines the measure.
+
+    Returns
+    -------
+    None
+    
+    Example
+    -------
+    `node = [("cnt_tum", "count(distinct z_tum_id)")]`
+    """
+    
+    with open(json_path, "r", encoding="utf-8") as file:
+        config = json.load(file)
+
+    for node in nodes:
+        fid = uuid.uuid4().hex
+        
+        # Define the measure
+        new_json_node = {
+            "analyticType": "measure",
+            "fid": f"{fid}",
+            "name": f"{node[0]}",
+            "semanticType": "quantitative",
+            "computed": True,
+            "aggName": "expr",
+            "expression": {
+                "op": "expr",
+                "as": f"{fid}",
+                "params": [{"type": "sql", "value": f"{node[1]}"}]
+            }
+        }
+
+        # Get the measures list
+        measures = config["config"][0]["encodings"]["measures"]
+
+        # Ensure the measure is present
+        if not any(measure.get("name") == node[0] for measure in measures):
+            measures.append(new_json_node)
+
+    # Write the updated JSON back to the file
+    with open(json_path, "w", encoding="utf-8") as file:
+        json.dump(config, file, indent=2)

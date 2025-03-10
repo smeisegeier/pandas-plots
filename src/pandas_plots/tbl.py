@@ -57,7 +57,7 @@ def descr_db(
     print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
 
     if use_preview:
-        db.limit(3).show()
+        db.limit(3).show(max_width=2000)
     return
 
 def describe_df(

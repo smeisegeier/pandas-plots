@@ -80,6 +80,7 @@ tbl.show_num_df(
   - `get_os` helps to identify and ensure operating system at runtime
   - `add_bitmask_label()` adds a column to the data that resolves a bitmask column into human-readable labels
   - `find_cols()` finds all columns in a list of columns that contain any of the given stubs
+  - `add_measures_to_pyg_config()` adds measures to a pygwalker config file to avoid frequent manual update
 <br>
 
 - `pii` has routines for handling of personally identifiable information
