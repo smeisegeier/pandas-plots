@@ -661,7 +661,6 @@ def plot_bars(
 
     # * layot caption if provided
     caption = _set_caption(caption)
-
     # ! plot
     _fig = px.bar(
         df.sort_values(
@@ -674,7 +673,7 @@ def plot_bars(
         orientation=orientation,
         # * retrieve the original columns from series
         title=title
-        or f"{caption}{_title_str_minval}{_title_str_top}[{df.columns[1]}] by [{col_index}]{_title_str_null}{_title_str_n}",
+        or f"{caption}{_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}{_title_str_n}",
         # * retrieve theme from env (intro.set_theme) or default
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         width=width,
@@ -732,8 +731,22 @@ def plot_bars(
 
     # * looks better on single bars
     _fig.update_traces(
-        textposition="outside" if not use_ci else "auto", error_y=dict(thickness=5)
+        error_y=dict(thickness=5)
     )
+    if use_ci:
+        _fig.update_traces(
+            textposition="inside",  # Put labels inside bars
+            insidetextanchor="start",  # Align labels at the bottom
+            textfont=dict(size=14, color="white")  # Adjust text color for visibility
+        )
+    else:
+        _fig.update_traces(
+            textposition="outside",
+            # error_y=dict(thickness=0)
+        )
+
+    # * set axis title
+
     _fig.show(renderer)
 
     # * save to png if path is provided

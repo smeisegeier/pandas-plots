@@ -269,6 +269,7 @@ def pivot_df(
     alter_font: bool = True,
     font_size_th: int = 0,
     font_size_td: int = 0,
+    col1_width: int = 0,
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
 ) -> pd.DataFrame:
@@ -306,6 +307,7 @@ def pivot_df(
         alter_font (bool, optional): Whether to alter the font. Defaults to True.
         font_size_th (int, optional): The font size for the header. Defaults to 0.
         font_size_td (int, optional): The font size for the table data. Defaults to 0.
+        col1_width (int, optional): The width of the first column in px. Defaults to 0.
         png_path (str | Path, optional): The path to save the output PNG file. Defaults to None.
         png_conversion (Literal["chrome", "selenium"], optional): The conversion method for the PNG file. Defaults to "selenium".
 
@@ -393,6 +395,7 @@ def pivot_df(
         alter_font=alter_font,
         font_size_th=font_size_th,
         font_size_td=font_size_td,
+        col1_width=col1_width,
         png_path=png_path,
         png_conversion=png_conversion,
         
@@ -416,6 +419,7 @@ def show_num_df(
     alter_font: bool = True,
     font_size_th: int = 0,
     font_size_td: int = 0,
+    col1_width: int = 0,
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
 ):
@@ -445,6 +449,7 @@ def show_num_df(
     - alter_font: a boolean indicating whether to alter the font family
     - font_size_th: an integer indicating the font size for the header
     - font_size_td: an integer indicating the font size for the table data
+    - col1_width: an integer indicating the width of the first column in px
     - png_path: a string or Path indicating the path to save the PNG file
     - png_conversion: a Literal indicating the conversion method for the PNG file ["chrome", "selenium"]
 
@@ -680,6 +685,15 @@ def show_num_df(
             dict(selector="td", props=_props_td),
         ]
     )
+    
+    if  col1_width > 0:
+        out.set_table_styles([
+            {'selector': 'th:first-child, td:first-child', 
+            'props': [(f'min-width', f'{col1_width}px !important'), 
+                    (f'max-width', f'{col1_width}px !important'), 
+                    ('white-space', 'nowrap'), 
+                    ('overflow', 'hidden')]}
+        ])
 
     if heatmap_axis:
         out.background_gradient(
