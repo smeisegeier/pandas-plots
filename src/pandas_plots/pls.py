@@ -340,7 +340,7 @@ def plot_stacked_bars(
     _title_str_top_index = f"TOP{top_n_index} " if top_n_index > 0 else ""
     _title_str_top_color = f"TOP{top_n_color} " if top_n_color > 0 else ""
     _title_str_null = f", NULL excluded" if dropna else ""
-    _title_str_n = f", n={n:_}"
+    _title_str_n = f", n={len(df):_} ({n:_})"
 
     _df = df.copy().assign(facet=None)
     _df.columns = (
@@ -653,7 +653,7 @@ def plot_bars(
 
     # * title str n
     _title_str_n = (
-        f", n={n:_}" if not use_ci else f", n={n_len:_}<br><sub>ci(95) on means<sub>"
+        f", n={n_len:_} ({n:_})" if not use_ci else f", n={n_len:_})<br><sub>ci(95) on means<sub>"
     )
 
     # * title str na
@@ -1325,6 +1325,8 @@ def plot_facet_stacked_bars(
         df["value"] = 1
     elif df.shape[1] == 4:
         df.columns = ["index", "col", "facet", "value"]
+    
+    n = df["value"].sum()
 
     aggregated_df = aggregate_data(
         df,
@@ -1427,7 +1429,7 @@ def plot_facet_stacked_bars(
     else:
         axis_details.append(f"[{original_column_names[2]}]")
 
-    title = f"{caption} {', '.join(axis_details)}, n = {original_rows:_}"
+    title = f"{caption} {', '.join(axis_details)}, n = {original_rows:_} ({n:_})"
     template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
     
     fig.update_layout(
