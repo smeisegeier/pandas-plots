@@ -195,7 +195,8 @@ def wrap_text(
         line = line + word_s + " "
         # * reset if counter exceeds limit, or if word ends with newline
         if i >= max_items_in_line or str(word).endswith("\n"):
-            out = out + line + "\n"
+            # out = out + line + "\n"
+            out = out + line.rstrip() + "  \n"
             line = ""
             i = 0
         # else:

@@ -121,14 +121,14 @@ def describe_df(
         if df[col].notna().sum() == 0 and df[col].dtype == "float":
             df[col] = df[col].astype(str)
 
-    print(f"🔵 {'*'*3} df: {caption} {'*'*3}")
-    print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)} ")
+    print(f"🔵 {'*'*3} df: {caption} {'*'*3}  ")
+    print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)}  ")
     # print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
-    print(f"🟣 duplicates: {df.duplicated().sum():_}")
-    print(f"🟣 uniques: {wrap_text(str({col: f'{df[col].nunique():_}' for col in df})) }")
+    print(f"🟣 duplicates: {df.duplicated().sum():_}  ")
+    print(f"🟣 uniques: {wrap_text(str({col: f'{df[col].nunique():_}' for col in df})) }  ")
     # print(f"🟣 uniques: { {col: f'{df[col].nunique():_}' for col in df} }")
     # print(f"🟣 uniques: {{ {', '.join(f'{col}: {df[col].nunique():_}' for col in df)} }}")
-    print(f"🟣 missings: {wrap_text(str({col: f'{df[col].isna().sum():_}' for col in df})) }")
+    print(f"🟣 missings: {wrap_text(str({col: f'{df[col].isna().sum():_}' for col in df})) }  ")
     # print(f"🟣 missings: { {col: f'{df[col].isna().sum():_}' for col in df} }")
     # print(f"🟣 missings: {dict(df.isna().sum())}")
     
@@ -141,13 +141,13 @@ def describe_df(
         # unis = df[col].sort_values().unique()
         unis = list(df[col].value_counts().sort_index().index)
         # * get header
-        header = f"🟠 {col}({len(unis):_}|{df[col].dtype})"
+        header = f"🟠 {col}({len(unis):_}|{df[col].dtype})  "
         return unis, header
 
     # hack this block somehow interferes with the plotly renderer. so its run even when use_columns=False
     if use_columns:
-        print("--- column uniques (all)")
-        print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}")
+        print("--- column uniques (all)  ")
+        print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}  ")
     for col in df.columns[:]:
         _u, _h = get_uniques_header(col)
         # * check col type
@@ -155,10 +155,10 @@ def describe_df(
         # * wrap output
         if use_columns:
                 print(
-                    f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}"
+                    f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}  "
                 )
 
-    print("--- column stats (numeric)")
+    print("--- column stats (numeric)  ")
     # * only show numerics
     for col in df.select_dtypes("number").columns:
         _u, _h = get_uniques_header(col)
@@ -793,7 +793,7 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str=" "
         # * extra care for scipy metrics, these are very vulnarable to nan
         if show:
             print(
-                f"""{name} -> min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}""")
+                f"""{name} -> min: {min:_} | lower: {lower:_} | q25: {q1:_} | median: {med:_} | mean: {mean:_} | q75: {q3:_} | upper: {upper:_} | max: {max:_} | std: {std:_} | cv: {cv:_} | sum: {sum:_} | skew: {skew} | kurto: {kurto}  """)
 
         summary = {
             "min": min,

@@ -1141,7 +1141,7 @@ def plot_boxes(
         width (int): The width of the plot.
         annotations (bool): Whether to add annotations to the plot.
         summary (bool): Whether to add a summary to the plot.
-        use_log (bool): Whether to use logarithmic scale for the plot.
+        use_log (bool): Whether to use logarithmic scale for the plot (cannot show negative values).
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
@@ -1259,7 +1259,7 @@ def plot_boxes(
     fig.update_yaxes(title_text=df.columns[1])
     fig.update_layout(boxmode="group")  # Ensures boxes are not too compressed
     fig.update_layout(showlegend=False)
-    fig.update_traces(marker=dict(size=7), width=box_width)  # Adjust width (default ~0.5)
+    fig.update_traces(marker=dict(size=5), width=box_width)  # Adjust width (default ~0.5)
 
     fig.show("png")
     if summary:
