@@ -22,29 +22,34 @@ from PIL import Image
 URL_REGEX = r"^(?:http|ftp)s?://"  # https://stackoverflow.com/a/1617386
 
 
-def mean_confidence_interval(df, confidence=0.95):
+def mean_confidence_interval(df, confidence=0.95, use_median=False):
     """
-    Calculate the mean and confidence interval of the input dataframe.
-    source: https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
+    Calculate the mean or median and confidence interval of the input dataframe.
+    Source: https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
 
     Parameters:
     df (array-like): The input dataframe.
     confidence (float, optional): The confidence level for the interval. Defaults to 0.95.
+    use_median (bool, optional): If True, calculates median and confidence interval instead of mean. Defaults to False.
 
     Returns:
-    tuple: A tuple containing the mean, interval, lower bound, and upper bound.
+    tuple: A tuple containing the central value (mean or median), interval, lower bound, and upper bound.
     """
     df = to_series(df)
     if df is None:
         return None
     a = 1.0 * np.array(df)
     n = len(a)
-    mean, se = np.mean(a), scipy.stats.sem(a)
-    # * calculate the margin of error for the confidence interval using the t-distribution with the specified confidence level.
-    margin = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
-    lower = mean - margin
-    upper = mean + margin
-    return mean, margin, lower, upper
+
+    if use_median:
+        median = np.median(a)
+        se = 1.253 * scipy.stats.sem(a)  # Approximate standard error for median
+        margin = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
+        return median, margin, median - margin, median + margin
+    else:
+        mean, se = np.mean(a), scipy.stats.sem(a)
+        margin = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
+        return mean, margin, mean - margin, mean + margin
 
     # # * Alternative
     # # from statistics import NormalDist
@@ -542,7 +547,9 @@ def add_measures_to_pyg_config(json_path: str, nodes: list[tuple[str, str]] = [(
 
     Example
     -------
-    `add_measures_to_pyg_config('config.json', [('cnt_tum', 'count(distinct z_tum_id)')], strict=True)`
+    default: `add_measures_to_pyg_config('config.json', [('cnt_tum', 'count(distinct z_tum_id)')], strict=True)`
+    
+    usage: start pygwalker with empty config file but defined config path. make changes on the chart, save the config file. then run this function again - measures will be added
     """
     if not os.path.exists(json_path):
         if strict:

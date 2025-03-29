@@ -500,6 +500,7 @@ def plot_bars(
     width: int = 1600,
     title: str = None,
     use_ci: bool = False,
+    ci_agg: Literal["mean", "median"] = "mean",
     precision: int = 0,
     renderer: Literal["png", "svg", None] = "png",
     png_path: Path | str = None,
@@ -569,9 +570,9 @@ def plot_bars(
                 dropna=False,
             )
             .agg(
-                mean=(col_name, "mean"),
+                mean=(col_name, ci_agg),
                 # * retrieve margin from custom func
-                margin=(col_name, lambda x: mean_confidence_interval(x)[1]),
+                margin=(col_name, lambda x: mean_confidence_interval(x, use_median = (ci_agg == "median"))[1]),
             )
             .reset_index()
         )
@@ -653,7 +654,7 @@ def plot_bars(
 
     # * title str n
     _title_str_n = (
-        f", n={n_len:_} ({n:_})" if not use_ci else f", n={n_len:_})<br><sub>ci(95) on means<sub>"
+        f", n={n_len:_} ({n:_})" if not use_ci else f", n={n_len:_})<br><sub>ci(95) on {ci_agg}s<sub>"
     )
 
     # * title str na
@@ -965,6 +966,7 @@ def plot_box(
     violin: bool = False,
     x_min: float = None,
     x_max: float = None,
+    use_log: bool = False,
     png_path: Path | str = None,
 ) -> object:
     """
@@ -977,10 +979,13 @@ def plot_box(
         height: The height of the plot.
         width: The width of the plot.
         annotations: Whether to add annotations to the plot.
-        violin: Use violin plot or not
-        x_min: The minimum value for the x-axis scale (max and min must be set)
-        x_max: The maximum value for the x-axis scale (max and min must be set)
-        summary: Whether to add a summary table to the plot
+        summary: Whether to add a summary table to the plot.
+        caption: The caption for the plot.
+        title: The title of the plot.
+        violin: Use violin plot or not.
+        x_min: The minimum value for the x-axis scale (max and min must be set).
+        x_max: The maximum value for the x-axis scale (max and min must be set).
+        use_log: Use logarithmic scale for the axis.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
@@ -993,7 +998,7 @@ def plot_box(
     # * drop na to keep scipy sane
     n_ = len(ser)
     ser.dropna(inplace=True)
-    n = len(ser)
+    # n = len(ser)
 
     # hack
     median = ser.median()
@@ -1011,7 +1016,6 @@ def plot_box(
     lvl3 = height * 0.25
 
     caption = _set_caption(caption)
-
     dict = {
         "data_frame": ser,
         "orientation": "h",
@@ -1020,7 +1024,9 @@ def plot_box(
         "width": width,
         "points": points,
         # 'box':True,
-        "title": f"{caption}[{ser.name}], n = {n_:_}({n:_})" if not title else title,
+        "log_x": use_log,   # * logarithmic scale, axis is always x
+        # "notched": True,
+        "title": f"{caption}[{ser.name}], n = {n_:_}" if not title else title,
     }
 
     fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)
@@ -1119,6 +1125,8 @@ def plot_boxes(
     annotations: bool = True,
     summary: bool = True,
     title: str = None,
+    use_log: bool = False,
+    box_width: float = 0.5,
     png_path: Path | str = None,
 ) -> object:
     """
@@ -1133,6 +1141,7 @@ def plot_boxes(
         width (int): The width of the plot.
         annotations (bool): Whether to add annotations to the plot.
         summary (bool): Whether to add a summary to the plot.
+        use_log (bool): Whether to use logarithmic scale for the plot.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns:
@@ -1170,11 +1179,14 @@ def plot_boxes(
         df,
         x=df.iloc[:, 0],
         y=df.iloc[:, 1],
+        color=df.iloc[:, 0],
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         orientation="v",
         height=height,
         width=width,
         points=points,
+        log_y=use_log,
+        # color_discrete_sequence=px.colors.qualitative.Plotly,
         title=(
             f"{caption}[{df.columns[0]}] on [{df.columns[1]}], n = {len(df):_.0f}"
             if not title
@@ -1245,6 +1257,9 @@ def plot_boxes(
 
     fig.update_xaxes(title_text=df.columns[0])
     fig.update_yaxes(title_text=df.columns[1])
+    fig.update_layout(boxmode="group")  # Ensures boxes are not too compressed
+    fig.update_layout(showlegend=False)
+    fig.update_traces(marker=dict(size=7), width=box_width)  # Adjust width (default ~0.5)
 
     fig.show("png")
     if summary:
