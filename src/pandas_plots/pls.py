@@ -1016,6 +1016,7 @@ def plot_box(
     lvl3 = height * 0.25
 
     caption = _set_caption(caption)
+    log_str = " (log-scale)" if use_log else ""
     dict = {
         "data_frame": ser,
         "orientation": "h",
@@ -1026,7 +1027,7 @@ def plot_box(
         # 'box':True,
         "log_x": use_log,   # * logarithmic scale, axis is always x
         # "notched": True,
-        "title": f"{caption}[{ser.name}], n = {n_:_}" if not title else title,
+        "title": f"{caption}[{ser.name}]{log_str}, n = {n_:_}" if not title else title,
     }
 
     fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)
@@ -1173,6 +1174,7 @@ def plot_boxes(
     items = df.iloc[:, 0].unique()
 
     caption = _set_caption(caption)
+    log_str = " (log-scale)" if use_log else ""
 
     # * main plot
     fig = px.box(
@@ -1188,7 +1190,7 @@ def plot_boxes(
         log_y=use_log,
         # color_discrete_sequence=px.colors.qualitative.Plotly,
         title=(
-            f"{caption}[{df.columns[0]}] on [{df.columns[1]}], n = {len(df):_.0f}"
+            f"{caption}[{df.columns[0]}] by [{df.columns[1]}]{log_str}, n = {len(df):_.0f}"
             if not title
             else title
         ),
