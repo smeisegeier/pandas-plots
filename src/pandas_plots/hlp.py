@@ -333,7 +333,7 @@ def show_package_version(
         "numpy",
         "duckdb",
         "pandas-plots",
-        "connection_helper",
+        "connection-helper",
     ]
     items = []
     items.append(f"🐍 {python_version()}")

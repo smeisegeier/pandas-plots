@@ -166,3 +166,4 @@ cython_debug/
 .local
 src/csv.ipynb
 .notes.md
+**/**.duckdb

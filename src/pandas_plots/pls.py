@@ -1273,7 +1273,6 @@ def plot_boxes(
 
     return fig
 
-
 def plot_facet_stacked_bars(
     df: pd.DataFrame,
     subplots_per_row: int = 4,
@@ -1294,59 +1293,41 @@ def plot_facet_stacked_bars(
     sort_values_color: bool = False,
     sort_values_facet: bool = False,
     relative: bool = False,
-    
-) -> object:
-    """
-    Create a grid of stacked bar charts.
+    show_pct: bool = False,
+) -> go.Figure:
 
-    Args:
-        df (pd.DataFrame): DataFrame with 3 or 4 columns.
-        subplots_per_row (int): Number of subplots per row.
-        top_n_index (int): top N index values to keep.
-        top_n_color (int): top N column values to keep.
-        top_n_facet (int): top N facet values to keep.
-        null_label (str): Label for null values.
-        subplot_size (int): Size of each subplot.
-        color_palette (str): Name of the color palette.
-        caption (str): Optional caption to prepend to the title.
-        renderer (Optional[Literal["png", "svg"]]): Renderer for saving the image.
-        annotations (bool): Whether to show annotations in the subplots.
-        precision (int): Decimal precision for annotations.
-        png_path (Optional[Path]): Path to save the image.
-        show_other (bool): If True, adds an "<other>" bar for columns not in top_n_color.
-        sort_values_index (bool): If True, sorts index by group sum.
-        sort_values_color (bool): If True, sorts columns by group sum.
-        sort_values_facet (bool): If True, sorts facet by group sum.
-        relative (bool): If True, show bars as relative proportions to 100%.
-        sort_values (bool): DEPRECATED
+    # --- ENFORCE show_pct RULES ---
+    if not relative:
+        # If bars are absolute, annotations MUST be absolute
+        if show_pct:
+            print("Warning: 'show_pct' cannot be True when 'relative' is False. Setting 'show_pct' to False.")
+            show_pct = False
+    # ------------------------------
 
+    try:
+        precision = int(precision)
+    except (ValueError, TypeError):
+        print(f"Warning: 'precision' received as {precision} (type: {type(precision)}). Defaulting to 0.")
+        precision = 0
 
-    Returns:
-        plot object
+    df_copy = df.copy()
 
-    Remarks:
-        If you need to include facets that have no data, fill up like this beforehand:
-        df.loc[len(df)]=[None, None, 12]
-    """
-
-    df = df.copy()  # Copy the input DataFrame to avoid modifying the original
-
-    if not (df.shape[1] == 3 or df.shape[1] == 4):
+    if not (df_copy.shape[1] == 3 or df_copy.shape[1] == 4):
         raise ValueError("Input DataFrame must have 3 or 4 columns.")
 
-    original_column_names = df.columns.tolist()
-    original_rows = len(df)
+    original_column_names = df_copy.columns.tolist()
 
-    if df.shape[1] == 3:
-        df.columns = ["index", "col", "facet"]
-        df["value"] = 1
-    elif df.shape[1] == 4:
-        df.columns = ["index", "col", "facet", "value"]
-    
-    n = df["value"].sum()
+    if df_copy.shape[1] == 3:
+        df_copy.columns = ["index", "col", "facet"]
+        df_copy["value"] = 1
+    elif df_copy.shape[1] == 4:
+        df_copy.columns = ["index", "col", "facet", "value"]
 
-    aggregated_df = aggregate_data(
-        df,
+    n = df_copy["value"].sum()
+    original_rows = len(df_copy)
+
+    aggregated_df = aggregate_data( # Assumes aggregate_data is accessible
+        df_copy,
         top_n_index,
         top_n_color,
         top_n_facet,
@@ -1357,106 +1338,91 @@ def plot_facet_stacked_bars(
         sort_values_facet=sort_values_facet,
     )
 
-    facets = sorted(
-        aggregated_df["facet"].unique()
-    )  # Ensure facets are sorted consistently
+    aggregated_df['index'] = aggregated_df['index'].astype(str)
+    aggregated_df['col'] = aggregated_df['col'].astype(str)
+    aggregated_df['facet'] = aggregated_df['facet'].astype(str)
 
-    columns = sorted(
-        aggregated_df.groupby("col", observed=True)["value"]
-        .sum()
-        .sort_values(ascending=False)
-        .index.tolist()
-    )
-    column_colors = assign_column_colors(columns, color_palette, null_label)
+    # --- Store original 'value' for annotations before potential scaling ---
+    aggregated_df['annotation_value'] = aggregated_df['value'].copy()
+    # ----------------------------------------------------------------------
 
-    fig = make_subplots(
-        rows=-(-len(facets) // subplots_per_row),
-        cols=min(subplots_per_row, len(facets)),
-        subplot_titles=facets,
-    )
-
-    # * relative?
     if relative:
+        # This transforms the bar heights (value column) to percentages (0-1 range)
         aggregated_df["value"] = aggregated_df.groupby(["facet", "index"])["value"].transform(lambda x: x / x.sum())
-        fig.update_layout(yaxis_tickformat=".0%")  # Show as percentage
 
-    # * Ensure all categories appear in the legend by adding an invisible trace
-    for column in columns:
-        fig.add_trace(
-            go.Bar(
-                x=[None],  # Invisible bar
-                y=[None],
-                name=column,
-                marker=dict(color=column_colors[column]),
-                showlegend=True,  # Ensure it appears in the legend
-            )
-        )
+    category_orders = {}
 
-    added_to_legend = set()
-    for i, facet in enumerate(facets):
-        facet_data = aggregated_df[aggregated_df["facet"] == facet]
-        row = (i // subplots_per_row) + 1
-        col = (i % subplots_per_row) + 1
+    if sort_values_index:
+        sum_by_index = aggregated_df.groupby('index')['value'].sum().sort_values(ascending=False)
+        category_orders["index"] = sum_by_index.index.tolist()
 
-        for column in columns:
-            column_data = facet_data[facet_data["col"] == column]
+    if sort_values_color:
+        sum_by_col = aggregated_df.groupby('col')['value'].sum().sort_values(ascending=False)
+        category_orders["col"] = sum_by_col.index.tolist()
 
-            show_legend = column not in added_to_legend
-            if show_legend:
-                added_to_legend.add(column)
+    if sort_values_facet:
+        sum_by_facet = aggregated_df.groupby('facet')['value'].sum().sort_values(ascending=False)
+        category_orders["facet"] = sum_by_facet.index.tolist()
 
-            fig.add_trace(
-                go.Bar(
-                    x=column_data["index"],
-                    y=column_data["value"],
-                    name=column,
-                    marker=dict(color=column_colors[column]),
-                    legendgroup=column,  # Ensures multiple traces use the same legend entry
-                    showlegend=False,  # suppress further legend items
-                ),
-                row=row,
-                col=col,
-            )
+    columns_for_color = sorted(aggregated_df["col"].unique().tolist())
+    column_colors_map = assign_column_colors(columns_for_color, color_palette, null_label) # Assumes assign_column_colors is accessible
 
-            if annotations:
-                for _, row_data in column_data.iterrows():
-                    fig.add_annotation(
-                        x=row_data["index"],
-                        y=row_data["value"],
-                        text=f"{row_data['value']:.{precision}f}",
-                        showarrow=False,
-                        row=row,
-                        col=col,
-                    )
-
-    unique_rows = len(aggregated_df)
-    axis_details = []
-    if top_n_index > 0:
-        axis_details.append(f"TOP {top_n_index} [{original_column_names[0]}]")
+    # --- Prepare the text series for annotations with 'show_pct' control ---
+    if annotations:
+        if show_pct:
+            # When show_pct is True, use the scaled 'value' column (0-1) and format as percentage
+            formatted_text_series = aggregated_df["value"].apply(lambda x: f"{x:.{precision}%}".replace('.', ','))
+        else:
+            # When show_pct is False, use the 'annotation_value' (original absolute) and format as absolute
+            formatted_text_series = aggregated_df["annotation_value"].apply(lambda x: f"{x:_.{precision}f}".replace('.', ','))
     else:
-        axis_details.append(f"[{original_column_names[0]}]")
+        formatted_text_series = None
+    # -----------------------------------------------------------------------
 
-    if top_n_color > 0:
-        axis_details.append(f"TOP {top_n_color} [{original_column_names[1]}]")
-    else:
-        axis_details.append(f"[{original_column_names[1]}]")
-
-    if top_n_facet > 0:
-        axis_details.append(f"TOP {top_n_facet} [{original_column_names[2]}]")
-    else:
-        axis_details.append(f"[{original_column_names[2]}]")
-
-    title = f"{caption} {', '.join(axis_details)}, n = {original_rows:_} ({n:_})"
-    template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
-    
-    fig.update_layout(
-        title=title,
+    fig = px.bar(
+        aggregated_df,
+        x="index",
+        y="value",
+        color="col",
+        facet_col="facet",
+        facet_col_wrap=subplots_per_row,
         barmode="stack",
-        height=subplot_size * (-(-len(facets) // subplots_per_row)),
-        width=subplot_size * min(subplots_per_row, len(facets)),
-        showlegend=True,
-        template=template,
+        color_discrete_map=column_colors_map,
+        category_orders=category_orders,
+        text=formatted_text_series,
+        text_auto=False,
+        height=subplot_size * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
+        title=f"{caption} {original_column_names[0]}, {original_column_names[1]}, {original_column_names[2]}",
     )
+
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
+    fig.update_xaxes(matches=None)
+    for axis in fig.layout:
+        if axis.startswith("xaxis"):
+            fig.layout[axis].showticklabels = True
+
+    template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
+
+    layout_updates = {
+        "title_text":   f"{caption} "
+                        f"{'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] "
+                        f"{'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] "
+                        f"{'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}] "
+                        f", n = {original_rows:_} ({n:_})",
+        "showlegend": True,
+        "template": template,
+        "width": subplot_size * subplots_per_row,
+    }
+
+    if relative:
+        layout_updates['yaxis_range'] = [0, 1.1]
+        layout_updates['yaxis_tickformat'] = ".0%"
+
+    fig.update_layout(**layout_updates)
+
+    if relative:
+        fig.update_yaxes(tickformat=".0%")
 
     if png_path:
         png_path = Path(png_path)
