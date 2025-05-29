@@ -83,9 +83,6 @@ tbl.show_num_df(
   - `add_measures_to_pyg_config()` adds measures to a pygwalker config file to avoid frequent manual update
 <br>
 
-- `pii` has routines for handling of personally identifiable information
-  - `remove_pii()` logs and deletes pii from a series
-
 > note: theme setting can be controlled through all functions by setting the environment variable `THEME` to either light or dark
 
 ## more examples
