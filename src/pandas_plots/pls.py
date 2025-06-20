@@ -563,9 +563,10 @@ def plot_bars(
 
     # * ensure df is grouped to prevent false aggregations, reset index to return df
     if use_ci:
-        # * grouping is smoother on df than on series
-        df = (
-            df_in.groupby(
+# * grouping is smoother on df than on series
+        df = (df_in
+            # ? dont dropna() here, this biases the input data
+            .groupby(
                 col_index,
                 dropna=False,
             )
@@ -576,10 +577,11 @@ def plot_bars(
             )
             .reset_index()
         )
-        # * enforce vertical bars when using ci
+        # * enforce vertical bars **when using ci**, normalize=False, dropna=True, set empty margin to 0 to avoid dropping the bar
         orientation = "v"
         normalize = False
         dropna = True
+        df.margin.fillna(0, inplace=True)
     else:
         df = df_in.groupby(col_index, dropna=dropna)[col_name].sum().reset_index()
 
@@ -590,6 +592,7 @@ def plot_bars(
         df = df.dropna()
     else:
         df = df.fillna("<NA>")
+
 
     # * get n, col1 now is always numeric
     n = df[df.columns[1]].sum()
@@ -1265,7 +1268,8 @@ def plot_boxes(
 
     fig.show("png")
     if summary:
-        print_summary(df=df, precision=precision)
+        # * sort df by first column
+        print_summary(df=df.sort_values(df.columns[0]), precision=precision)
 
     # * save to png if path is provided
     if png_path is not None:
