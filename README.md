@@ -13,7 +13,7 @@ pip install pandas-plots -U
 include in python
 
 ```python
-from pandas_plots import tbl, pls, ven, hlp, pii
+from pandas_plots import tbl, pls, ven, hlp
 ```
 
 ## example
