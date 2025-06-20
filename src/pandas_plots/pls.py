@@ -1116,6 +1116,8 @@ def plot_box(
     return fig
 
 
+
+
 def plot_boxes(
     df: pd.DataFrame,
     caption: str = None,
@@ -1164,14 +1166,9 @@ def plot_boxes(
     xlvl2 = 0
     xlvl3 = 50
 
-    # * not working
-    # yspan_seg = (df.iloc[:, 1].max() - df.iloc[:, 1].max()) * .05
-    # ylvl1 = -yspan_seg
-    # ylvl2 = 0
-    # ylvl3 = yspan_seg
-
     # * unique items
-    items = df.iloc[:, 0].unique()
+    # Sort the unique items alphabetically
+    items = sorted(df.iloc[:, 0].unique())
 
     caption = _set_caption(caption)
     log_str = " (log-scale)" if use_log else ""
@@ -1195,6 +1192,9 @@ def plot_boxes(
             else title
         ),
     )
+
+    # * Set the order of the x-axis categories
+    fig.update_xaxes(categoryorder="array", categoryarray=items)
 
     # * yshift is trivial
     YS = 0
@@ -1272,6 +1272,7 @@ def plot_boxes(
         fig.write_image(Path(png_path).as_posix())
 
     return fig
+
 
 def plot_facet_stacked_bars(
     df: pd.DataFrame,
