@@ -172,6 +172,9 @@ def describe_df(
         # * fix bug(?) in plotly/choreographer - datetime columns are not plotted, set these to str
         datetime_cols = df.select_dtypes(include=['datetime64']).columns
         df[datetime_cols] = df[datetime_cols].astype(str)
+        
+        # ! Drop completely empty columns (Series)
+        df = df.dropna(axis=1, how='all')
 
         # * reduce column names len if selected
         if top_n_chars_in_columns > 0:
