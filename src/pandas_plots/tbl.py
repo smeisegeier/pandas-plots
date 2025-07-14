@@ -769,6 +769,11 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str=" "
 
         # * drop NA to keep scipy sane
         ser.dropna(inplace=True)
+        
+        # * on empty series: return
+        if ser.empty:
+            print(f"{name} -> empty")
+            return
 
         # Using the iqr function, we still calculate the bounds manually
         q1 = round(stats.scoreatpercentile(ser, 25), precision)
