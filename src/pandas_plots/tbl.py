@@ -768,7 +768,7 @@ def print_summary(df: pd.DataFrame | pd.Series, show: bool = True, name: str=" "
         iqr_value = stats.iqr(ser)
 
         # * drop NA to keep scipy sane
-        # ser.dropna(inplace=True)
+        ser.dropna(inplace=True)
 
         # Using the iqr function, we still calculate the bounds manually
         q1 = round(stats.scoreatpercentile(ser, 25), precision)
