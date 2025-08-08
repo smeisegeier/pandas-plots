@@ -7,7 +7,9 @@
 install / update package
 
 ```bash
-pip install pandas-plots -U
+uv add -U pandas-plots
+# if no uv is available:
+# pip install pandas-plots -U
 ```
 
 include in python
@@ -45,7 +47,7 @@ tbl.show_num_df(
 `pandas-plots` is a package to help you examine and visualize data that are organized in a pandas DataFrame. It provides a high level api to pandas / plotly with some selected functions and predefined options:
 
 - `tbl` utilities for table descriptions
-  - 🌟`show_num_df()` displays a table as styled version with additional information
+  - `show_num_df()` displays a table as styled version with additional information
   - `describe_df()` an alternative version of pandas `describe()` function
   - `descr_db()` a very short descr for a `duckdb` relation
   - `pivot_df()` gets a pivot table of a 3 column dataframe (or 2 columns if no weights are given)
@@ -55,7 +57,7 @@ tbl.show_num_df(
 - `pls` for plotly visualizations
   - `plot_box()` auto annotated boxplot w/ violin option
   - `plot_boxes()` multiple boxplots _(annotation is experimental)_
-  - `plot_stacked_bars()` shortcut to stacked bars 😄
+  - `plot_stacked_bars()` shortcut to stacked bars
   - `plots_bars()` a standardized bar plot for a **categorical** column
     - features confidence intervals via `use_ci` option
   - `plot_histogram()` histogram for one or more **numerical** columns
@@ -71,7 +73,7 @@ tbl.show_num_df(
 <br>
 
 - `hlp` contains some (variety) helper functions
-  - `to_series()` converts a dataframe to a series (`🚨 breaking change`)
+  - `to_series()` converts a dataframe to a series
   - `mean_confidence_interval()` calculates mean and confidence interval for a series
   - `wrap_text()` formats strings or lists to a given width to fit nicely on the screen
   - `replace_delimiter_outside_quotes()` when manual import of csv files is needed: replaces delimiters only outside of quotes
@@ -84,7 +86,13 @@ tbl.show_num_df(
   - `add_measures_to_pyg_config()` adds measures to a pygwalker config file to avoid frequent manual update
 <br>
 
-> note: theme setting can be controlled through all functions by setting the environment variable `THEME` to either light or dark
+> note: theme setting ☀️ 🌔 can be controlled through all functions by setting the environment variable `THEME` to either light or dark
+
+## prerequisites
+
+- ⚠️ for static image generation, this package uses Plotly's kaleido engine, which requires a system-wide installation of the Chrome or Chromium browser
+- if image generation fails, it may be because a compatible browser is missing
+- in such cases, please run `kaleido_get_chrome` from your terminal to install the necessary dependency.
 
 ## more examples
 
