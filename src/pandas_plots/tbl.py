@@ -75,6 +75,7 @@ def describe_df(
     top_n_uniques: int = 5,
     top_n_chars_in_index: int = 0,
     top_n_chars_in_columns: int = 0,
+    missing_figsize: tuple[int, int] = (26, 6),
 ):
     """
     This function takes a pandas DataFrame and a caption as input parameters and prints out the caption as a styled header, followed by the shape of the DataFrame and the list of column names. For each column, it prints out the column name, the number of unique values, and the column data type. If the column is a numeric column with more than 100 unique values, it also prints out the minimum, mean, maximum, and sum values. Otherwise, it prints out the first 100 unique values of the column.
@@ -94,6 +95,7 @@ def describe_df(
     top_n_uniques (int): number of uniques to display
     top_n_chars_in_index (int): number of characters to display on plot axis
     top_n_chars_in_columns (int): number of characters to display on plot axis. If set, minimum is 10.
+    missing_figsize (tuple[int, int]): figsize for missing plot (default (26, 6)
 
     usage:
     describe_df(
@@ -252,7 +254,7 @@ def describe_df(
     
     if use_missing:
         import missingno as msno
-        msno.matrix(df_, figsize=(12, 5))
+        msno.matrix(df_, figsize=missing_figsize)
 
 
 def pivot_df(

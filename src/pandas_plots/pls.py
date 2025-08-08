@@ -564,13 +564,21 @@ def plot_bars(
 
     # * if df, check if valid
     if isinstance(df_in, pd.DataFrame):
-        if len(df_in.columns) != 2:
-            print("❌ df must have exactly 2 columns")
-            return
-        elif not (df_in.iloc[:, 0].dtype.kind in ["O", "b"]) or not (
-            df_in.iloc[:, 1].dtype.kind in ["i", "f"]
-        ):
-            print("❌ df must have string and numeric columns (in that order).")
+        if len(df_in.columns) == 1:
+            if not (df_in.iloc[:, 0].dtype.kind in ["O", "b"]):
+                print("❌ df must have 1 column of object or bool type.")
+                return
+            else:
+                df_in = df_in.value_counts(dropna=dropna).to_frame().reset_index()
+                use_ci = False
+        elif len(df_in.columns) == 2:
+            if not (df_in.iloc[:, 0].dtype.kind in ["O", "b"]) or not (
+                df_in.iloc[:, 1].dtype.kind in ["i", "f"]
+            ):
+                print("❌ df must have string and numeric columns (in that order).")
+                return
+        else:
+            print("❌ df must have exactly 1 or 2 columns")
             return
     else:
         print("❌ input must be series or dataframe.")
@@ -1194,6 +1202,10 @@ def plot_boxes(
     xlvl1 = -50
     xlvl2 = 0
     xlvl3 = 50
+    
+    # * type of col0 must be str, not object. otherwise px.box will fail since sorting will fail
+    if pd.api.types.is_object_dtype(df.iloc[:, 0]):
+        df.iloc[:, 0] = df.iloc[:, 0].astype(str)
 
     # * unique items
     # Sort the unique items alphabetically

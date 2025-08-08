@@ -1,6 +1,6 @@
 [project]
 name = "pandas-plots"
-version = "0.15.2"
+version = "0.15.3"
 description = "A collection of helper for table handling and visualization"
 long_description = "file: README.md"
 long_description_content_type = "text/markdown"
@@ -35,7 +35,7 @@ dependencies = [
     "duckdb>=1.3.0",
     "nbformat>=4.2.0",
     "dataframe_image>=0.2.6",
-    "connection-helper>=0.11.2",
+    "connection-helper>=0.12",
 ]
 
 [project.urls]
