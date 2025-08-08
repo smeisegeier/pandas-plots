@@ -1,7 +1,6 @@
 [project]
 name = "pandas-plots"
-version = "0.15.0"
-author_email = "dexterDSDo@googlemail.com"
+version = "0.15.1"
 description = "A collection of helper for table handling and visualization"
 long_description = "file: README.md"
 long_description_content_type = "text/markdown"
@@ -9,7 +8,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["tables", "pivot", "plotly", "venn", "plot", "vizualization"]
 authors = [
-    { name = "smeisegeier", email = "meisegeiers@rki.de" },
+    { name = "smeisegeier", email = "dexterDSD@googlemail.com" },
 ]
 
 classifiers = [

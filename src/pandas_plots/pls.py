@@ -244,7 +244,9 @@ def plot_stacked_bars(
     color_palette: str = "Plotly",
     null_label: str = "<NA>",
     show_other: bool = False,
-) -> plotly.graph_objects:
+    show_pct_all: bool = False,
+    show_pct_bar: bool = False,
+) -> None:
     """
     Generates a stacked bar plot using the provided DataFrame.
 
@@ -273,9 +275,10 @@ def plot_stacked_bars(
     - show_other (bool): If True, shows the "Other" category in the legend.
     - sort_values_index (bool): If True, sorts the index categories by group sum
     - sort_values_color (bool): If True, sorts the columns categories by group sum
+    - show_pct_all (bool): If True, formats the bar text with percentages from the total n.
+    - show_pct_bar (bool): If True, formats the bar text with percentages from the bar's total.
 
-    Returns:
-    - A Plotly figure object representing the stacked bar chart.
+    Returns: None
     """
     BAR_LENGTH_MULTIPLIER = 1.05
 
@@ -366,18 +369,32 @@ def plot_stacked_bars(
 
     df = aggregated_df.copy()
 
+    # * calculate bar totals
+    bar_totals = df.groupby("index")["value"].transform("sum")
+
     caption = _set_caption(caption)
 
     # * after grouping add cols for pct and formatting
-    df["cnt_pct_only"] = df["value"].apply(lambda x: f"{(x / n) * 100:.{precision}f}%")
+    df["cnt_pct_all_only"] = df["value"].apply(lambda x: f"{(x / n) * 100:.{precision}f}%")
+    df["cnt_pct_bar_only"] = (df["value"] / bar_totals * 100).apply(lambda x: f"{x:.{precision}f}%")
 
     # * format output
     df["cnt_str"] = df["value"].apply(lambda x: f"{x:_.{precision}f}")
 
     divider2 = "<br>" if orientation == "v" else " "
-    df["cnt_pct_str"] = df.apply(
-        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_only']})", axis=1
+    
+    df["cnt_pct_all_str"] = df.apply(
+        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_all_only']})", axis=1
     )
+    df["cnt_pct_bar_str"] = df.apply(
+        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_bar_only']})", axis=1
+    )
+
+    text_to_show = "cnt_str"
+    if show_pct_all:
+        text_to_show = "cnt_pct_all_str"
+    elif show_pct_bar:
+        text_to_show = "cnt_pct_bar_str"
 
     if sort_values_color:
         colors_unique = (
@@ -418,7 +435,7 @@ def plot_stacked_bars(
         y="value" if orientation == "v" else "index",
         # color=columns,
         color="col",
-        text="cnt_pct_str" if normalize else "cnt_str",
+        text=text_to_show,
         orientation=orientation,
         title=title
         or f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}",
@@ -487,8 +504,7 @@ def plot_stacked_bars(
         height=height,
     )
 
-    return fig
-
+    return
 
 def plot_bars(
     df_in: pd.Series | pd.DataFrame,
@@ -507,7 +523,7 @@ def plot_bars(
     precision: int = 0,
     renderer: Literal["png", "svg", None] = "png",
     png_path: Path | str = None,
-) -> object:
+) -> None:
     """
     A function to plot a bar chart based on a *categorical* column (must be string or bool) and a numerical value.
     Accepts:
@@ -535,8 +551,7 @@ def plot_bars(
     - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is "png".
     - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
-    Returns:
-    - plot object
+    Returns: None
     """
     # * if series, apply value_counts, deselect use_ci
     if isinstance(df_in, pd.Series):
@@ -766,7 +781,7 @@ def plot_bars(
     if png_path is not None:
         _fig.write_image(Path(png_path).as_posix())
 
-    return _fig
+    return
 
 
 def plot_histogram(
@@ -785,7 +800,7 @@ def plot_histogram(
     caption: str = None,
     title: str = None,
     png_path: Path | str = None,
-) -> object:
+) -> None:
     """
     A function to plot a histogram based on *numeric* columns in a DataFrame.
     Accepts:
@@ -808,8 +823,7 @@ def plot_histogram(
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
 
-    Returns:
-        plot object
+    Returns: None
     """
 
     # * convert to df if series
@@ -865,7 +879,7 @@ def plot_histogram(
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
 
-    return fig
+    return
 
 
 def plot_joint(
@@ -877,7 +891,7 @@ def plot_joint(
     caption: str = "",
     title: str = "",
     png_path: Path | str = None,
-) -> object:
+) -> None:
     """
     Generate a seaborn joint plot for *two numeric* columns of a given DataFrame.
 
@@ -891,8 +905,7 @@ def plot_joint(
         - title: The title of the plot.
         - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
-    Returns:
-        plot object
+    Returns: None
     """
 
     if df.shape[1] != 2:
@@ -964,7 +977,7 @@ def plot_joint(
     if png_path is not None:
         fig.savefig(Path(png_path).as_posix())
 
-    return fig
+    return
 
 
 def plot_box(
@@ -983,7 +996,7 @@ def plot_box(
     use_log: bool = False,
     png_path: Path | str = None,
     renderer: Literal["png", "svg", None] = "png",
-) -> object:
+) -> None:
     """
     Plots a horizontal box plot for the given pandas Series.
 
@@ -1004,8 +1017,7 @@ def plot_box(
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
         renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to "png".
 
-    Returns:
-        plot object
+    Returns: None
     """
     ser = to_series(ser)
     if ser is None:
@@ -1131,7 +1143,7 @@ def plot_box(
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
 
-    return fig
+    return
 
 
 def plot_boxes(
@@ -1148,7 +1160,7 @@ def plot_boxes(
     box_width: float = 0.5,
     png_path: Path | str = None,
     renderer: Literal["png", "svg", None] = "png",
-) -> object:
+) -> None:
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
 
@@ -1165,8 +1177,7 @@ def plot_boxes(
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
         renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to "png".
 
-    Returns:
-        plot object
+    Returns: None
     """
 
     if (
@@ -1290,7 +1301,7 @@ def plot_boxes(
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
 
-    return fig
+    return
 
 
 def plot_facet_stacked_bars(
@@ -1314,7 +1325,7 @@ def plot_facet_stacked_bars(
     sort_values_facet: bool = False,
     relative: bool = False,
     show_pct: bool = False,
-) -> go.Figure:
+) -> None:
 
     """
     A function to plot multiple (subplots_per_row) stacked bar charts, facetted by the third column, with the first column as the index and the second column as the colors.
@@ -1341,8 +1352,7 @@ def plot_facet_stacked_bars(
     - relative (bool): Whether to show the bars as relative values (0-1 range). Default is False.
     - show_pct (bool): Whether to show the annotations as percentages. Default is False.
 
-    Returns:
-    - go.Figure: The chart object.
+    Returns: None
     """
     # ENFORCE show_pct RULES ---
     if not relative:
@@ -1501,7 +1511,7 @@ def plot_facet_stacked_bars(
         * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
     )
 
-    return fig
+    return
 
 
 def plot_sankey(
