@@ -67,7 +67,7 @@ def describe_df(
     use_columns: bool = True,
     use_missing: bool = False,
     renderer: Literal["png", "svg", None] = "png",
-    fig_cols: int = 3,
+    fig_cols: int = 5,
     fig_offset: int = None,
     fig_rowheight: int = 300,
     fig_width: int = 400,

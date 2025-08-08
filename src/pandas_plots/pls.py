@@ -233,7 +233,7 @@ def plot_stacked_bars(
     height: int = 500,
     width: int = 2000,
     title: str = None,
-    renderer: Literal["png", "svg", None] = "png",
+    renderer: Literal["png", "svg", "notebook"] = "notebook",
     caption: str = None,
     sort_values: bool = False,
     sort_values_index: bool = False,
@@ -504,7 +504,7 @@ def plot_stacked_bars(
         fig.write_image(Path(png_path).as_posix())
 
     fig.show(
-        renderer=renderer,
+        renderer=renderer or os.getenv("RENDERER"),
         width=width,
         height=height,
     )
@@ -526,7 +526,7 @@ def plot_bars(
     use_ci: bool = False,
     ci_agg: Literal["mean", "median"] = "mean",
     precision: int = 0,
-    renderer: Literal["png", "svg", None] = "png",
+    renderer: Literal["png", "svg", "notebook"] = "notebook",
     png_path: Path | str = None,
 ) -> None:
     """
@@ -785,7 +785,7 @@ def plot_bars(
 
     # * set axis title
     _fig.show(
-        renderer,
+        renderer=renderer or os.getenv("RENDERER"),
         width=width,
         height=height,
     )
@@ -809,7 +809,7 @@ def plot_histogram(
     width: int = 1600,
     text_auto: bool = True,
     barmode: Literal["group", "overlay", "relative"] = "relative",
-    renderer: Literal["png", "svg", None] = "png",
+    renderer: Literal["png", "svg", "notebook"] = "notebook",
     caption: str = None,
     title: str = None,
     png_path: Path | str = None,
@@ -1008,7 +1008,7 @@ def plot_box(
     x_max: float = None,
     use_log: bool = False,
     png_path: Path | str = None,
-    renderer: Literal["png", "svg", None] = "png",
+    renderer: Literal["png", "svg", "notebook"] = "notebook",
 ) -> None:
     """
     Plots a horizontal box plot for the given pandas Series.
@@ -1143,7 +1143,7 @@ def plot_box(
         )
 
     fig.show(
-        renderer=renderer,
+        renderer=renderer or os.getenv("RENDERER"),
         width=width,
         height=height,
     )
@@ -1172,7 +1172,7 @@ def plot_boxes(
     use_log: bool = False,
     box_width: float = 0.5,
     png_path: Path | str = None,
-    renderer: Literal["png", "svg", None] = "png",
+    renderer: Literal["png", "svg", "notebook"] = "notebook",
 ) -> None:
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
@@ -1309,7 +1309,7 @@ def plot_boxes(
         marker=dict(size=5), width=box_width
     )  # Adjust width (default ~0.5)
 
-    fig.show(renderer=renderer, width=width, height=height)
+    fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
     if summary:
         # * sort df by first column
         print_summary(df=df.sort_values(df.columns[0]), precision=precision)
@@ -1331,7 +1331,7 @@ def plot_facet_stacked_bars(
     subplot_size: int = 300,
     color_palette: str = "Plotly",
     caption: str = "",
-    renderer: Optional[Literal["png", "svg"]] = "png",
+    renderer: Optional[Literal["png", "svg", "notebook"]] = "png",
     annotations: bool = False,
     precision: int = 0,
     png_path: Optional[Path] = None,
@@ -1522,7 +1522,7 @@ def plot_facet_stacked_bars(
         fig.write_image(str(png_path))
 
     fig.show(
-        renderer=renderer,
+        renderer=renderer or os.getenv("RENDERER"),
         width=subplot_size * subplots_per_row,
         height=subplot_size
         * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
@@ -1860,8 +1860,7 @@ def plot_sankey(
     )
 
     fig.update_layout(title_text=chart_title, font_size=font_size)
-    fig.show(renderer=renderer, width=width, height=height)
-
+    fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
 
 # * extend objects to enable chaining
 pd.DataFrame.plot_bars = plot_bars

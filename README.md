@@ -86,7 +86,9 @@ tbl.show_num_df(
   - `add_measures_to_pyg_config()` adds measures to a pygwalker config file to avoid frequent manual update
 <br>
 
-> note: theme setting ☀️ 🌔 can be controlled through all functions by setting the environment variable `THEME` to either light or dark
+> theme setting ☀️ 🌔 can be controlled through all functions by setting the environment variable `'THEME'` to either `'light'` or `'dark'`
+
+> renderer can be controlled through all functions by setting the environment variable `'RENDERER'` to `'png'` for printing to markdown or pdf
 
 ## prerequisites
 
