@@ -164,6 +164,5 @@ cython_debug/
 .DS_Store
 .env
 .local
-src/csv.ipynb
 .notes.md
 **/**.duckdb

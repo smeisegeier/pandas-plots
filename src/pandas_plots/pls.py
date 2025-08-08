@@ -1,5 +1,6 @@
 from pathlib import Path
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import os
@@ -62,12 +63,14 @@ def aggregate_data(
         top_indexes = (
             aggregated_df.groupby("index")["value"]
             .sum()
-            .sort_values(ascending=False)[:top_n_index or None]
+            .sort_values(ascending=False)[: top_n_index or None]
             .index
         )
-    
+
     else:
-        top_indexes = aggregated_df["index"].sort_values().unique()[:top_n_index or None]
+        top_indexes = (
+            aggregated_df["index"].sort_values().unique()[: top_n_index or None]
+        )
 
     aggregated_df = aggregated_df[aggregated_df["index"].isin(top_indexes)]
 
@@ -75,18 +78,16 @@ def aggregate_data(
         top_colors = (
             aggregated_df.groupby("col")["value"]
             .sum()
-            .sort_values(ascending=False)[:top_n_color or None]
+            .sort_values(ascending=False)[: top_n_color or None]
             .index
         )
     else:
-        top_colors = aggregated_df["col"].sort_values().unique()[:top_n_color or None]
+        top_colors = aggregated_df["col"].sort_values().unique()[: top_n_color or None]
 
     others_df = df[~df["col"].isin(top_colors)]
     aggregated_df = aggregated_df[aggregated_df["col"].isin(top_colors)]
     if show_other and top_n_color > 0 and not others_df.empty:
-        other_agg = others_df.groupby(["index", "facet"], as_index=False)[
-            "value"
-        ].sum()
+        other_agg = others_df.groupby(["index", "facet"], as_index=False)["value"].sum()
         other_agg["col"] = "<other>"
         other_agg = other_agg[["index", "col", "facet", "value"]]
         aggregated_df = pd.concat([aggregated_df, other_agg], ignore_index=True)
@@ -96,11 +97,13 @@ def aggregate_data(
         top_facets = (
             aggregated_df.groupby("facet")["value"]
             .sum()
-            .sort_values(ascending=False)[:top_n_facet or None]
+            .sort_values(ascending=False)[: top_n_facet or None]
             .index
         )
     else:
-        top_facets = aggregated_df["facet"].sort_values().unique()[:top_n_facet or None]
+        top_facets = (
+            aggregated_df["facet"].sort_values().unique()[: top_n_facet or None]
+        )
 
     aggregated_df = aggregated_df[aggregated_df["facet"].isin(top_facets)]
 
@@ -358,7 +361,7 @@ def plot_stacked_bars(
         show_other=show_other,
         sort_values_index=sort_values_index,
         sort_values_color=sort_values_color,
-        sort_values_facet=False, # just a placeholder
+        sort_values_facet=False,  # just a placeholder
     )
 
     df = aggregated_df.copy()
@@ -377,8 +380,8 @@ def plot_stacked_bars(
     )
 
     if sort_values_color:
-        colors_unique = (df
-            .groupby("col", observed=True)["value"]
+        colors_unique = (
+            df.groupby("col", observed=True)["value"]
             .sum()
             .sort_values(ascending=False)
             .index.tolist()
@@ -387,8 +390,8 @@ def plot_stacked_bars(
         colors_unique = sorted(df["col"].unique().tolist())
 
     if sort_values_index:
-        index_unique = (df
-            .groupby("index", observed=True)["value"]
+        index_unique = (
+            df.groupby("index", observed=True)["value"]
             .sum()
             .sort_values(ascending=False)
             .index.tolist()
@@ -397,7 +400,6 @@ def plot_stacked_bars(
         index_unique = sorted(df["index"].unique().tolist())
 
     color_map = assign_column_colors(colors_unique, color_palette, null_label)
-    
 
     cat_orders = {
         "index": index_unique,
@@ -405,8 +407,9 @@ def plot_stacked_bars(
     }
 
     # Ensure bl is categorical with the correct order
-    df["index"] = pd.Categorical(df["index"], categories=cat_orders["index"], ordered=True)
-
+    df["index"] = pd.Categorical(
+        df["index"], categories=cat_orders["index"], ordered=True
+    )
 
     # * plot
     fig = px.bar(
@@ -420,12 +423,9 @@ def plot_stacked_bars(
         title=title
         or f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}",
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
-        width=width,
-        height=height,
         color_discrete_map=color_map,  # Use assigned colors
-        category_orders= cat_orders,
+        category_orders=cat_orders,
     )
-
 
     # print(cat_orders)
     # print(color_map)
@@ -457,9 +457,8 @@ def plot_stacked_bars(
             },
         },
     )
-    fig.update_layout(legend_traceorder="normal") 
+    fig.update_layout(legend_traceorder="normal")
     fig.update_layout(legend_title_text=col_color)
-
 
     # * set dtick
     if orientation == "h":
@@ -482,7 +481,11 @@ def plot_stacked_bars(
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
 
-    fig.show(renderer=renderer)
+    fig.show(
+        renderer=renderer,
+        width=width,
+        height=height,
+    )
 
     return fig
 
@@ -563,8 +566,9 @@ def plot_bars(
 
     # * ensure df is grouped to prevent false aggregations, reset index to return df
     if use_ci:
-# * grouping is smoother on df than on series
-        df = (df_in
+        # * grouping is smoother on df than on series
+        df = (
+            df_in
             # ? dont dropna() here, this biases the input data
             .groupby(
                 col_index,
@@ -573,7 +577,12 @@ def plot_bars(
             .agg(
                 mean=(col_name, ci_agg),
                 # * retrieve margin from custom func
-                margin=(col_name, lambda x: mean_confidence_interval(x, use_median = (ci_agg == "median"))[1]),
+                margin=(
+                    col_name,
+                    lambda x: mean_confidence_interval(
+                        x, use_median=(ci_agg == "median")
+                    )[1],
+                ),
             )
             .reset_index()
         )
@@ -592,7 +601,6 @@ def plot_bars(
         df = df.dropna()
     else:
         df = df.fillna("<NA>")
-
 
     # * get n, col1 now is always numeric
     n = df[df.columns[1]].sum()
@@ -657,7 +665,9 @@ def plot_bars(
 
     # * title str n
     _title_str_n = (
-        f", n={n_len:_} ({n:_})" if not use_ci else f", n={n_len:_})<br><sub>ci(95) on {ci_agg}s<sub>"
+        f", n={n_len:_} ({n:_})"
+        if not use_ci
+        else f", n={n_len:_})<br><sub>ci(95) on {ci_agg}s<sub>"
     )
 
     # * title str na
@@ -680,8 +690,6 @@ def plot_bars(
         or f"{caption}{_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}{_title_str_n}",
         # * retrieve theme from env (intro.set_theme) or default
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
-        width=width,
-        height=height,
         error_y=None if not use_ci else df["margin"],
         color_discrete_sequence=px.colors.qualitative.D3,
         color=col_index,
@@ -734,14 +742,12 @@ def plot_bars(
             _fig.update_layout(yaxis={"categoryorder": "category descending"})
 
     # * looks better on single bars
-    _fig.update_traces(
-        error_y=dict(thickness=5)
-    )
+    _fig.update_traces(error_y=dict(thickness=5))
     if use_ci:
         _fig.update_traces(
             textposition="inside",  # Put labels inside bars
             insidetextanchor="start",  # Align labels at the bottom
-            textfont=dict(size=14, color="white")  # Adjust text color for visibility
+            textfont=dict(size=14, color="white"),  # Adjust text color for visibility
         )
     else:
         _fig.update_traces(
@@ -750,8 +756,11 @@ def plot_bars(
         )
 
     # * set axis title
-
-    _fig.show(renderer)
+    _fig.show(
+        renderer,
+        width=width,
+        height=height,
+    )
 
     # * save to png if path is provided
     if png_path is not None:
@@ -828,8 +837,6 @@ def plot_histogram(
         marginal="box",
         barmode=barmode,
         text_auto=text_auto,
-        height=height,
-        width=width,
         orientation=orientation,
         title=title or f"{_caption}[{', '.join(df.columns)}], n={df.shape[0]:_}",
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
@@ -848,7 +855,11 @@ def plot_histogram(
         showlegend=False if df.shape[1] == 1 else True,
     )
 
-    fig.show(renderer)
+    fig.show(
+        renderer,
+        width=width,
+        height=height,
+    )
 
     # * save to png if path is provided
     if png_path is not None:
@@ -971,6 +982,7 @@ def plot_box(
     x_max: float = None,
     use_log: bool = False,
     png_path: Path | str = None,
+    renderer: Literal["png", "svg", None] = "png",
 ) -> object:
     """
     Plots a horizontal box plot for the given pandas Series.
@@ -990,6 +1002,7 @@ def plot_box(
         x_max: The maximum value for the x-axis scale (max and min must be set).
         use_log: Use logarithmic scale for the axis.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to "png".
 
     Returns:
         plot object
@@ -1024,11 +1037,9 @@ def plot_box(
         "data_frame": ser,
         "orientation": "h",
         "template": "plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
-        "height": height,
-        "width": width,
         "points": points,
         # 'box':True,
-        "log_x": use_log,   # * logarithmic scale, axis is always x
+        "log_x": use_log,  # * logarithmic scale, axis is always x
         # "notched": True,
         "title": f"{caption}[{ser.name}]{log_str}, n = {n_:_}" if not title else title,
     }
@@ -1106,7 +1117,11 @@ def plot_box(
             y=-0,
         )
 
-    fig.show("png")
+    fig.show(
+        renderer=renderer,
+        width=width,
+        height=height,
+    )
 
     if summary:
         # * if only series is provided, col name is None
@@ -1117,8 +1132,6 @@ def plot_box(
         fig.write_image(Path(png_path).as_posix())
 
     return fig
-
-
 
 
 def plot_boxes(
@@ -1134,6 +1147,7 @@ def plot_boxes(
     use_log: bool = False,
     box_width: float = 0.5,
     png_path: Path | str = None,
+    renderer: Literal["png", "svg", None] = "png",
 ) -> object:
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
@@ -1149,6 +1163,7 @@ def plot_boxes(
         summary (bool): Whether to add a summary to the plot.
         use_log (bool): Whether to use logarithmic scale for the plot (cannot show negative values).
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to "png".
 
     Returns:
         plot object
@@ -1184,8 +1199,6 @@ def plot_boxes(
         color=df.iloc[:, 0],
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         orientation="v",
-        height=height,
-        width=width,
         points=points,
         log_y=use_log,
         # color_discrete_sequence=px.colors.qualitative.Plotly,
@@ -1264,9 +1277,11 @@ def plot_boxes(
     fig.update_yaxes(title_text=df.columns[1])
     fig.update_layout(boxmode="group")  # Ensures boxes are not too compressed
     fig.update_layout(showlegend=False)
-    fig.update_traces(marker=dict(size=5), width=box_width)  # Adjust width (default ~0.5)
+    fig.update_traces(
+        marker=dict(size=5), width=box_width
+    )  # Adjust width (default ~0.5)
 
-    fig.show("png")
+    fig.show(renderer=renderer, width=width, height=height)
     if summary:
         # * sort df by first column
         print_summary(df=df.sort_values(df.columns[0]), precision=precision)
@@ -1301,18 +1316,50 @@ def plot_facet_stacked_bars(
     show_pct: bool = False,
 ) -> go.Figure:
 
-    # --- ENFORCE show_pct RULES ---
+    """
+    A function to plot multiple (subplots_per_row) stacked bar charts, facetted by the third column, with the first column as the index and the second column as the colors.
+
+    Parameters:
+    - df (pd.DataFrame): Input DataFrame with 3 or 4 columns.
+    - subplots_per_row (int): The number of subplots to display per row.
+    - top_n_index (int): The number of top indexes to include in the chart. Default is 0, which includes all indexes.
+    - top_n_color (int): The number of top colors to include in the chart. Default is 0, which includes all colors.
+    - top_n_facet (int): The number of top facets to include in the chart. Default is 0, which includes all facets.
+    - null_label (str): The label to use for null values. Default is "<NA>".
+    - subplot_size (int): The size of each subplot in pixels. Default is 300.
+    - color_palette (str): The name of the color palette to use. Default is "Plotly".
+    - caption (str): An optional string indicating the caption for the chart.
+    - renderer (str): The output format. Default is "png".
+    - annotations (bool): Whether to include annotations on the chart. Default is False.
+    - precision (int): The number of decimal places to round the values to. Default is 0.
+    - png_path (str): The path to save the chart to, if provided.
+    - show_other (bool): Whether to include "<other>" for columns not in top_n_color. Default is False.
+    - sort_values (bool): Whether to sort the values in the chart. Default is True.
+    - sort_values_index (bool): Whether to sort the index column. Default is False.
+    - sort_values_color (bool): Whether to sort the color column. Default is False.
+    - sort_values_facet (bool): Whether to sort the facet column. Default is False.
+    - relative (bool): Whether to show the bars as relative values (0-1 range). Default is False.
+    - show_pct (bool): Whether to show the annotations as percentages. Default is False.
+
+    Returns:
+    - go.Figure: The chart object.
+    """
+    # ENFORCE show_pct RULES ---
     if not relative:
         # If bars are absolute, annotations MUST be absolute
         if show_pct:
-            print("Warning: 'show_pct' cannot be True when 'relative' is False. Setting 'show_pct' to False.")
+            print(
+                "Warning: 'show_pct' cannot be True when 'relative' is False. Setting 'show_pct' to False."
+            )
             show_pct = False
-    # ------------------------------
+    # 
 
     try:
         precision = int(precision)
     except (ValueError, TypeError):
-        print(f"Warning: 'precision' received as {precision} (type: {type(precision)}). Defaulting to 0.")
+        print(
+            f"Warning: 'precision' received as {precision} (type: {type(precision)}). Defaulting to 0."
+        )
         precision = 0
 
     df_copy = df.copy()
@@ -1331,7 +1378,7 @@ def plot_facet_stacked_bars(
     n = df_copy["value"].sum()
     original_rows = len(df_copy)
 
-    aggregated_df = aggregate_data( # Assumes aggregate_data is accessible
+    aggregated_df = aggregate_data(  # Assumes aggregate_data is accessible
         df_copy,
         top_n_index,
         top_n_color,
@@ -1343,46 +1390,60 @@ def plot_facet_stacked_bars(
         sort_values_facet=sort_values_facet,
     )
 
-    aggregated_df['index'] = aggregated_df['index'].astype(str)
-    aggregated_df['col'] = aggregated_df['col'].astype(str)
-    aggregated_df['facet'] = aggregated_df['facet'].astype(str)
+    aggregated_df["index"] = aggregated_df["index"].astype(str)
+    aggregated_df["col"] = aggregated_df["col"].astype(str)
+    aggregated_df["facet"] = aggregated_df["facet"].astype(str)
 
     # --- Store original 'value' for annotations before potential scaling ---
-    aggregated_df['annotation_value'] = aggregated_df['value'].copy()
+    aggregated_df["annotation_value"] = aggregated_df["value"].copy()
     # ----------------------------------------------------------------------
 
     if relative:
         # This transforms the bar heights (value column) to percentages (0-1 range)
-        aggregated_df["value"] = aggregated_df.groupby(["facet", "index"])["value"].transform(lambda x: x / x.sum())
+        aggregated_df["value"] = aggregated_df.groupby(["facet", "index"])[
+            "value"
+        ].transform(lambda x: x / x.sum())
 
     category_orders = {}
 
     if sort_values_index:
-        sum_by_index = aggregated_df.groupby('index')['value'].sum().sort_values(ascending=False)
+        sum_by_index = (
+            aggregated_df.groupby("index")["value"].sum().sort_values(ascending=False)
+        )
         category_orders["index"] = sum_by_index.index.tolist()
 
     if sort_values_color:
-        sum_by_col = aggregated_df.groupby('col')['value'].sum().sort_values(ascending=False)
+        sum_by_col = (
+            aggregated_df.groupby("col")["value"].sum().sort_values(ascending=False)
+        )
         category_orders["col"] = sum_by_col.index.tolist()
 
     if sort_values_facet:
-        sum_by_facet = aggregated_df.groupby('facet')['value'].sum().sort_values(ascending=False)
+        sum_by_facet = (
+            aggregated_df.groupby("facet")["value"].sum().sort_values(ascending=False)
+        )
         category_orders["facet"] = sum_by_facet.index.tolist()
 
     columns_for_color = sorted(aggregated_df["col"].unique().tolist())
-    column_colors_map = assign_column_colors(columns_for_color, color_palette, null_label) # Assumes assign_column_colors is accessible
+    column_colors_map = assign_column_colors(
+        columns_for_color, color_palette, null_label
+    )  # Assumes assign_column_colors is accessible
 
-    # --- Prepare the text series for annotations with 'show_pct' control ---
+    #  Prepare the text series for annotations with 'show_pct' control
     if annotations:
         if show_pct:
             # When show_pct is True, use the scaled 'value' column (0-1) and format as percentage
-            formatted_text_series = aggregated_df["value"].apply(lambda x: f"{x:.{precision}%}".replace('.', ','))
+            formatted_text_series = aggregated_df["value"].apply(
+                lambda x: f"{x:.{precision}%}".replace(".", ",")
+            )
         else:
             # When show_pct is False, use the 'annotation_value' (original absolute) and format as absolute
-            formatted_text_series = aggregated_df["annotation_value"].apply(lambda x: f"{x:_.{precision}f}".replace('.', ','))
+            formatted_text_series = aggregated_df["annotation_value"].apply(
+                lambda x: f"{x:_.{precision}f}".replace(".", ",")
+            )
     else:
         formatted_text_series = None
-    # -----------------------------------------------------------------------
+    # - - - -
 
     fig = px.bar(
         aggregated_df,
@@ -1396,7 +1457,7 @@ def plot_facet_stacked_bars(
         category_orders=category_orders,
         text=formatted_text_series,
         text_auto=False,
-        height=subplot_size * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
+        # height=subplot_size * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
         title=f"{caption} {original_column_names[0]}, {original_column_names[1]}, {original_column_names[2]}",
     )
 
@@ -1410,19 +1471,19 @@ def plot_facet_stacked_bars(
     template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
 
     layout_updates = {
-        "title_text":   f"{caption} "
-                        f"{'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] "
-                        f"{'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] "
-                        f"{'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}] "
-                        f", n = {original_rows:_} ({n:_})",
+        "title_text": f"{caption} "
+        f"{'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] "
+        f"{'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] "
+        f"{'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}] "
+        f", n = {original_rows:_} ({n:_})",
         "showlegend": True,
         "template": template,
-        "width": subplot_size * subplots_per_row,
+        # "width": subplot_size * subplots_per_row,
     }
 
     if relative:
-        layout_updates['yaxis_range'] = [0, 1.1]
-        layout_updates['yaxis_tickformat'] = ".0%"
+        layout_updates["yaxis_range"] = [0, 1.1]
+        layout_updates["yaxis_tickformat"] = ".0%"
 
     fig.update_layout(**layout_updates)
 
@@ -1433,12 +1494,27 @@ def plot_facet_stacked_bars(
         png_path = Path(png_path)
         fig.write_image(str(png_path))
 
-    fig.show(renderer=renderer)
+    fig.show(
+        renderer=renderer,
+        width=subplot_size * subplots_per_row,
+        height=subplot_size
+        * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
+    )
 
     return fig
 
 
-def plot_sankey(df=None, max_events_per_id=None, height=None, width=None, exclude_overlap_id=False, exclude_overlap_event=False, renderer=None, show_start_node=True):
+def plot_sankey(
+    df=None,
+    max_events_per_id=None,
+    height=None,
+    width=None,
+    exclude_overlap_id=False,
+    exclude_overlap_event=False,
+    renderer=None,
+    show_start_node=True,
+    font_size=10,
+):
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
     1. ID (string or integer)
@@ -1450,71 +1526,117 @@ def plot_sankey(df=None, max_events_per_id=None, height=None, width=None, exclud
 
     Args:
         df (pd.DataFrame, optional): A Pandas DataFrame containing the event data.
-                           Expected column order: ID, Date, Event.
+                        Expected column order: ID, Date, Event.
         max_events_per_id (int, optional): The maximum number of events to display for each ID.
-                                           If None, all events for each ID will be used.
+                                        If None, all events for each ID will be used.
         height (int, optional): The height of the plot in pixels.
         width (int, optional): The width of the plot in pixels.
         exclude_overlap_id (bool): If True, excludes any IDs that have multiple events on the same date.
-                                   This takes precedence over `exclude_overlap_event`.
+                                This takes precedence over `exclude_overlap_event`.
         exclude_overlap_event (bool): If True, only excludes the specific events that fall on the same date,
-                                      retaining other non-overlapping events for that ID.
+                                    retaining other non-overlapping events for that ID.
         renderer (str, optional): The renderer to use for displaying the plot. Options include
-                                  'browser', 'notebook', 'json', 'png', 'svg', 'jpeg', 'webp', or 'pdf'.
-                                  If None, plotly's default renderer is used.
+                                'browser', 'notebook', 'json', 'png', 'svg', 'jpeg', 'webp', or 'pdf'.
+                                If None, plotly's default renderer is used.
         show_start_node (bool): If True, adds a visual 'start' node and links all
                                 first events to it. This is useful for visualizing
                                 IDs with only one event.
+        font_size (int): The font size of the labels in the plot.
     """
     # --- Example Usage with Enlarged Pandas DataFrame if no DataFrame is provided ---
     if df is None:
-        data_demo = { # Renamed to data_demo for clarity
-            'tumor-id': [
-                '1', '1', '1', '1', '1',
-                '2', '2', '2', '2',
-                '3', '3', '3', '3',
-                '4', '4', '4',
-                '5', '5',
-                '6', '6',
-                '7', '7',
-                '8',
-                '9',
-                '10',
-                '11',
-                '12'
+        data_demo = {  # Renamed to data_demo for clarity
+            "tumor-id": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "2",
+                "2",
+                "2",
+                "2",
+                "3",
+                "3",
+                "3",
+                "3",
+                "4",
+                "4",
+                "4",
+                "5",
+                "5",
+                "6",
+                "6",
+                "7",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
             ],
-            'diagnosis date': [
-                '2020-01-01', '2021-02-01', '2022-03-01', '2023-04-01', '2024-05-01', # Tumor 1
-                '2010-01-01', '2011-02-01', '2012-03-01', '2013-04-01',               # Tumor 2
-                '2015-01-01', '2016-02-01', '2017-03-01', '2018-04-01',               # Tumor 3
-                '2005-01-01', '2006-02-01', '2007-03-01',                             # Tumor 4
-                '2019-01-01', '2020-02-01',                                           # Tumor 5
-                '2021-01-01', '2022-02-01',                                           # Tumor 6
-                '2014-01-01', '2015-02-01',                                           # Tumor 7
-                '2025-01-01',                                                         # Tumor 8 (single event)
-                '2025-02-01',                                                         # Tumor 9 (single event)
-                '2025-03-01',                                                         # Tumor 10 (single event)
-                '2025-04-01',                                                         # Tumor 11 (single event)
-                '2025-05-01'                                                          # Tumor 12 (single event)
+            "diagnosis date": [
+                "2020-01-01",
+                "2021-02-01",
+                "2022-03-01",
+                "2023-04-01",
+                "2024-05-01",  # Tumor 1
+                "2010-01-01",
+                "2011-02-01",
+                "2012-03-01",
+                "2013-04-01",  # Tumor 2
+                "2015-01-01",
+                "2016-02-01",
+                "2017-03-01",
+                "2018-04-01",  # Tumor 3
+                "2005-01-01",
+                "2006-02-01",
+                "2007-03-01",  # Tumor 4
+                "2019-01-01",
+                "2020-02-01",  # Tumor 5
+                "2021-01-01",
+                "2022-02-01",  # Tumor 6
+                "2014-01-01",
+                "2015-02-01",  # Tumor 7
+                "2025-01-01",  # Tumor 8 (single event)
+                "2025-02-01",  # Tumor 9 (single event)
+                "2025-03-01",  # Tumor 10 (single event)
+                "2025-04-01",  # Tumor 11 (single event)
+                "2025-05-01",  # Tumor 12 (single event)
             ],
-            'treatment': [
-                'op', 'syst', 'op', 'rad', 'op', # Tumor 1
-                'syst', 'st', 'op', 'rad',       # Tumor 2
-                'op', 'rad', 'syst', 'op',       # Tumor 3
-                'st', 'syst', 'op',              # Tumor 4
-                'op', 'rad',                     # Tumor 5
-                'syst', 'op',                    # Tumor 6
-                'st', 'rad',                     # Tumor 7
-                'op',                            # Tumor 8
-                'op',                            # Tumor 9
-                'syst',                          # Tumor 10
-                'rad',                           # Tumor 11
-                'op'                             # Tumor 12
-            ]
+            "treatment": [
+                "op",
+                "syst",
+                "op",
+                "rad",
+                "op",  # Tumor 1
+                "syst",
+                "st",
+                "op",
+                "rad",  # Tumor 2
+                "op",
+                "rad",
+                "syst",
+                "op",  # Tumor 3
+                "st",
+                "syst",
+                "op",  # Tumor 4
+                "op",
+                "rad",  # Tumor 5
+                "syst",
+                "op",  # Tumor 6
+                "st",
+                "rad",  # Tumor 7
+                "op",  # Tumor 8
+                "op",  # Tumor 9
+                "syst",  # Tumor 10
+                "rad",  # Tumor 11
+                "op",  # Tumor 12
+            ],
         }
         df = pd.DataFrame(data_demo)
         print("--- Using demo data (data_demo) ---")
-        print(df.head().to_string()) # Print first 5 rows of the DataFrame prettily
+        print(df.head().to_string())  # Print first 5 rows of the DataFrame prettily
         print("-----------------------------------")
 
     # --- Simplified Column Recognition based on index ---
@@ -1525,139 +1647,193 @@ def plot_sankey(df=None, max_events_per_id=None, height=None, width=None, exclud
     df_processed = df.copy()
 
     # --- Aggregate the data to remove duplicate rows before processing ---
-    df_processed = df_processed.drop_duplicates(subset=[id_col_name, date_col_name, event_col_name])
+    df_processed = df_processed.drop_duplicates(
+        subset=[id_col_name, date_col_name, event_col_name]
+    )
 
     try:
         df_processed[date_col_name] = pd.to_datetime(df_processed[date_col_name])
     except (ValueError, TypeError):
-        print(f"Error: Could not convert column '{date_col_name}' to a valid date format.")
+        print(
+            f"Error: Could not convert column '{date_col_name}' to a valid date format."
+        )
         return None
 
     # --- Handle overlap exclusion based on user selection ---
     overlap_title_part = ""
     if exclude_overlap_id:
-        overlapping_ids = df_processed.groupby([id_col_name, date_col_name]).size().loc[lambda x: x > 1].index.get_level_values(id_col_name).unique()
-        df_processed = df_processed[~df_processed[id_col_name].isin(overlapping_ids)].copy()
+        overlapping_ids = (
+            df_processed.groupby([id_col_name, date_col_name])
+            .size()
+            .loc[lambda x: x > 1]
+            .index.get_level_values(id_col_name)
+            .unique()
+        )
+        df_processed = df_processed[
+            ~df_processed[id_col_name].isin(overlapping_ids)
+        ].copy()
         overlap_title_part = ", overlap ids excluded"
     elif exclude_overlap_event:
-        overlapping_event_set = set(df_processed.groupby([id_col_name, date_col_name]).size().loc[lambda x: x > 1].index)
-        df_processed = df_processed[~df_processed.set_index([id_col_name, date_col_name]).index.isin(overlapping_event_set)].copy()
+        overlapping_event_set = set(
+            df_processed.groupby([id_col_name, date_col_name])
+            .size()
+            .loc[lambda x: x > 1]
+            .index
+        )
+        df_processed = df_processed[
+            ~df_processed.set_index([id_col_name, date_col_name]).index.isin(
+                overlapping_event_set
+            )
+        ].copy()
         overlap_title_part = ", overlap events excluded"
 
     df_sorted = df_processed.sort_values(by=[id_col_name, date_col_name])
-    
+
     # --- Performance Optimization: Use vectorized operations instead of loops ---
-    df_sorted['event_order'] = df_sorted.groupby(id_col_name).cumcount() + 1
-    
+    df_sorted["event_order"] = df_sorted.groupby(id_col_name).cumcount() + 1
+
     if max_events_per_id is not None:
-        df_sorted = df_sorted[df_sorted['event_order'] <= max_events_per_id]
-        
-    df_sorted['ordered_event_label'] = '[' + df_sorted['event_order'].astype(str) + '] ' + df_sorted[event_col_name]
-    
+        df_sorted = df_sorted[df_sorted["event_order"] <= max_events_per_id]
+
+    df_sorted["ordered_event_label"] = (
+        "[" + df_sorted["event_order"].astype(str) + "] " + df_sorted[event_col_name]
+    )
+
     if df_sorted.empty:
         print("No valid data to plot after filtering.")
         return None
 
     # Use a vectorized shift operation to create source and target columns
-    df_sorted['source_label'] = df_sorted.groupby(id_col_name)['ordered_event_label'].shift(1)
-    df_with_links = df_sorted.dropna(subset=['source_label']).copy()
+    df_sorted["source_label"] = df_sorted.groupby(id_col_name)[
+        "ordered_event_label"
+    ].shift(1)
+    df_with_links = df_sorted.dropna(subset=["source_label"]).copy()
 
     # Create the start node and links if enabled
     if show_start_node:
         first_events = df_sorted.groupby(id_col_name).first().reset_index()
-        first_events['source_label'] = "[0] start"
-        df_with_links = pd.concat([first_events[['source_label', 'ordered_event_label']], df_with_links[['source_label', 'ordered_event_label']]], ignore_index=True)
-        
-    link_counts = df_with_links.groupby(['source_label', 'ordered_event_label']).size().reset_index(name='value')
+        first_events["source_label"] = "[0] start"
+        df_with_links = pd.concat(
+            [
+                first_events[["source_label", "ordered_event_label"]],
+                df_with_links[["source_label", "ordered_event_label"]],
+            ],
+            ignore_index=True,
+        )
+
+    link_counts = (
+        df_with_links.groupby(["source_label", "ordered_event_label"])
+        .size()
+        .reset_index(name="value")
+    )
 
     # Get all unique nodes for the labels and sorting
-    all_labels = pd.concat([link_counts['source_label'], link_counts['ordered_event_label']]).unique()
-    unique_labels_df = pd.DataFrame(all_labels, columns=['label'])
-    unique_labels_df['event_order_num'] = unique_labels_df['label'].str.extract(r'\[(\d+)\]').astype(float).fillna(0)
-    unique_labels_df['event_name'] = unique_labels_df['label'].str.extract(r'\] (.*)').fillna('start')
-    unique_labels_df_sorted = unique_labels_df.sort_values(by=['event_order_num', 'event_name'])
-    unique_unformatted_labels_sorted = unique_labels_df_sorted['label'].tolist()
+    all_labels = pd.concat(
+        [link_counts["source_label"], link_counts["ordered_event_label"]]
+    ).unique()
+    unique_labels_df = pd.DataFrame(all_labels, columns=["label"])
+    unique_labels_df["event_order_num"] = (
+        unique_labels_df["label"].str.extract(r"\[(\d+)\]").astype(float).fillna(0)
+    )
+    unique_labels_df["event_name"] = (
+        unique_labels_df["label"].str.extract(r"\] (.*)").fillna("start")
+    )
+    unique_labels_df_sorted = unique_labels_df.sort_values(
+        by=["event_order_num", "event_name"]
+    )
+    unique_unformatted_labels_sorted = unique_labels_df_sorted["label"].tolist()
 
-    label_to_index = {label: i for i, label in enumerate(unique_unformatted_labels_sorted)}
+    label_to_index = {
+        label: i for i, label in enumerate(unique_unformatted_labels_sorted)
+    }
 
     # Calculate total unique IDs for percentage calculation
     total_unique_ids = df_processed[id_col_name].nunique()
 
     display_labels = []
-    node_counts = df_sorted['ordered_event_label'].value_counts()
+    node_counts = df_sorted["ordered_event_label"].value_counts()
     for label in unique_unformatted_labels_sorted:
         if label == "[0] start":
             count = total_unique_ids
         else:
             count = node_counts.get(label, 0)
-        
+
         percentage = (count / total_unique_ids) * 100
-        formatted_count = f"{count:,}".replace(',', '_')
+        formatted_count = f"{count:,}".replace(",", "_")
         formatted_percentage = f"({int(round(percentage, 0))}%)"
 
         display_labels.append(f"{label} {formatted_count} {formatted_percentage}")
 
     # Map sources and targets to indices
-    sources = link_counts['source_label'].map(label_to_index).tolist()
-    targets = link_counts['ordered_event_label'].map(label_to_index).tolist()
-    values = link_counts['value'].tolist()
+    sources = link_counts["source_label"].map(label_to_index).tolist()
+    targets = link_counts["ordered_event_label"].map(label_to_index).tolist()
+    values = link_counts["value"].tolist()
 
     # Define a color palette for links
     color_palette = [
-        "rgba(255, 99, 71, 0.6)", "rgba(60, 179, 113, 0.6)", "rgba(65, 105, 225, 0.6)",
-        "rgba(255, 215, 0, 0.6)", "rgba(147, 112, 219, 0.6)", "rgba(0, 206, 209, 0.6)",
-        "rgba(255, 160, 122, 0.6)", "rgba(124, 252, 0, 0.6)", "rgba(30, 144, 255, 0.6)",
-        "rgba(218, 165, 32, 0.6)"
+        "rgba(255, 99, 71, 0.6)",
+        "rgba(60, 179, 113, 0.6)",
+        "rgba(65, 105, 225, 0.6)",
+        "rgba(255, 215, 0, 0.6)",
+        "rgba(147, 112, 219, 0.6)",
+        "rgba(0, 206, 209, 0.6)",
+        "rgba(255, 160, 122, 0.6)",
+        "rgba(124, 252, 0, 0.6)",
+        "rgba(30, 144, 255, 0.6)",
+        "rgba(218, 165, 32, 0.6)",
     ]
     start_link_color = "rgba(128, 128, 128, 0.6)"
-    
+
     link_colors = []
     link_type_to_color = {}
     color_index = 0
     for i, row in link_counts.iterrows():
-        source_l = row['source_label']
-        target_l = row['ordered_event_label']
+        source_l = row["source_label"]
+        target_l = row["ordered_event_label"]
         if source_l == "[0] start":
             link_colors.append(start_link_color)
         else:
-            source_event_name = re.search(r'\] (.*)', source_l).group(1)
-            target_event_name = re.search(r'\] (.*)', target_l).group(1)
+            source_event_name = re.search(r"\] (.*)", source_l).group(1)
+            target_event_name = re.search(r"\] (.*)", target_l).group(1)
             link_type = (source_event_name, target_event_name)
 
             if link_type not in link_type_to_color:
-                link_type_to_color[link_type] = color_palette[color_index % len(color_palette)]
+                link_type_to_color[link_type] = color_palette[
+                    color_index % len(color_palette)
+                ]
                 color_index += 1
             link_colors.append(link_type_to_color[link_type])
 
-    formatted_total_ids = f"{total_unique_ids:,}".replace(',', '_')
+    formatted_total_ids = f"{total_unique_ids:,}".replace(",", "_")
     total_rows = len(df_processed)
-    formatted_total_rows = f"{total_rows:,}".replace(',', '_')
-    
+    formatted_total_rows = f"{total_rows:,}".replace(",", "_")
+
     chart_title = f"[{id_col_name}] over [{event_col_name}]"
     if max_events_per_id is not None:
         chart_title += f", top {max_events_per_id} events"
     chart_title += overlap_title_part
     chart_title += f", n = {formatted_total_ids} ({formatted_total_rows})"
 
-    fig = go.Figure(data=[go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=display_labels,
-            color="blue",
-            align="left"
-        ),
-        link=dict(
-            source=sources,
-            target=targets,
-            value=values,
-            color=link_colors
-        )
-    )])
+    fig = go.Figure(
+        data=[
+            go.Sankey(
+                node=dict(
+                    pad=15,
+                    thickness=20,
+                    line=dict(color="black", width=0.5),
+                    label=display_labels,
+                    color="blue",
+                    align="left",
+                ),
+                link=dict(
+                    source=sources, target=targets, value=values, color=link_colors
+                ),
+            )
+        ]
+    )
 
-    fig.update_layout(title_text=chart_title, font_size=10, height=height, width=width)
-    fig.show(renderer=renderer)
+    fig.update_layout(title_text=chart_title, font_size=font_size)
+    fig.show(renderer=renderer, width=width, height=height)
 
 
 # * extend objects to enable chaining

@@ -70,8 +70,9 @@ def describe_df(
     fig_cols: int = 3,
     fig_offset: int = None,
     fig_rowheight: int = 300,
+    fig_width: int = 400,
     sort_mode: Literal["value", "index"] = "value",
-    top_n_uniques: int = 30,
+    top_n_uniques: int = 5,
     top_n_chars_in_index: int = 0,
     top_n_chars_in_columns: int = 0,
 ):
@@ -88,6 +89,7 @@ def describe_df(
     fig_cols (int): number of columns in plot
     fig_offset (int): offset for plots as iloc Argument. None = no offset, -1 = omit last plot
     fig_rowheight (int): row height for plot (default 300)
+    fig_width (int): width for plot (default 400)
     sort_mode (Literal["value", "index"]): sort by value or index
     top_n_uniques (int): number of uniques to display
     top_n_chars_in_index (int): number of characters to display on plot axis
@@ -203,8 +205,8 @@ def describe_df(
             subplot_titles=cols,
         )
         # * layout settings
-        fig.layout.height = fig_rowheight * fig_rows
-        fig.layout.width = 400 * fig_cols
+        # fig.layout.height = fig_rowheight * fig_rows
+        # fig.layout.width = 400 * fig_cols
 
         # * construct subplots
         for i, col in enumerate(cols):
@@ -246,7 +248,7 @@ def describe_df(
         fig.update_layout(
             template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
         )
-        fig.show(renderer)
+        fig.show(renderer, width=fig_width * fig_cols, height=fig_rowheight * fig_rows)
     
     if use_missing:
         import missingno as msno
