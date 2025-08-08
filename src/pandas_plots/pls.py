@@ -375,19 +375,24 @@ def plot_stacked_bars(
     caption = _set_caption(caption)
 
     # * after grouping add cols for pct and formatting
-    df["cnt_pct_all_only"] = df["value"].apply(lambda x: f"{(x / n) * 100:.{precision}f}%")
-    df["cnt_pct_bar_only"] = (df["value"] / bar_totals * 100).apply(lambda x: f"{x:.{precision}f}%")
+    df["cnt_pct_all_only"] = (df["value"] / n * 100).apply(lambda x: f"{(x):.{precision}f}%")
+    df["cnt_pct_bar_only"] = (df["value"] / bar_totals * 100).apply(lambda x: f"{(x):.{precision}f}%")
 
     # * format output
     df["cnt_str"] = df["value"].apply(lambda x: f"{x:_.{precision}f}")
 
     divider2 = "<br>" if orientation == "v" else " "
     
+    # Modify this section
     df["cnt_pct_all_str"] = df.apply(
-        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_all_only']})", axis=1
+        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_all_only']})"
+        if (row["value"] / n * 100) >= 5 else row["cnt_str"],
+        axis=1
     )
     df["cnt_pct_bar_str"] = df.apply(
-        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_bar_only']})", axis=1
+        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_bar_only']})"
+        if (row["value"] / bar_totals.loc[row.name] * 100) >= 5 else row["cnt_str"],
+        axis=1
     )
 
     text_to_show = "cnt_str"
