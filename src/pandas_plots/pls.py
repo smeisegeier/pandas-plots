@@ -233,7 +233,7 @@ def plot_stacked_bars(
     height: int = 500,
     width: int = 2000,
     title: str = None,
-    renderer: Literal["png", "svg", "notebook"] = "notebook",
+    renderer: Literal["png", "svg", None] = None,
     caption: str = None,
     sort_values: bool = False,
     sort_values_index: bool = False,
@@ -526,7 +526,7 @@ def plot_bars(
     use_ci: bool = False,
     ci_agg: Literal["mean", "median"] = "mean",
     precision: int = 0,
-    renderer: Literal["png", "svg", "notebook"] = "notebook",
+    renderer: Literal["png", "svg", None] = None,
     png_path: Path | str = None,
 ) -> None:
     """
@@ -553,7 +553,7 @@ def plot_bars(
         - enforces nomalize=False
         - enforces dropna=True
     - precision: An integer indicating the number of decimal places to round the values to. Default is 0.
-    - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is "png".
+    - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is None.
     - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
 
     Returns: None
@@ -809,7 +809,7 @@ def plot_histogram(
     width: int = 1600,
     text_auto: bool = True,
     barmode: Literal["group", "overlay", "relative"] = "relative",
-    renderer: Literal["png", "svg", "notebook"] = "notebook",
+    renderer: Literal["png", "svg", None] = None,
     caption: str = None,
     title: str = None,
     png_path: Path | str = None,
@@ -830,7 +830,7 @@ def plot_histogram(
         width (int): The width of the plot. Default is 1600.
         text_auto (bool): Whether to automatically display text on the plot. Default is True.
         barmode (Literal["group", "overlay", "relative"]): The mode for the bars in the histogram. Default is "relative".
-        renderer (Literal["png", "svg", None]): The renderer for displaying the plot. Default is "png".
+        renderer (Literal["png", "svg", None]): The renderer for displaying the plot. Default is None.
         caption (str): The caption for the plot. Default is None.
         title (str): The title of the plot. Default is None.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
@@ -1008,7 +1008,7 @@ def plot_box(
     x_max: float = None,
     use_log: bool = False,
     png_path: Path | str = None,
-    renderer: Literal["png", "svg", "notebook"] = "notebook",
+    renderer: Literal["png", "svg", None] = None,
 ) -> None:
     """
     Plots a horizontal box plot for the given pandas Series.
@@ -1028,7 +1028,7 @@ def plot_box(
         x_max: The maximum value for the x-axis scale (max and min must be set).
         use_log: Use logarithmic scale for the axis.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
-        renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to "png".
+        renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to None.
 
     Returns: None
     """
@@ -1172,7 +1172,7 @@ def plot_boxes(
     use_log: bool = False,
     box_width: float = 0.5,
     png_path: Path | str = None,
-    renderer: Literal["png", "svg", "notebook"] = "notebook",
+    renderer: Literal["png", "svg", None] = None,
 ) -> None:
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
@@ -1188,7 +1188,7 @@ def plot_boxes(
         summary (bool): Whether to add a summary to the plot.
         use_log (bool): Whether to use logarithmic scale for the plot (cannot show negative values).
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
-        renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to "png".
+        renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to None.
 
     Returns: None
     """
@@ -1331,7 +1331,7 @@ def plot_facet_stacked_bars(
     subplot_size: int = 300,
     color_palette: str = "Plotly",
     caption: str = "",
-    renderer: Optional[Literal["png", "svg", "notebook"]] = "png",
+    renderer: Optional[Literal["png", "svg", None]] = "png",
     annotations: bool = False,
     precision: int = 0,
     png_path: Optional[Path] = None,
@@ -1563,7 +1563,7 @@ def plot_sankey(
         exclude_overlap_event (bool): If True, only excludes the specific events that fall on the same date,
                                     retaining other non-overlapping events for that ID.
         renderer (str, optional): The renderer to use for displaying the plot. Options include
-                                'browser', 'notebook', 'json', 'png', 'svg', 'jpeg', 'webp', or 'pdf'.
+                                'browser', None, 'json', 'png', 'svg', 'jpeg', 'webp', or 'pdf'.
                                 If None, plotly's default renderer is used.
         show_start_node (bool): If True, adds a visual 'start' node and links all
                                 first events to it. This is useful for visualizing

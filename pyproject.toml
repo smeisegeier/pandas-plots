@@ -1,6 +1,6 @@
 [project]
 name = "pandas-plots"
-version = "0.15.5"
+version = "0.15.6"
 description = "A collection of helper for table handling and visualization"
 long_description = "file: README.md"
 long_description_content_type = "text/markdown"
@@ -43,9 +43,13 @@ Homepage = "https://github.com/smeisegeier/pandas-plots"
 Repository = "https://github.com/smeisegeier/pandas-plots"
 "Bug Tracker" = "https://github.com/smeisegeier/pandas-plots/issues"
 
+# [build-system]
+# requires = ["hatchling"] # Use hatchling as the build tool
+# build-backend = "hatchling.build"
+
 [build-system]
-requires = ["hatchling"] # Use hatchling as the build tool
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.7,<0.9.0"]
+build-backend = "uv_build"
 
 # Hatchling automatically discovers packages in 'src' by default.
 # No need for a separate [tool.setuptools.packages.find] section.
