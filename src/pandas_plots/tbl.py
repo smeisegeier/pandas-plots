@@ -6,7 +6,7 @@ import os
 from collections import abc
 from pathlib import Path
 from typing import Literal, get_args
-import numpy as np
+from IPython.display import display, HTML
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 from scipy import stats
 import dataframe_image as dfi
 
-from .hlp import wrap_text, to_series
+from .hlp import wrap_text
 
 import duckdb as ddb
 
@@ -53,11 +53,21 @@ def descr_db(
     -------
     None
     """
+
+    # * ensure markdown is correctly rendered
+    is_print = (os.getenv("RENDERER") in ('png', 'svg'))
+
+    # * wide tables are not properly rendered in markdown
+    width = 220 if is_print else 2000
+    
+    if is_print:
+        display(HTML("<br>"))
+    
     cols = ", ".join(db.columns)
     print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
-
+    
     if use_preview:
-        db.limit(3).show(max_width=2000)
+        db.limit(3).show(max_width=width)
     return
 
 def describe_df(
