@@ -76,11 +76,11 @@ def describe_df(
     use_plot: bool = True,
     use_columns: bool = True,
     use_missing: bool = False,
-    renderer: Literal["png", "svg", None] = "png",
+    renderer: Literal["png", "svg", None] = None,
     fig_cols: int = 5,
     fig_offset: int = None,
     fig_rowheight: int = 300,
-    fig_width: int = 400,
+    fig_width: int = 300,
     sort_mode: Literal["value", "index"] = "value",
     top_n_uniques: int = 5,
     top_n_chars_in_index: int = 0,
@@ -256,11 +256,14 @@ def describe_df(
             # * add trace to fig, only data not layout, only 1 series
             fig.add_trace(figsub["data"][0], row=_row, col=_col)
 
-        # * set template
+        # * set template and layout size
         fig.update_layout(
-            template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
+            template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
+            width=fig_width * fig_cols,  # <-- Set width here
+            height=fig_rowheight * fig_rows,  # <-- Set height here
         )
-        fig.show(renderer, width=fig_width * fig_cols, height=fig_rowheight * fig_rows)
+
+        fig.show(renderer)
     
     if use_missing:
         import missingno as msno
