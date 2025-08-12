@@ -499,6 +499,11 @@ def plot_stacked_bars(
     fig.update_xaxes(showgrid=True, gridwidth=1)
     fig.update_yaxes(showgrid=True, gridwidth=1)
 
+    fig.update_layout(
+        width=width,
+        height=height,
+    )
+
     # * save to png if path is provided
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
@@ -782,6 +787,11 @@ def plot_bars(
             textposition="outside",
             # error_y=dict(thickness=0)
         )
+    
+    _fig.update_layout(
+        width=width,
+        height=height,
+    )
 
     # * set axis title
     _fig.show(
@@ -881,6 +891,11 @@ def plot_histogram(
         },
         showlegend=False if df.shape[1] == 1 else True,
     )
+    
+    fig.update_layout(
+        width=width,
+        height=height,
+    )    
 
     fig.show(
         renderer,
@@ -1141,6 +1156,11 @@ def plot_box(
             yshift=lvl3,
             y=-0,
         )
+
+    fig.update_layout(
+        width=width,
+        height=height,
+    )
 
     fig.show(
         renderer=renderer or os.getenv("RENDERER"),
@@ -1517,6 +1537,12 @@ def plot_facet_stacked_bars(
     if relative:
         fig.update_yaxes(tickformat=".0%")
 
+    fig.update_layout(
+        width=subplot_size * subplots_per_row,
+        height=subplot_size
+        * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
+    )
+
     if png_path:
         png_path = Path(png_path)
         fig.write_image(str(png_path))
@@ -1859,7 +1885,8 @@ def plot_sankey(
         ]
     )
 
-    fig.update_layout(title_text=chart_title, font_size=font_size)
+
+    fig.update_layout(title_text=chart_title, font_size=font_size, width=width, height=height)
     fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
 
 # * extend objects to enable chaining

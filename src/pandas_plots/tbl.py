@@ -263,7 +263,11 @@ def describe_df(
             height=fig_rowheight * fig_rows,  # <-- Set height here
         )
 
-        fig.show(renderer)
+        fig.show(
+            renderer,
+            width=fig_width * fig_cols,  # <-- Set width here
+            height=fig_rowheight * fig_rows,  # <-- Set height here
+        )
     
     if use_missing:
         import missingno as msno
