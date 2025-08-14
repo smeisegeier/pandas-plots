@@ -1,0 +1,51 @@
+name: Build and Simulate Publish to PyPI
+
+on:
+  push:
+    branches:
+      - main  # or your default branch
+
+env:
+  IS_PROD: true   # Change to true to run real publish and skip simulation
+
+jobs:
+  build-and-simulate-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+
+    - name: Read Python version from .python-version
+      id: python_version
+      run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install build tool
+      run: python -m pip install --upgrade pip build
+
+    - name: Build the package
+      run: python -m build
+
+    - name: Simulate publish to PyPI
+      if: env.IS_PROD == 'false'
+      env:
+        PYPI_API_KEY: ${{ secrets.PYPI_API_KEY_PERSONAL }}
+      run: |
+        echo "Simulating package publish to PyPI..."
+        echo "Package files in dist/:"
+        ls dist/
+        echo "Using Python version: ${{ env.PYTHON_VERSION }}"
+        # Mask the actual API key for security
+        echo "API key (masked): ${PYPI_API_KEY:0:6}****"
+        echo "This is a simulation. No actual upload done."
+
+    - name: Publish to PyPI
+      if: env.IS_PROD == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_KEY_PERSONAL }}
