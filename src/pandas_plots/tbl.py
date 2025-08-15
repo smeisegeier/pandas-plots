@@ -112,7 +112,7 @@ def describe_df(
         df=df,
         caption="dataframe",
         use_plot=True,
-        renderer="png",
+        renderer=None,
         template="plotly",
         fig_cols=3,
         fig_offset=None,
@@ -264,7 +264,7 @@ def describe_df(
         )
 
         fig.show(
-            renderer,
+            renderer=renderer or os.getenv("RENDERER"),
             width=fig_width * fig_cols,  # <-- Set width here
             height=fig_rowheight * fig_rows,  # <-- Set height here
         )
@@ -272,7 +272,6 @@ def describe_df(
     if use_missing:
         import missingno as msno
         msno.matrix(df_, figsize=missing_figsize)
-
 
 def pivot_df(
     df: pd.DataFrame,
