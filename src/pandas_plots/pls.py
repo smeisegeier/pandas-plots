@@ -11,8 +11,10 @@ import seaborn as sb
 from matplotlib import pyplot as plt
 from plotly import express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 from plotly.subplots import make_subplots
 import plotly  # needed for return types
+
 import re
 
 from .hlp import *
@@ -1889,6 +1891,86 @@ def plot_sankey(
     fig.update_layout(title_text=chart_title, font_size=font_size, width=width, height=height)
     fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
 
+
+def plot_pie(
+    data: pd.Series | pd.DataFrame,
+    caption: str = None,
+    width=800,
+    height=500,
+    renderer="notebook",
+    donut_size=0,
+):
+    """
+    Creates and displays a pie or donut chart using Plotly Express.
+
+    Args:
+        data (pd.Series or pd.DataFrame): The data to plot.
+            If a DataFrame, it must have only one column. The index will be
+            used for labels and the values for the pie slice sizes.
+        caption (str): The title for the plot.
+        height (int, optional): The height of the plot in pixels. Defaults to 800.
+        width (int, optional): The width of the plot in pixels. Defaults to 500.
+        renderer (str, optional): The Plotly renderer to use (e.g., 'notebook', 'png', 'svg').
+            Defaults to 'notebook'.
+        donut_size (float, optional): A value between 0 and 1 to create a donut chart.
+            A value of 0 results in a regular pie chart. Defaults to 0.
+    """
+    # Store the original renderer to restore it later
+    # original_renderer = pio.renderers.default
+    # ? override renderer
+    original_renderer = "notebook"
+
+    # * 1. Check for correct data type first
+    if not isinstance(data, (pd.Series, pd.DataFrame)):
+        print("Error: Data must be a pandas Series or DataFrame.")
+        return
+
+    # * 2. **CONVERT SERIES TO DATAFRAME**
+    if isinstance(data, pd.Series):
+        # * Get the name of the Series
+        label = data.name
+        # * Convert the Series to a DataFrame with a column named 'values'
+        # * The index will automatically become the DataFrame index
+        data = data.to_frame(name="values")
+    else:
+        # * Get the name of the first column
+        label = data.columns[0]
+
+    # * 3. Ensure the DataFrame has only one column
+    if len(data.columns) != 1:
+        print("Error: DataFrame must have exactly one column for this function.")
+        return
+
+    # * Set the temporary renderer for the plot
+    pio.renderers.default = renderer
+
+    # * Get the number of observations
+    n = len(data)
+
+    # * take 1st (only) column and use value counts to get distribution
+    data = data.iloc[:, 0].value_counts()
+
+    # * 4. Create the figure
+    fig = px.pie(
+        data,
+        values=data,
+        names=data.index,
+        title=f"{_set_caption(caption)}{label}, n = {n:_}",
+        height=height,
+        width=width,
+        hole=donut_size,
+        template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
+    )
+
+    # * Display the plot
+    fig.show()
+
+    # finally:
+    # * 5. Restore the original renderer, ensuring it's always done
+    pio.renderers.default = original_renderer
+
+
+
 # * extend objects to enable chaining
 pd.DataFrame.plot_bars = plot_bars
 pd.DataFrame.plot_stacked_bars = plot_stacked_bars
@@ -1899,3 +1981,4 @@ pd.DataFrame.plot_quadrants = plot_quadrants
 pd.DataFrame.plot_histogram = plot_histogram
 pd.DataFrame.plot_joint = plot_joint
 pd.DataFrame.plot_sankey = plot_sankey
+pd.DataFrame.plot_pie = plot_pie

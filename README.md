@@ -65,6 +65,7 @@ tbl.show_num_df(
   - `plot_quadrants()` quickly shows a 2x2 heatmap
   - `plot_facet_stacked_bars()` shows stacked bars for a facet value as subplots 
   - `plot_sankey()` generates a Sankey diagram
+  - `plot_pie()` generates a pie chart
 <br>
 
 - `ven` offers functions for _venn diagrams_
