@@ -971,6 +971,18 @@ wheels = [
 ]
 
 [[package]]
+name = "matplotlib-inline"
+version = "0.1.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "traitlets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/99/5b/a36a337438a14116b16480db471ad061c36c3694df7c2084a0da7ba538b7/matplotlib_inline-0.1.7.tar.gz", hash = "sha256:8423b23ec666be3d16e16b60bdd8ac4e86e840ebd1dd11a30b9f117f2fa0ab90", size = 8159, upload-time = "2024-04-15T13:44:44.803Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/8e/9ad090d3553c280a8060fbf6e24dc1c0c29704ee7d1c372f0c174aa59285/matplotlib_inline-0.1.7-py3-none-any.whl", hash = "sha256:df192d39a4ff8f21b1895d72e6a13f5fcc5099f00fa84384e0ea28c2cc0653ca", size = 9899, upload-time = "2024-04-15T13:44:43.265Z" },
+]
+
+[[package]]
 name = "matplotlib-venn"
 version = "0.11.10"
 source = { registry = "https://pypi.org/simple" }
@@ -1302,7 +1314,7 @@ wheels = [
 
 [[package]]
 name = "pandas-plots"
-version = "0.15.12"
+version = "0.16.1"
 source = { editable = "." }
 dependencies = [
     { name = "connection-helper", version = "0.12", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -1312,6 +1324,7 @@ dependencies = [
     { name = "jinja2" },
     { name = "kaleido" },
     { name = "matplotlib" },
+    { name = "matplotlib-inline" },
     { name = "matplotlib-venn" },
     { name = "missingno" },
     { name = "nbformat" },
@@ -1330,6 +1343,7 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3.1.4" },
     { name = "kaleido", specifier = ">=1" },
     { name = "matplotlib", specifier = ">=3.8.2" },
+    { name = "matplotlib-inline" },
     { name = "matplotlib-venn", specifier = "==0.11.10" },
     { name = "missingno", specifier = ">=0.5.2" },
     { name = "nbformat", specifier = ">=4.2.0" },
