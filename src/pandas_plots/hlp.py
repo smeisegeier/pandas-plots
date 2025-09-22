@@ -21,43 +21,48 @@ from PIL import Image
 
 URL_REGEX = r"^(?:http|ftp)s?://"  # https://stackoverflow.com/a/1617386
 
-
-def mean_confidence_interval(df, confidence=0.95, use_median=False):
+def mean_confidence_interval(data, confidence=0.95, use_median=False, n_bootstraps=1000):
     """
-    Calculate the mean or median and confidence interval of the input dataframe.
-    Source: https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
+    Calculate the mean or median and confidence interval.
+    For median, uses bootstrapping for a more robust confidence interval.
 
     Parameters:
-    df (array-like): The input dataframe.
+    data (array-like): The input data.
     confidence (float, optional): The confidence level for the interval. Defaults to 0.95.
-    use_median (bool, optional): If True, calculates median and confidence interval instead of mean. Defaults to False.
+    use_median (bool, optional): If True, calculates median and its confidence interval. Defaults to False.
+    n_bootstraps (int, optional): Number of bootstrap samples for median CI. Only used if use_median is True.
 
     Returns:
-    tuple: A tuple containing the central value (mean or median), interval, lower bound, and upper bound.
+    tuple: A tuple containing the central value (mean or median), margin of error, lower bound, and upper bound.
     """
-    df = to_series(df)
-    if df is None:
-        return None
-    a = 1.0 * np.array(df)
+    data = to_series(data)
+    if data is None or len(data) == 0:
+        return np.nan, np.nan, np.nan, np.nan
+    a = 1.0 * np.array(data)
     n = len(a)
 
     if use_median:
+        if n < 2: # Cannot bootstrap with n < 2
+            return np.median(a), np.nan, np.nan, np.nan
+
+        bootstrapped_medians = []
+        for _ in range(n_bootstraps):
+            sample = np.random.choice(a, size=n, replace=True)
+            bootstrapped_medians.append(np.median(sample))
+
         median = np.median(a)
-        se = 1.253 * scipy.stats.sem(a)  # Approximate standard error for median
-        margin = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
-        return median, margin, median - margin, median + margin
+        alpha = (1 - confidence) / 2
+        lower_bound = np.percentile(bootstrapped_medians, alpha * 100)
+        upper_bound = np.percentile(bootstrapped_medians, (1 - alpha) * 100)
+        margin = (upper_bound - lower_bound) / 2 # Simple approximation for margin based on interval width
+        return median, margin, lower_bound, upper_bound
     else:
-        mean, se = np.mean(a), scipy.stats.sem(a)
+        mean = np.mean(a)
+        if n <= 1:
+            return mean, np.nan, np.nan, np.nan
+        se = scipy.stats.sem(a)
         margin = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
         return mean, margin, mean - margin, mean + margin
-
-    # # * Alternative
-    # # from statistics import NormalDist
-    # def confidence_interval(data, confidence=0.95):
-    #     dist = NormalDist.from_samples(data)
-    #     z = NormalDist().inv_cdf((1 + confidence) / 2.)
-    #     h = dist.stdev * z / ((len(data) - 1) ** .5)
-    #     return dist.mean - h, dist.mean + h
 
 
 def to_series(df) -> pd.Series | None:
@@ -520,7 +525,7 @@ def find_cols(all_cols: list[str], stubs: list[str] = None) -> list[str]:
     
     result = []
     for stub in stubs:
-        result.extend([col for col in all_cols if stub in col])
+        result.extend([col for col in all_cols if stub.lower() in col.lower()])
     
     return result
 
@@ -593,3 +598,124 @@ def add_measures_to_pyg_config(json_path: str, nodes: list[tuple[str, str]] = [(
     # * Write the updated JSON back to the file
     with open(json_path, "w", encoding="utf-8") as file:
         json.dump(config, file, indent=2)
+
+
+
+def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
+    """
+    Prints the details of a specific tumor to the console.
+    Needs con to clinical cancer data
+    v2.3
+
+    Args:
+        z_tum_id (str): The ID of the tumor to retrieve details for.
+        con (dbr.DuckDB): A DuckDB connection object.
+
+    Returns:
+        None
+    """
+    print("pat")
+    (con.sql(f"""--sql
+        select
+                z_pat_id,
+                z_sex,
+                Geburtsdatum,
+                Diagnosedatum,
+                DatumVitalstatus,
+                Verstorben,
+                z_age,
+                z_ag05,
+        from Patient
+        join Tumor on Patient.oBDS_RKIPatientId = Tumor.z_pat_id
+        where z_tum_id = '{z_tum_id}'
+        order by z_tum_order
+        """)
+        .show()
+    )
+    print("tum1")
+    (con.sql(f"""--sql
+        select  z_kkr_label,
+                z_icd10,
+                z_tum_op_count,
+                z_tum_st_count,
+                z_tum_sy_count,
+                z_tum_fo_count,
+                z_first_treatment,
+                z_first_treatment_after_days,
+                z_tum_order,
+                z_last_tum_status,
+        from Tumor
+        where z_tum_id = '{z_tum_id}'
+        order by z_tum_order
+        """)
+        .show()
+    )
+
+    print("tum2")
+    (con.sql(f"""--sql
+        select
+                z_event_order,
+                z_events,
+                Anzahl_Tage_Diagnose_Tod,
+                z_period_diag_death_day,
+                DatumPSA,
+                z_period_diag_psa_day,
+                z_class_hpv,
+        from Tumor
+        where z_tum_id = '{z_tum_id}'
+        order by z_tum_order
+        """)
+        .show()
+    )
+
+    print("op")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from OP
+        where z_tum_id = '{z_tum_id}'
+        order by z_op_order
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+    print("st")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from ST
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
+    print("be")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Bestrahlung
+        where z_tum_id = '{z_tum_id}'
+        order by z_bestr_order
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
+    print("syst")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from SYST
+        where z_tum_id = '{z_tum_id}'
+        order by z_syst_order
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
+    print("fo")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Folgeereignis
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )

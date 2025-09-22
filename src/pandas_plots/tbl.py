@@ -33,7 +33,7 @@ KPI_LITERAL = Literal[
 
 
 def descr_db(
-    db: ddb.duckdb.DuckDBPyRelation, 
+    db: ddb.DuckDBPyRelation,
     caption: str = "db",
     use_preview: bool = True,
 )->None:
@@ -42,7 +42,7 @@ def descr_db(
 
     Parameters
     ----------
-    db: ddb.duckdb.DuckDBPyRelation
+    db: ddb.DuckDBPyRelation
         The relation to be described
     caption: str, optional
         A caption to be printed left of the description. Defaults to "db".
