@@ -1,7 +1,7 @@
 from pathlib import Path
 import warnings
 
-warnings.filterwarnings("ignore")
+from pandas_plots import tbl
 
 import os
 from typing import Optional, Literal
@@ -20,8 +20,9 @@ import re
 from .hlp import *
 from .tbl import print_summary
 
-### helper functions
+warnings.filterwarnings("ignore")
 
+### helper functions
 
 def _set_caption(caption: str) -> str:
     return f"#️⃣{'-'.join(caption.split())}, " if caption else ""
@@ -825,6 +826,7 @@ def plot_histogram(
     caption: str = None,
     title: str = None,
     png_path: Path | str = None,
+    print_summary: bool = False,
 ) -> None:
     """
     A function to plot a histogram based on *numeric* columns in a DataFrame.
@@ -835,7 +837,7 @@ def plot_histogram(
     Parameters:
         df_ser (pd.DataFrame | pd.Series): The input containing the data to be plotted.
         histnorm (Literal["probability", "probability density", "density", "percent", None]): The normalization mode for the histogram. Default is None.
-        nbins (int): The number of bins in the histogram. Default is 0.
+        nbins (int): The number of bins in the histogram. Default is 0. If its set to -1, the number of bins will represent the integer span of the data.
         orientation (Literal["h", "v"]): The orientation of the histogram. Default is "v".
         precision (int): The precision for rounding the data. Default is 2.
         height (int): The height of the plot. Default is 500.
@@ -846,6 +848,7 @@ def plot_histogram(
         caption (str): The caption for the plot. Default is None.
         title (str): The title of the plot. Default is None.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        print_summary (bool): Whether to print a summary table of the data. Default is False.
 
 
     Returns: None
@@ -866,6 +869,10 @@ def plot_histogram(
 
     # * rounding
     df = df.applymap(lambda x: round(x, precision))
+
+    # * nbins defaults to number of unique values
+    if nbins == -1:
+        nbins = int(df.max() - df.min())
 
     # ! plot
     _caption = _set_caption(caption)
@@ -900,7 +907,7 @@ def plot_histogram(
     )    
 
     fig.show(
-        renderer,
+        renderer=renderer or os.getenv("RENDERER"),
         width=width,
         height=height,
     )
@@ -908,6 +915,9 @@ def plot_histogram(
     # * save to png if path is provided
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
+
+    if print_summary:
+        tbl.print_summary(df)
 
     return
 
