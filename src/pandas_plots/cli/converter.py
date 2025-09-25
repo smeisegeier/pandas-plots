@@ -7,7 +7,7 @@ def jupyter_to_md(
     path: str,
     output_dir: str = "./docs",
     no_input=False,
-    execute=True,
+    execute=True,  # Default to True, can be overridden with --no_execute
     chrome_path="/opt/homebrew/bin/chromium",
 ):
     # * ensure output directory exists
@@ -65,17 +65,20 @@ def main():
     parser.add_argument("path", help="Path to the Jupyter notebook to convert")
     parser.add_argument("--output_dir", "-o", default="./docs", help="Output directory (default: ./docs)")
     parser.add_argument("--no_input", action="store_true", help="Exclude input cells in output (default: False)")
-    parser.add_argument("--execute", action="store_true", help="Execute notebook before conversion (default: False)")
+    parser.add_argument("--no_execute", action="store_true", help="Do not execute notebook before conversion (default: False - executes by default)")
     parser.add_argument("--chrome_path", default="/opt/homebrew/bin/chromium", 
                     help="Path to Chrome/Chromium executable (default: /opt/homebrew/bin/chromium)")
     
     args = parser.parse_args()
     
+    # Convert no_execute to execute (invert the logic)
+    execute = not args.no_execute
+    
     jupyter_to_md(
         path=args.path,
         output_dir=args.output_dir,
         no_input=args.no_input,
-        execute=args.execute,
+        execute=execute,
         chrome_path=args.chrome_path
     )
 

@@ -1314,7 +1314,7 @@ wheels = [
 
 [[package]]
 name = "pandas-plots"
-version = "0.16.4"
+version = "0.16.5"
 source = { editable = "." }
 dependencies = [
     { name = "connection-helper", version = "0.12", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
