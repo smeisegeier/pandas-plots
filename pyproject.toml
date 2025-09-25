@@ -1,6 +1,6 @@
 [project]
 name = "pandas-plots"
-version = "0.16.3"
+version = "0.16.4"
 description = "A collection of helper for table handling and visualization"
 long_description = "file: README.md"
 long_description_content_type = "text/markdown"
@@ -38,6 +38,10 @@ dependencies = [
     "dataframe_image>=0.2.6",
     "connection-helper>=0.12",
 ]
+
+[project.scripts]
+jupyter-to-md = "pandas_plots.cli.converter:main"
+test = "pandas_plots.cli.converter:test"
 
 [project.urls]
 Homepage = "https://github.com/smeisegeier/pandas-plots"
