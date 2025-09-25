@@ -6,7 +6,7 @@ import argparse
 def jupyter_to_md(
     path: str,
     output_dir: str = "./docs",
-    no_input=True,
+    no_input=False,
     execute=True,
     chrome_path="/opt/homebrew/bin/chromium",
 ):
@@ -64,7 +64,7 @@ def main():
     parser = argparse.ArgumentParser(description="Convert Jupyter notebooks to markdown")
     parser.add_argument("path", help="Path to the Jupyter notebook to convert")
     parser.add_argument("--output_dir", "-o", default="./docs", help="Output directory (default: ./docs)")
-    parser.add_argument("--no_input", action="store_false", help="Include input cells in output (default: True)")
+    parser.add_argument("--no_input", action="store_true", help="Exclude input cells in output (default: False)")
     parser.add_argument("--execute", action="store_true", help="Execute notebook before conversion (default: False)")
     parser.add_argument("--chrome_path", default="/opt/homebrew/bin/chromium", 
                     help="Path to Chrome/Chromium executable (default: /opt/homebrew/bin/chromium)")
