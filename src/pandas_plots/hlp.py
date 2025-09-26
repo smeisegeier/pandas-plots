@@ -619,12 +619,13 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         select
                 z_pat_id,
                 z_sex,
-                Geburtsdatum,
-                Diagnosedatum,
-                DatumVitalstatus,
-                Verstorben,
                 z_age,
                 z_ag05,
+                Verstorben,
+                Geburtsdatum,
+                Geburtsdatum_Genauigkeit,
+                DatumVitalstatus,
+                DatumVitalstatus_Genauigkeit,
         from Patient
         join Tumor on Patient.oBDS_RKIPatientId = Tumor.z_pat_id
         where z_tum_id = '{z_tum_id}'
@@ -632,18 +633,31 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         """)
         .show()
     )
+    print("tod")
+    (con.sql(f"""--sql
+        select  TodesursacheId,
+                Code,
+                Version,
+                IsGrundleiden,
+        from Todesursache tu
+        join Tumor on tu.oBDS_RKIPatientId = Tumor.z_pat_id
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .show()
+    )
+
     print("tum1")
     (con.sql(f"""--sql
         select  z_kkr_label,
                 z_icd10,
+                Diagnosedatum,
+                Diagnosedatum_Genauigkeit,
                 z_tum_op_count,
                 z_tum_st_count,
                 z_tum_sy_count,
                 z_tum_fo_count,
                 z_first_treatment,
                 z_first_treatment_after_days,
-                z_tum_order,
-                z_last_tum_status,
         from Tumor
         where z_tum_id = '{z_tum_id}'
         order by z_tum_order
@@ -660,7 +674,9 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
                 z_period_diag_death_day,
                 DatumPSA,
                 z_period_diag_psa_day,
+                z_last_tum_status,
                 z_class_hpv,
+                z_tum_order,
         from Tumor
         where z_tum_id = '{z_tum_id}'
         order by z_tum_order
@@ -678,6 +694,17 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         .project("* exclude (z_tum_id)")
         .show()
     )
+
+    print("ops")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from OPS
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
     print("st")
     (con.sql(f"""--sql
         select * exclude (z_kkr)
@@ -699,6 +726,16 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         .show()
     )
 
+    print("app")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Applikationsart
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
     print("syst")
     (con.sql(f"""--sql
         select * exclude (z_kkr)
@@ -712,8 +749,59 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("fo")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
+        select *
         from Folgeereignis
+        where z_tum_id = '{z_tum_id}'
+        order by z_fo_order
+        """)
+        .project("* exclude (z_tum_id, z_kkr)")
+        .show()
+    )
+
+    print("fo_tnm")
+    (con.sql(f"""--sql
+        select *
+        from Folgeereignis_TNM
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id, z_kkr)")
+        .show()
+    )
+
+    print("fo_fm")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Folgeereignis_Fernmetastase
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
+    print("fo_weitere")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Folgeereignis_WeitereKlassifikation
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
+    print("diag_fm")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Diagnose_Fernmetastase
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show()
+    )
+
+    print("diag_weitere")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Diagnose_WeitereKlassifikation
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")

@@ -826,7 +826,7 @@ def plot_histogram(
     caption: str = None,
     title: str = None,
     png_path: Path | str = None,
-    print_summary: bool = False,
+    summary: bool = False,
 ) -> None:
     """
     A function to plot a histogram based on *numeric* columns in a DataFrame.
@@ -916,7 +916,7 @@ def plot_histogram(
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
 
-    if print_summary:
+    if summary:
         tbl.print_summary(df)
 
     return
