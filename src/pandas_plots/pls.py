@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore")
 ### helper functions
 
 def _set_caption(caption: str) -> str:
-    return f"#️⃣{'-'.join(caption.split())}, " if caption else ""
+    return f"#️⃣{' '.join(caption.split())}, " if caption else ""
 
 
 def aggregate_data(
