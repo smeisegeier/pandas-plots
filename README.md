@@ -66,6 +66,11 @@ tbl.show_num_df(
   - `plot_facet_stacked_bars()` shows stacked bars for a facet value as subplots 
   - `plot_sankey()` generates a Sankey diagram
   - `plot_pie()` generates a pie chart
+  - variants for **large** datasets - these use seaborn instead of plotly to dramatically lower file size
+    - `plot_box_large()`
+    - `plot_boxes_large()`
+    - `plot_histogram_large()`
+
 <br>
 
 - `ven` offers functions for _venn diagrams_

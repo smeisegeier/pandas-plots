@@ -1,11 +1,12 @@
 from pathlib import Path
 import warnings
 
-from pandas_plots import tbl
 
+from pandas_plots import tbl
+import numpy as np
+from io import BytesIO # Needed for saving in-memory image
 import os
 from typing import Optional, Literal
-
 import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
@@ -834,6 +835,8 @@ def plot_histogram(
         - a numeric series
         - a dataframe with only numeric columns
 
+    ⚠️ on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
+
     Parameters:
         df_ser (pd.DataFrame | pd.Series): The input containing the data to be plotted.
         histnorm (Literal["probability", "probability density", "density", "percent", None]): The normalization mode for the histogram. Default is None.
@@ -870,12 +873,15 @@ def plot_histogram(
     # * rounding
     df = df.applymap(lambda x: round(x, precision))
 
-    # * nbins defaults to number of unique values
+
+    _caption = _set_caption(caption)
+
+        # * nbins defaults to number of unique values
     if nbins == -1:
         nbins = int(df.max() - df.min())
 
+
     # ! plot
-    _caption = _set_caption(caption)
     fig = px.histogram(
         data_frame=df,
         histnorm=histnorm,
@@ -900,11 +906,11 @@ def plot_histogram(
         },
         showlegend=False if df.shape[1] == 1 else True,
     )
-    
+
     fig.update_layout(
         width=width,
         height=height,
-    )    
+    )
 
     fig.show(
         renderer=renderer or os.getenv("RENDERER"),
@@ -918,6 +924,114 @@ def plot_histogram(
 
     if summary:
         tbl.print_summary(df)
+
+    return
+
+
+def plot_histogram_large(
+    df_ser: pd.DataFrame | pd.Series,
+    nbins: int = -1,
+    precision: int = 2,
+    height: int = 500,
+    width: int = 1600,
+    caption: str = None,
+    title: str = None,
+    png_path: Path | str = None,
+    summary: bool = False,
+) -> None:
+    """
+    A function to plot a histogram based on a large number of *numeric* columns in a DataFrame
+    using Seaborn's histplot for efficient static rendering.
+
+    Accepts:
+        - a numeric series
+        - a dataframe with only numeric columns
+
+
+    Parameters:
+        df_ser (pd.DataFrame | pd.Series): The input containing the data to be plotted.
+        nbins (int): The number of bins in the histogram. If set to -1, the number of bins 
+                     will be calculated based on the data span (Seaborn will use 'auto' by default 
+                     if no integer is provided, which is generally better).
+        precision (int): The precision for rounding the data.
+        height (int): The height of the plot.
+        width (int): The width of the plot.
+        caption (str): The caption for the plot.
+        title (str): The title of the plot.
+        png_path (Path | str, optional): The path to save the image as a png file.
+        summary (bool): Whether to print a summary table of the data. # UPDATED: Docstring for summary
+
+    Returns: None
+    """
+
+    # * convert to df if series
+    if isinstance(df_ser, pd.Series):
+        df = df_ser.to_frame()
+    else:
+        df = df_ser
+
+    col_not_num = df.select_dtypes(exclude="number").columns
+    if any(col_not_num):
+        print(
+            f"❌ all columns must be numeric, but the following are not: [{', '.join(col_not_num)}]. consider using plot_bars()."
+        )
+        return
+
+    # * Only plot the first numeric column if DataFrame has multiple
+    data_series = df.iloc[:, 0]
+    
+    # * rounding (apply only to the plotting data if needed)
+    data_series = data_series.apply(lambda x: round(x, precision))
+    
+    # --- Matplotlib/Seaborn Setup ---
+    
+    # * Set dark theme based on environment (assuming _set_caption exists)
+    if os.getenv("THEME") == "dark":
+        plt.style.use('dark_background')
+    else:
+        plt.style.use('default')
+
+    # * Set figure size
+    scale_factor = 100
+    plt.figure(figsize=(width / scale_factor, height / scale_factor))
+
+    # * Title and Labels
+    _caption = _set_caption(caption)
+    title_str = title or f"{_caption}[{data_series.name or 'Value'}], n={data_series.shape[0]:_.0f}"
+    
+    # * Determine number of bins (Fixes TypeError: bins must be an integer, a string, or an array)
+    bins_arg = nbins if nbins > 0 else "auto" 
+    
+    # * Main Plotting with Seaborn histplot
+    sb.histplot(
+        x=data_series,
+        bins=bins_arg, 
+        kde=True, # Standard histogram
+        color="skyblue", # Set a default color
+        edgecolor=".2", # Dark edges for bars
+        ax=plt.gca()
+    )
+
+    # * Apply title and labels
+    ax = plt.gca()
+    ax.set_title(title_str)
+    ax.set_xlabel(data_series.name or 'Value')
+    ax.set_ylabel('Count')
+
+    # * Display the plot
+    plt.tight_layout()
+    plt.show()
+
+    # * save to png if path is provided
+    if png_path is not None:
+        plt.savefig(Path(png_path).as_posix(), format='png', transparent=False)
+        
+    plt.close()
+    plt.style.use('default') # Reset style
+
+    if summary:
+        # Assuming print_summary is a helper function that accepts a DataFrame
+        print_summary(df)
 
     return
 
@@ -981,7 +1095,7 @@ def plot_joint(
         "ratio": 10,
         "marginal_ticks": False,
         "dropna": dropna,
-        # "title": f"{caption}[{ser.name}], n = {len(ser):_}" if not title else title,
+        # "title": f"{caption}[{ser.name}], n={len(ser):_}" if not title else title,
     }
     dict_hex = {"cmap": _cmap}
     dict_kde = {"fill": True, "cmap": _cmap}
@@ -996,7 +1110,7 @@ def plot_joint(
     # * emojis dont work in good ol seaborn
     _caption = "" if not caption else f"#{caption}, "
     fig.figure.suptitle(
-        title or f"{_caption}[{df.columns[0]}] vs [{df.columns[1]}], n = {len(df):_}"
+        title or f"{_caption}[{df.columns[0]}] vs [{df.columns[1]}], n={len(df):_}"
     )
     # * leave some room for the title
     fig.figure.tight_layout()
@@ -1039,6 +1153,8 @@ def plot_box(
 ) -> None:
     """
     Plots a horizontal box plot for the given pandas Series.
+
+    ⚠️ on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
 
     Args:
         ser: The pandas Series to plot.
@@ -1093,7 +1209,7 @@ def plot_box(
         # 'box':True,
         "log_x": use_log,  # * logarithmic scale, axis is always x
         # "notched": True,
-        "title": f"{caption}[{ser.name}]{log_str}, n = {n_:_}" if not title else title,
+        "title": f"{caption}[{ser.name}]{log_str}, n={n_:_}" if not title else title,
     }
 
     fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)
@@ -1109,7 +1225,7 @@ def plot_box(
     #     width=width,
     #     points=points,
     #     box=True,
-    #     title=f"{caption}[{ser.name}], n = {len(ser):_}" if not title else title,
+    #     title=f"{caption}[{ser.name}], n={len(ser):_}" if not title else title,
     #     )
     if annotations:
         fig.add_annotation(
@@ -1191,6 +1307,214 @@ def plot_box(
     return
 
 
+
+def plot_box_large(
+    ser: pd.Series,
+    points: Literal["all", "outliers", "suspectedoutliers", None] = None,
+    precision: int = 2,
+    height: int = 200,
+    width: int = 1200,
+    annotations: bool = False,
+    summary: bool = True,
+    caption: str = None,
+    title: str = None,
+    violin: bool = False,
+    x_min: float = None,
+    x_max: float = None,
+    use_log: bool = False,
+    png_path: Path | str = None,
+) -> None:
+    """
+        Plots a horizontal box or violin plot for a pandas Series.
+
+        This function is designed to handle large datasets efficiently by rendering a 
+        static image instead of a large interactive plot structure.
+
+        Args:
+            ser: The pandas Series containing the data to plot.
+            points: Controls outlier visibility. 'all' or 'outliers' shows fliers; 
+                    None or 'suspectedoutliers' hides them (Plotly's distinct types 
+                    are not fully supported by Seaborn's static output).
+            precision: The decimal precision for the annotation labels.
+            height: The height of the plot figure in pixels (scaled to Matplotlib inches).
+            width: The width of the plot figure in pixels (scaled to Matplotlib inches).
+            annotations: If True, adds calculated statistical values (min, max, quartiles, 
+                        mean, fences) as text and arrows onto the plot.
+            summary: If True, prints a statistical summary table below the plot.
+            caption: A custom prefix added to the default plot title.
+            title: The specific title to use for the plot (overrides the default generated title).
+            violin: If True, generates a violin plot with an inner boxplot; otherwise, 
+                    generates a standard boxplot.
+            x_min: The minimum value for the x-axis scale.
+            x_max: The maximum value for the x-axis scale.
+            use_log: If True, uses a logarithmic scale for the x-axis.
+            png_path (Path | str, optional): The file path to save the generated image. 
+                                            The plot will be saved in PNG format.
+            renderer (Literal["png", "svg", None], optional): This argument is maintained 
+                    for compatibility but is **ignored** as Seaborn/Matplotlib uses 
+                    `plt.show()` for display.
+
+        Returns:
+            None
+    """
+    ser = to_series(ser)
+    if ser is None:
+        return
+
+    # * drop na to keep scipy sane
+    n_ = len(ser)
+    ser.dropna(inplace=True)
+    
+    # ----------------------------------------------------
+    # --- Data and Layout Setup ---
+    # ----------------------------------------------------
+    
+    # * apply theme early
+    if os.getenv("THEME") == "dark":
+        plt.style.use('dark_background')
+    else:
+        plt.style.use('default')
+
+
+    # Seaborn/Matplotlib setup for size
+    # figsize takes (width, height) in inches, so we scale by a factor (e.g., 100 DPI)
+    scale_factor = 100
+    plt.figure(figsize=(width / scale_factor, height / scale_factor))
+
+    # Create a dummy DataFrame suitable for Seaborn's y/x mapping for a single Series
+    # We use 'value' for the numeric data and a constant 'category' for the y-axis
+    df_plot = pd.DataFrame({'value': ser.values, 'category': ser.name or 'Series'})
+    
+    caption = _set_caption(caption)
+    log_str = " (log-scale)" if use_log else ""
+    plot_title = f"{caption}[{ser.name}]{log_str}, n={n_:_}" if not title else title
+
+    # ----------------------------------------------------
+    # --- Seaborn Plotting ---
+    # ----------------------------------------------------
+    
+    if violin:
+        # Use violinplot
+        ax = sb.violinplot(
+            data=df_plot,
+            x='value',
+            y='category',
+            orient='h',
+            cut=0, # Seaborn argument to control how far the plot extends past whiskers
+            inner='box' # Show a mini boxplot inside the violin
+        )
+    else:
+        # Use boxplot
+        # The 'points' argument is partially supported via 'fliersize' and 'showfliers'
+        
+        # Determine flier/outlier display
+        showfliers = True
+        flier_size = 5 # Default size
+        if points == 'outliers' or points == 'all':
+            showfliers = True
+        elif points is None or points == 'suspectedoutliers':
+            # Note: Seaborn/Matplotlib doesn't distinguish between 'outliers' and 'suspected' like Plotly
+            # 'suspectedoutliers' is not directly translatable, so we'll treat it as 'None' (no fliers)
+            if points == 'suspectedoutliers':
+                showfliers = False
+
+        ax = sb.boxplot(
+            data=df_plot,
+            x='value',
+            y='category',
+            orient='h',
+            palette='tab10',
+            showfliers=showfliers,
+            flierprops={'markerfacecolor': 'red', 'markersize': flier_size} if showfliers else {},
+        )
+
+    # Apply axis limits and scale
+    if use_log:
+        ax.set_xscale('log')
+        # use_log: bool = False, # Handled above with ax.set_xscale
+    
+    if (x_min is not None) and (x_max is not None):
+        ax.set_xlim(x_min, x_max)
+        # x_min: float = None, # Handled above with ax.set_xlim
+        # x_max: float = None, # Handled above with ax.set_xlim
+        
+    ax.set_title(plot_title)
+    ax.set_ylabel("") # Remove the category label on the y-axis
+
+    # ----------------------------------------------------
+    # --- Annotations and Summary ---
+    # ----------------------------------------------------
+
+    # Recalculate stats for annotations
+    median = ser.median()
+    mean = ser.mean()
+    q25 = ser.quantile(0.25)
+    q75 = ser.quantile(0.75)
+    min_val = ser.min()
+    max_val = ser.max()
+    iqr = q75 - q25
+    
+    # Calculate fences (Matplotlib standard)
+    fence0_ = q25 - 1.5 * iqr
+    fence0 = fence0_ if fence0_ > min_val else min_val
+    fence1_ = q75 + 1.5 * iqr
+    fence1 = fence1_ if fence1_ < max_val else max_val
+    
+    # Note: Annotations in Matplotlib are tedious and highly dependent on figure size.
+    # The Plotly yshift logic (lvl1, lvl2, lvl3) is not easily portable. 
+    # We use a simple constant y position (0.5 for the single series) and a vertical offset.
+    
+    if annotations:
+        y_pos = 0.5 # Center of the single boxplot on the y-axis
+        v_offset = 0.05 # Vertical distance for labels
+        
+        # Simplified annotation loop to place labels above/below the plot
+        labels = [
+            (min_val, f"min: {min_val:.{precision}f}", v_offset),
+            (fence0, f"lower: {fence0:.{precision}f}", v_offset * 2),
+            (q25, f"q25: {q25:.{precision}f}", v_offset),
+            (median, f"median: {median:.{precision}f}", -v_offset * 2),
+            (mean, f"mean: {mean:.{precision}f}", v_offset * 3),
+            (q75, f"q75: {q75:.{precision}f}", -v_offset),
+            (fence1, f"upper: {fence1:.{precision}f}", v_offset),
+            (max_val, f"max: {max_val:.{precision}f}", -v_offset * 3),
+        ]
+        
+        for x, text, offset in labels:
+            ax.annotate(
+                text,
+                xy=(x, y_pos),
+                xytext=(x, y_pos + offset),
+                ha='center',
+                arrowprops=dict(facecolor='black', arrowstyle='->', connectionstyle="arc3,rad=0.0"),
+                fontsize=8,
+            )
+
+    # height: int = 200, # Handled by plt.figure(figsize=...)
+    # width: int = 1200, # Handled by plt.figure(figsize=...)
+    # caption: str = None, # Handled in title
+    # renderer: Literal["png", "svg", None] = None, # NOT SUPPORTED/COMMENTED OUT
+
+    # Display the plot
+    plt.tight_layout()
+    plt.show()
+
+    if summary:
+        print_summary(ser.to_frame())
+
+    # * save to png if path is provided
+    if png_path is not None:
+        plt.savefig(Path(png_path).as_posix(), format='png')
+        
+    # Clear the figure to prevent display issues if multiple plots are run
+    plt.close()
+    plt.style.use('default')
+    return
+
+# Example usage (assuming _set_caption etc. are available)
+# df = pd.DataFrame({'DataPoints': np.random.lognormal(size=1000)})
+# plot_box(df['DataPoints'], annotations=True, use_log=True, height=300, width=800, png_path='test_seaborn_box.png')
+
 def plot_boxes(
     df: pd.DataFrame,
     caption: str = None,
@@ -1208,6 +1532,9 @@ def plot_boxes(
 ) -> None:
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
+
+    ⚠️ on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
+
 
     Args:
         df (pd.DataFrame): The input DataFrame with two columns, where the first column is string or bool type and the second column is numeric.
@@ -1263,7 +1590,7 @@ def plot_boxes(
         log_y=use_log,
         # color_discrete_sequence=px.colors.qualitative.Plotly,
         title=(
-            f"{caption}[{df.columns[0]}] by [{df.columns[1]}]{log_str}, n = {len(df):_.0f}"
+            f"{caption}[{df.columns[0]}] by [{df.columns[1]}]{log_str}, n={len(df):_.0f}"
             if not title
             else title
         ),
@@ -1349,6 +1676,144 @@ def plot_boxes(
     # * save to png if path is provided
     if png_path is not None:
         fig.write_image(Path(png_path).as_posix())
+
+    return
+
+
+def plot_boxes_large(
+    df: pd.DataFrame,
+    caption: str = None,
+    points: Literal["all", "outliers", "suspectedoutliers", None] = None,
+    precision: int = 2,
+    height: int = 600,
+    width: int = 1200,
+    summary: bool = True,
+    title: str = None,
+    violin: bool = False,
+    use_log: bool = False,
+    box_width: float = 0.5,
+    png_path: Path | str = None,
+) -> None:
+    """
+    Plots vertical box plots for each unique item in the DataFrame using Seaborn/Matplotlib.
+    Use it for large datasets.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame with two columns: [0] str or bool (category), 
+                            and [1] numeric (value).
+        caption (str): The caption for the plot.
+        points (Literal["all", "outliers", "suspectedoutliers", None]): Controls the visibility of fliers (outliers).
+                        'all' or 'outliers' shows fliers. None hides them.
+        precision (int): The precision for rounding the statistics.
+        height (int): The height of the plot figure in pixels.
+        width (int): The width of the plot figure in pixels.
+        summary (bool): Whether to add a summary to the plot.
+        title (str): The specific title to use for the plot.
+        use_log (bool): Whether to use logarithmic scale for the plot (cannot show negative values).
+        violin (bool): If True, generates a violin plot instead of a box plot.
+        box_width (float): The relative width of the boxes (0 to 1).
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+
+    Returns: None
+    """
+
+    if (
+        len(df.columns) != 2
+        or not (
+            (pd.api.types.is_object_dtype(df.iloc[:, 0]))
+            or (pd.api.types.is_bool_dtype(df.iloc[:, 0]))
+        )
+        or not pd.api.types.is_numeric_dtype(df.iloc[:, 1])
+    ):
+        print("❌ df must have 2 columns: [0] str or bool, [1] num")
+        return
+    
+    # * Set theme and figure size
+    if os.getenv("THEME") == "dark":
+        plt.style.use('dark_background')
+    else:
+        plt.style.use('default')
+
+    scale_factor = 100
+    plt.figure(figsize=(width / scale_factor, height / scale_factor))
+    
+    # * Prepare DataFrame for Seaborn
+    col_cat, col_num = df.columns[0], df.columns[1]
+    
+    # * type of col0 must be str, not object
+    if pd.api.types.is_object_dtype(df.iloc[:, 0]):
+        df[col_cat] = df[col_cat].astype(str)
+
+    # * unique items (needed for title and potential ordering)
+    items = sorted(df[col_cat].unique())
+
+    # * Title and Labels
+    caption = _set_caption(caption)
+    log_str = " (log-scale)" if use_log else ""
+    plot_title = (
+        f"{caption}[{col_cat}] by [{col_num}]{log_str}, n={len(df):_.0f}"
+        if not title
+        else title
+    )
+
+    # * Determine flier/outlier display
+    showfliers = True
+    flier_size = 5 
+    if points == 'outliers' or points == 'all':
+        showfliers = True
+    elif points is None or points == 'suspectedoutliers':
+         # Plotly's 'suspectedoutliers' is not directly translatable, treat as None (hide fliers)
+         if points == 'suspectedoutliers':
+             showfliers = False
+
+ # * Main Plotting with Seaborn - Use Boxplot or Violinplot
+    if violin:
+        sb.violinplot(
+            data=df,
+            x=col_cat,
+            y=col_num,
+            palette="tab10",
+            width=box_width, 
+            inner="box" if not use_log else None, # inner="box" is standard for violin
+            ax=plt.gca()
+        )
+    else:
+        sb.boxplot(
+            data=df,
+            x=col_cat,
+            y=col_num,
+            palette="tab10",
+            width=box_width, 
+            showfliers=showfliers,
+            flierprops={'markerfacecolor': 'white', 'markersize': flier_size} if showfliers else {},
+            ax=plt.gca()
+        )
+
+    # * Apply log scale and title
+    ax = plt.gca()
+    if use_log:
+        ax.set_yscale('log') # Vertical plot means log scale is applied to y-axis
+        # use_log: bool = False, # Handled above
+        
+    ax.set_title(plot_title)
+    # fig.update_xaxes(categoryorder="array", categoryarray=items) # NOT DIRECTLY SUPPORTED (Seaborn uses unique order) / COMMENTED OUT
+    # fig.update_layout(boxmode="group") # NOT APPLICABLE (Seaborn handles this by default) / COMMENTED OUT
+    # fig.update_layout(showlegend=False) # NOT APPLICABLE (Seaborn doesn't show legend for this type) / COMMENTED OUT
+
+    # * Display the plot
+    plt.tight_layout()
+    plt.show()
+
+    if summary:
+        # * sort df by first column before printing summary
+        print_summary(df=df.sort_values(col_cat), precision=precision)
+
+    # * save to png if path is provided
+    if png_path is not None:
+        plt.savefig(Path(png_path).as_posix(), format='png', transparent=False)
+        
+    plt.close()
+    plt.style.use('default') # Reset style
 
     return
 
@@ -1534,7 +1999,7 @@ def plot_facet_stacked_bars(
         f"{'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] "
         f"{'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] "
         f"{'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}] "
-        f", n = {original_rows:_} ({n:_})",
+        f", n={original_rows:_} ({n:_})",
         "showlegend": True,
         "template": template,
         # "width": subplot_size * subplots_per_row,
@@ -1877,7 +2342,7 @@ def plot_sankey(
     if max_events_per_id is not None:
         chart_title += f", top {max_events_per_id} events"
     chart_title += overlap_title_part
-    chart_title += f", n = {formatted_total_ids} ({formatted_total_rows})"
+    chart_title += f", n={formatted_total_ids} ({formatted_total_rows})"
 
     fig = go.Figure(
         data=[
@@ -1965,7 +2430,7 @@ def plot_pie(
         data,
         values=data,
         names=data.index,
-        title=f"{_set_caption(caption)}{label}, n = {n:_}",
+        title=f"{_set_caption(caption)}{label}, n={n:_}",
         height=height,
         width=width,
         hole=donut_size,
