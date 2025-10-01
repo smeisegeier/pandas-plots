@@ -184,7 +184,8 @@ def describe_df(
     # ! *** PLOTS ***
     if use_plot:
         # * fix bug(?) in plotly/choreographer - datetime columns are not plotted, set these to str
-        datetime_cols = df.select_dtypes(include=['datetime64']).columns
+        # * also make bool -> str for plot to have the <NA> values shown
+        datetime_cols = df.select_dtypes(include=['datetime64','boolean']).columns
         df[datetime_cols] = df[datetime_cols].astype(str)
         
         # ! Drop completely empty columns (Series)
