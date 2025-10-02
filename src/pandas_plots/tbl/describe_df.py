@@ -145,8 +145,10 @@ def describe_df(
         datetime_cols = df.select_dtypes(include=['datetime64','boolean']).columns
         df[datetime_cols] = df[datetime_cols].astype(str)
         
-        # ! Drop completely empty columns (Series)
-        df = df.dropna(axis=1, how='all')
+        # * fix bug where empty Int64 columns are not plotted
+        df = df.astype(
+            dict.fromkeys(df.columns[df.dtypes == 'Int64'][df.loc[:, df.dtypes == 'Int64'].isnull().all()], 'float64')
+            )
 
         # * reduce column names len if selected
         if top_n_chars_in_columns > 0:
