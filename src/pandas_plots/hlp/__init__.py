@@ -15,6 +15,7 @@ from .add_bitmask_label import add_bitmask_label
 from .find_cols import find_cols
 from .add_measures_to_pyg_config import add_measures_to_pyg_config
 from .get_tum_details import get_tum_details
+from .get_sparse_df import get_sparse_df
 
 __all__ = [
     "mean_confidence_interval",
@@ -29,5 +30,6 @@ __all__ = [
     "add_bitmask_label",
     "find_cols",
     "add_measures_to_pyg_config",
-    "get_tum_details"
+    "get_tum_details",
+    "get_sparse_df"
 ]

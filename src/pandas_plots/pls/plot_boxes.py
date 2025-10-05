@@ -9,7 +9,6 @@ from ..hlp import *
 from ..tbl import print_summary
 from ..helper import set_caption
 
-
 def plot_boxes(
     df: pd.DataFrame,
     caption: str = None,
@@ -17,7 +16,7 @@ def plot_boxes(
     precision: int = 2,
     height: int = 600,
     width: int = 1200,
-    annotations: bool = True,
+    annotations: bool = False,
     summary: bool = True,
     title: str = None,
     use_log: bool = False,
@@ -28,7 +27,7 @@ def plot_boxes(
     """
     [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
 
-    ⚠️ on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
+    ⚠️ ⚠️ DEPRECATION WARNING: on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
 
 
     Args:
@@ -148,8 +147,12 @@ def plot_boxes(
 
     fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
     if summary:
-        # * sort df by first column
-        print_summary(df=df.sort_values(df.columns[0]), precision=precision)
+        # * sort df by first column before printing summary
+        # * print all data
+        print_summary(df=df.sort_values(df.columns[0]), precision=precision,sparse=False,)
+
+        # * print values
+        print_summary(df=df.sort_values(df.columns[0]), precision=precision,sparse=True,)
 
     # * save to png if path is provided
     if png_path is not None:

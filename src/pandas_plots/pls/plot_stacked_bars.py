@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 
 from ..hlp import *
 from ..helper import set_caption, assign_column_colors, aggregate_data
+from ..hlp.group_kkr import group_kkr
 
 
 def plot_stacked_bars(
@@ -35,6 +36,8 @@ def plot_stacked_bars(
     show_other: bool = False,
     show_pct_all: bool = False,
     show_pct_bar: bool = False,
+    kkr_col: Optional[str] = None
+    
 ) -> None:
     """
     Generates a stacked bar plot using the provided DataFrame.
@@ -92,6 +95,9 @@ def plot_stacked_bars(
     #     return
 
     df = df.copy()  # Copy the input DataFrame to avoid modifying the original
+
+    if kkr_col:
+        df = group_kkr(df=df, kkr_col=kkr_col)
 
     # * add count column[2] as a service if none is present
     if len(df.columns) == 2:

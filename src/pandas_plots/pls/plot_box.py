@@ -30,7 +30,7 @@ def plot_box(
     """
     Plots a horizontal box plot for the given pandas Series.
 
-    ⚠️ on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
+    ⚠️ DEPRECATION WARNING: on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
 
     Args:
         ser: The pandas Series to plot.

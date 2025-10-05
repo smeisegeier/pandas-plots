@@ -128,7 +128,11 @@ def plot_boxes_large(
 
     if summary:
         # * sort df by first column before printing summary
-        print_summary(df=df.sort_values(col_cat), precision=precision)
+        # * print all data
+        print_summary(df=df.sort_values(col_cat), precision=precision,sparse=False,)
+
+        # * print values
+        print_summary(df=df.sort_values(col_cat), precision=precision,sparse=True,)
 
     # * save to png if path is provided
     if png_path is not None:

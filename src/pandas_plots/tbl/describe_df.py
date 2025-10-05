@@ -3,21 +3,17 @@
 
 import math
 import os
-from collections import abc
-from pathlib import Path
-from typing import Literal, get_args
-from IPython.display import display, HTML
+from typing import Literal
+from IPython.display import display
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 from scipy import stats
-import dataframe_image as dfi
 
 from ..hlp.wrap_text import wrap_text
-
-import duckdb as ddb
+from .print_summary import print_summary
 
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
@@ -28,7 +24,7 @@ KPI_LITERAL = Literal[
 
 def describe_df(
     df: pd.DataFrame,
-    caption: str,
+    caption: str = "<unknown>",
     use_plot: bool = True,
     use_columns: bool = True,
     use_missing: bool = False,
@@ -59,8 +55,8 @@ def describe_df(
     fig_width (int): width for plot (default 400)
     sort_mode (Literal["value", "index"]): sort by value or index
     top_n_uniques (int): number of uniques to display
-    top_n_chars_in_index (int): number of characters to display on plot axis
-    top_n_chars_in_columns (int): number of characters to display on plot axis. If set, minimum is 10.
+    top_n_chars_in_index (int): number of characters to display on index axis on the plot (value range)
+    top_n_chars_in_columns (int): number of characters to display as subplot title (column name). If set, minimum is 10.
     missing_figsize (tuple[int, int]): figsize for missing plot (default (26, 6)
 
     usage:
@@ -83,13 +79,8 @@ def describe_df(
 
     # * check if df is empty
     if len(df) == 0:
-        print(f"DataFrame is empty!")
+        print("DataFrame is empty!")
         return
-
-    # ! fix bug(?) in plotly - empty float columns are not plotted, set these to str
-    for col in df.columns:
-        if df[col].notna().sum() == 0 and df[col].dtype == "float":
-            df[col] = df[col].astype(str)
 
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}  ")
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)}  ")
@@ -130,10 +121,10 @@ def describe_df(
 
     print("--- column stats (numeric)  ")
     # * only show numerics
-    for col in df.select_dtypes("number").columns:
-        _u, _h = get_uniques_header(col)
-        from .print_summary import print_summary
-        print_summary(df=df[col], name=_h)
+    # for col in df.select_dtypes("number").columns:
+    #     _u, _h = get_uniques_header(col)
+    #     print_summary(df=df[col], name=_h)
+    print_summary(df=df)
 
     #  * show first 3 rows
     display(df[:3])
@@ -146,9 +137,18 @@ def describe_df(
         df[datetime_cols] = df[datetime_cols].astype(str)
         
         # * fix bug where empty Int64 columns are not plotted
+        # * get Int64 columns that are all null -> set to object
+        mask = df.dtypes.astype(str).str.lower().isin(['int64', 'float64'])
         df = df.astype(
-            dict.fromkeys(df.columns[df.dtypes == 'Int64'][df.loc[:, df.dtypes == 'Int64'].isnull().all()], 'float64')
+            dict.fromkeys(
+                df.columns[mask][df.loc[:, mask].isnull().all()],
+                'object'
             )
+        )
+
+        # * now set all empty object columns to <NA>
+        null_cols = df.columns[df.dtypes == 'object'][df.loc[:, df.dtypes == 'object'].isnull().all()]
+        df[null_cols] = "<NA>"
 
         # * reduce column names len if selected
         if top_n_chars_in_columns > 0:
@@ -196,7 +196,12 @@ def describe_df(
                 x = span.iloc[:100].index
                 y = span.iloc[:100].values
                 # * cut long strings
-                if x.dtype == "object" and top_n_chars_in_index > 0:
+                if (
+                    x.dtype == "object"
+                    and top_n_chars_in_index > 0
+                    # * check if all values in span are datetime. if so - do not cut! (its just datetime..)
+                    and not pd.to_datetime(x, errors='coerce').dropna().shape[0] == pd.Series(x).dropna().shape[0]
+                    ) :
                     x = x.astype(str).tolist()
                     _cut = lambda s: (
                         s[:top_n_chars_in_index] + ".."

@@ -269,6 +269,12 @@ def plot_bars(
         height=height,
     )
 
+    # hack for #79
+    if ci_agg == "median":
+        _fig.update_layout(
+            yaxis_title="median",
+        )
+
     # * set axis title
     _fig.show(
         renderer=renderer or os.getenv("RENDERER"),
