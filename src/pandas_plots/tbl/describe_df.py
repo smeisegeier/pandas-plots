@@ -83,43 +83,60 @@ def describe_df(
         return
 
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}  ")
-    print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {np.array(df.columns)}  ")
-    # print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]}) columns: {df.columns.tolist()} ")
+    print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]})")
     print(f"🟣 duplicates: {df.duplicated().sum():_}  ")
-    print(f"🟣 uniques: {wrap_text(str({col: f'{df[col].nunique():_}' for col in df})) }  ")
+    # print(f"🟣 uniques: {wrap_text(str({col: f'{df[col].nunique():_}' for col in df})) }  ")
     # print(f"🟣 uniques: { {col: f'{df[col].nunique():_}' for col in df} }")
     # print(f"🟣 uniques: {{ {', '.join(f'{col}: {df[col].nunique():_}' for col in df)} }}")
-    print(f"🟣 missings: {wrap_text(str({col: f'{df[col].isna().sum():_}' for col in df})) }  ")
+    # print(f"🟣 missings: {wrap_text(str({col: f'{df[col].isna().sum():_}' for col in df})) }  ")
     # print(f"🟣 missings: { {col: f'{df[col].isna().sum():_}' for col in df} }")
     # print(f"🟣 missings: {dict(df.isna().sum())}")
     
 
+    n_rows = len(df) # Define the total number of rows
+
     def get_uniques_header(col: str):
-        # * sorting has issues when col is of mixed type (object)
+        # * Calculate Missing Values
+        n_missing = df[col].isna().sum()
+        percent_missing = (n_missing / n_rows) * 100
+        
+        # * Prep column for unique value count
         if df[col].dtype == "object":
-            df[col] = df[col].astype(str)
-        # * get unique values
-        # unis = df[col].sort_values().unique()
-        unis = list(df[col].value_counts().sort_index().index)
-        # * get header
-        header = f"🟠 {col}({len(unis):_}|{df[col].dtype})  "
+            # Convert object to string to handle mixed types gracefully when counting uniques
+            col_series = df[col].astype(str)
+        else:
+            col_series = df[col]
+            
+        # * Get unique values and count
+        unis = list(col_series.value_counts(dropna=False).sort_index().index)
+        n_uniques = len(unis)
+        
+        # * Format the header string: 🟠 col_name (dtype | uniques | missings)
+        header = (
+            f"- {col} ({df[col].dtype} | {n_uniques:_} | "
+            f"{n_missing:_} ({percent_missing:.0f}%))"
+        )
+        
         return unis, header
 
     # hack this block somehow interferes with the plotly renderer. so its run even when use_columns=False
     if use_columns:
-        print("--- column uniques (all)  ")
-        print(f"🟠 index {wrap_text(df.index.tolist()[:top_n_uniques])}  ")
+        print("🟠 column stats all (dtype | uniques | missings) [values]  ")
+        print(f"- index {wrap_text(df.index.tolist()[:top_n_uniques])}  ")
+        
     for col in df.columns[:]:
         _u, _h = get_uniques_header(col)
-        # * check col type
+        
+        # * check col type (use the original dtype for wrapping)
         is_str = df.loc[:, col].dtype.kind == "O"
+        
         # * wrap output
         if use_columns:
                 print(
                     f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}  "
                 )
 
-    print("--- column stats (numeric)  ")
+    print("🟠 column stats numeric  ")
     # * only show numerics
     # for col in df.select_dtypes("number").columns:
     #     _u, _h = get_uniques_header(col)
