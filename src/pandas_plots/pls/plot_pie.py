@@ -1,15 +1,11 @@
 import os
 from pathlib import Path
-from typing import Literal, Optional
 import pandas as pd
-import plotly.express as px
-import plotly.io as pio
 from ..hlp import *
 from ..helper import set_caption
 import matplotlib.pyplot as plt
 import os
 from pathlib import Path
-from typing import Literal # Added for type hinting completeness (though not used in signature)
 
 
 def plot_pie(

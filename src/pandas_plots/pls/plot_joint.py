@@ -1,13 +1,12 @@
 import os
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 
 from ..hlp import *
-from ..helper import set_caption
 
 
 def plot_joint(

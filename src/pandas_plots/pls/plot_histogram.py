@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 import pandas as pd
 import plotly.express as px

@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Literal, Optional
 
 import pandas as pd
 import seaborn as sb

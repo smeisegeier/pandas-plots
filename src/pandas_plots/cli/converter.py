@@ -14,11 +14,18 @@ def jupyter_to_md(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    renderer = os.getenv("RENDERER")
+    debug = os.getenv("DEBUG")
+    theme = os.getenv("THEME")
+
     # * if this isnt set, plotly digrams will not be rendered
     os.environ["RENDERER"] = "svg"
 
     # * suppress DEBUG output
     os.environ["DEBUG"] = "0"
+
+    # * set theme to light
+    os.environ["THEME"] = "light"
 
     # * convert
     dfi.convert(
@@ -41,6 +48,8 @@ def jupyter_to_md(
 
     # * reset
     os.environ["RENDERER"] = ""  # <None> does not work
+    os.environ["DEBUG"] = debug
+    os.environ["THEME"] = theme
 
 
 # Keep the original function name as primary, alias if needed

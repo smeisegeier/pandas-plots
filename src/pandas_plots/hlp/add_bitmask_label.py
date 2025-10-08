@@ -1,21 +1,5 @@
-import importlib.metadata as md
-import os
-import platform
-import re
-from enum import Enum, auto
-from io import BytesIO
-from platform import python_version
-from typing import List, Literal
-import json
-import uuid
-
 import duckdb as ddb
-import numpy as np
 import pandas as pd
-import requests
-import scipy.stats
-from matplotlib import pyplot as plt
-from PIL import Image
 
 def add_bitmask_label(
     data: pd.DataFrame | pd.Series | ddb.DuckDBPyRelation,
@@ -31,6 +15,8 @@ def add_bitmask_label(
     - bitmask_col must have been generated before. its value must be constructed as a bitmask, e.g:
     - a red, green, blue combination is rendered into binary 110, which means it has green and blue
     - its value is 6, which will resolved into "g|b" if the list ["r","g","b"] is given
+
+    bitmask_col values with null are set to 0 to be processed.
 
     if the bitmask value is 0, it will be replaced with the zero_code.
     the method can be chained in pandas as well as in duckdb: df.add_bitmask_label(...)
@@ -59,10 +45,15 @@ def add_bitmask_label(
         bitmask_col = data.name if data.name else "bitmask"
         data = data.to_frame(name=bitmask_col)
 
+
+
     if not isinstance(data, pd.DataFrame):
         raise ValueError(
             "Input must be a pandas DataFrame, Series, or DuckDB Relation."
         )
+
+    # ! null values cant be handled, so they are replaced with 0
+    data[bitmask_col] = data[bitmask_col].fillna(0)
 
     # * get max allowed value by bitshift, eg for 4 labels its 2^4 -1 = 15
     max_allowable_value = (1 << len(labels)) - 1

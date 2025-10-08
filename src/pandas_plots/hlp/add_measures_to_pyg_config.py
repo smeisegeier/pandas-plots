@@ -1,21 +1,7 @@
-import importlib.metadata as md
 import os
-import platform
-import re
-from enum import Enum, auto
-from io import BytesIO
-from platform import python_version
-from typing import List, Literal
 import json
 import uuid
 
-import duckdb as ddb
-import numpy as np
-import pandas as pd
-import requests
-import scipy.stats
-from matplotlib import pyplot as plt
-from PIL import Image
 
 def add_measures_to_pyg_config(json_path: str, nodes: list[tuple[str, str]] = [("cnt_tum", "count(distinct z_tum_id)")], strict: bool = False) -> None:
     """
