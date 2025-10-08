@@ -14,7 +14,6 @@ def jupyter_to_md(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    renderer = os.getenv("RENDERER")
     debug = os.getenv("DEBUG")
     theme = os.getenv("THEME")
 
@@ -48,9 +47,10 @@ def jupyter_to_md(
 
     # * reset
     os.environ["RENDERER"] = ""  # <None> does not work
-    os.environ["DEBUG"] = debug
-    os.environ["THEME"] = theme
-
+    if debug:
+        os.environ["DEBUG"] = debug
+    if theme:
+        os.environ["THEME"] = theme
 
 # Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):
