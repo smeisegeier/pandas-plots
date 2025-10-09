@@ -6,6 +6,7 @@ def descr_db(
     db: ddb.DuckDBPyRelation,
     caption: str = "db",
     use_preview: bool = True,
+    width: int = 0,
 )->None:
     """
     Print a short description of the given duckdb relation.
@@ -18,17 +19,20 @@ def descr_db(
         A caption to be printed left of the description. Defaults to "db".
     use_preview: bool, optional
         Whether to print a preview of the first 3 rows of the relation. Defaults to True.
+    width: int, optional
+        The maximum width of the table. Defaults to 0.
 
     Returns
     -------
     None
     """
 
-    # * ensure markdown is correctly rendered
+    # * check if print is enabled
     is_print = (os.getenv("RENDERER") in ('png', 'svg'))
 
-    # * wide tables are not properly rendered in markdown
-    width = 220 if is_print else 2000
+    if width == 0:
+        # * wide tables are not properly rendered in markdown
+        width = 220 if is_print else 2000
     
     if is_print:
         display(HTML("<br>"))
@@ -38,4 +42,6 @@ def descr_db(
     
     if use_preview:
         db.limit(3).show(max_width=width)
+    
+    print(f"is_print: {is_print}")
     return

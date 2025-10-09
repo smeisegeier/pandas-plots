@@ -91,11 +91,12 @@ tbl.show_num_df(
   - `find_cols()` finds all columns in a list of columns that contain any of the given stubs
   - `add_measures_to_pyg_config()` adds measures to a pygwalker config file to avoid frequent manual update
   - `get_tum_details()` prints the details of a specific tumor (needs con to clinical cancer data)
+  - `set_theme()` sets the theme for pandas-plots notebooks. ensures light theme upon printing.
 <br>
 
-> theme setting ☀️ 🌔 can be controlled through all functions by setting the environment variable `'THEME'` to either `'light'` or `'dark'`
+> theme setting ☀️ 🌔 can be controlled through all functions by calling `set_theme()` to either `'light'` or `'dark'`
 
-> renderer can be controlled through all functions by setting the environment variable `'RENDERER'` to `'png'` for printing to markdown or pdf
+> renderer can be controlled through all functions by setting the environment variable `'RENDERER'` to `'png'` or `'svg'` for printing to markdown or pdf
 
 ## prerequisites
 

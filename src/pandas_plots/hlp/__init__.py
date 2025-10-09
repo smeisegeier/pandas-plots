@@ -16,6 +16,7 @@ from .find_cols import find_cols
 from .add_measures_to_pyg_config import add_measures_to_pyg_config
 from .get_tum_details import get_tum_details
 from .get_sparse_df import get_sparse_df
+from .set_theme import set_theme
 
 __all__ = [
     "mean_confidence_interval",
@@ -31,5 +32,6 @@ __all__ = [
     "find_cols",
     "add_measures_to_pyg_config",
     "get_tum_details",
-    "get_sparse_df"
+    "get_sparse_df",
+    "set_theme",
 ]

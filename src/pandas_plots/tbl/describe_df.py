@@ -15,6 +15,8 @@ from scipy import stats
 from ..hlp.wrap_text import wrap_text
 from .print_summary import print_summary
 
+from IPython.display import display, HTML
+
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
 ]
@@ -82,6 +84,13 @@ def describe_df(
         print("DataFrame is empty!")
         return
 
+    # * check if print is enabled
+    is_print = (os.getenv("RENDERER") in ('png', 'svg'))
+
+    if is_print:
+        # * print <br> to avoid .show() bug in duckdb?
+        display(HTML("<br>"))
+
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}  ")
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]})")
     print(f"🟣 duplicates: {df.duplicated().sum():_}  ")
@@ -91,7 +100,6 @@ def describe_df(
     # print(f"🟣 missings: {wrap_text(str({col: f'{df[col].isna().sum():_}' for col in df})) }  ")
     # print(f"🟣 missings: { {col: f'{df[col].isna().sum():_}' for col in df} }")
     # print(f"🟣 missings: {dict(df.isna().sum())}")
-    
 
     n_rows = len(df) # Define the total number of rows
 
@@ -118,6 +126,7 @@ def describe_df(
         )
         
         return unis, header
+
 
     # hack this block somehow interferes with the plotly renderer. so its run even when use_columns=False
     if use_columns:

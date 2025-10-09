@@ -1,6 +1,56 @@
 import dataframe_image as dfi
 import os
 import argparse
+import re
+
+def remove_pandas_style_from_md(markdown_filepath):
+    """
+    Removes the default Pandas HTML style block and cleans up excessive 
+    blank lines from a Markdown file.
+    
+    This function targets the <style> block often included by Pandas
+    and compresses three or more consecutive blank lines into two.
+    """
+    try:
+        # 1. Read the file content
+        with open(markdown_filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        original_content = content # Keep original content to check for changes
+
+        # 2. REMOVE STYLE BLOCK
+        # Regular expression to find any <style>...</style> block.
+        style_pattern = re.compile(
+            r'<style\s*.*?>.*?</style>',
+            re.DOTALL | re.IGNORECASE
+        )
+        content = re.sub(style_pattern, '', content)
+
+        
+        # 3. CLEAN EXCESS BLANK LINES
+        # Replace two or more blank lines (which may contain whitespace) 
+        # with just a single blank line (\n\n).
+        # We search for \n followed by zero or more spaces (\s*) and another \n, 
+        # repeated at least twice.
+        content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
+        
+
+        if content != original_content:
+            # 4. Write the cleaned content back to the file
+            with open(markdown_filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"✅ SUCCESS: Cleaned style blocks and excess blank lines in: {markdown_filepath}")
+            return True
+        else:
+            print(f"ℹ️ NO CHANGES: No style blocks or excessive blank lines found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ AN ERROR OCCURRED: {e}")
+        return False
 
 
 def jupyter_to_md(
@@ -14,17 +64,8 @@ def jupyter_to_md(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    debug = os.getenv("DEBUG")
-    theme = os.getenv("THEME")
-
     # * if this isnt set, plotly digrams will not be rendered
     os.environ["RENDERER"] = "svg"
-
-    # * suppress DEBUG output
-    os.environ["DEBUG"] = "0"
-
-    # * set theme to light
-    os.environ["THEME"] = "light"
 
     # * convert
     dfi.convert(
@@ -47,10 +88,16 @@ def jupyter_to_md(
 
     # * reset
     os.environ["RENDERER"] = ""  # <None> does not work
-    if debug:
-        os.environ["DEBUG"] = debug
-    if theme:
-        os.environ["THEME"] = theme
+    
+    # * remove style block
+    # 1. Get the filename without its original extension
+    root = os.path.splitext(os.path.basename(path))[0]
+
+    # 2. Construct the full path using the correct .md extension
+    target_md_path = os.path.join(output_dir, root + '.md')
+
+    # 3. Call the function
+    remove_pandas_style_from_md(target_md_path)
 
 # * Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):
