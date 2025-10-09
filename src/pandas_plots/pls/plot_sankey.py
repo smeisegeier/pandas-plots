@@ -1,11 +1,6 @@
-from pathlib import Path
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
-import os
 import re
-from ..hlp import *
-
 
 def plot_sankey(
     df=None,
@@ -26,6 +21,8 @@ def plot_sankey(
 
     Nodes represent the order of events (e.g., "[1] op", "[2] syst").
     A default demo is shown if no DataFrame is provided.
+    Id with missing date/events are also shown.
+    Percentages are (x% | y%). x is the share of all id in total, y is the share of all id on this step
 
     Args:
         df (pd.DataFrame, optional): A Pandas DataFrame containing the event data.
@@ -43,7 +40,7 @@ def plot_sankey(
                                 If None, plotly's default renderer is used.
         show_start_node (bool): If True, adds a visual 'start' node and links all
                                 first events to it. This is useful for visualizing
-                                IDs with only one event.
+                                IDs with only one event, including those with missing/invalid events.
         font_size (int): The font size of the labels in the plot.
     """
     # --- Example Usage with Enlarged Pandas DataFrame if no DataFrame is provided ---
@@ -99,8 +96,8 @@ def plot_sankey(
                 "2020-02-01",  # Tumor 5
                 "2021-01-01",
                 "2022-02-01",  # Tumor 6
-                "2014-01-01",
-                "2015-02-01",  # Tumor 7
+                "",
+                "",  # Tumor 7 (Missing dates)
                 "2025-01-01",  # Tumor 8 (single event)
                 "2025-02-01",  # Tumor 9 (single event)
                 "2025-03-01",  # Tumor 10 (single event)
@@ -128,8 +125,8 @@ def plot_sankey(
                 "rad",  # Tumor 5
                 "syst",
                 "op",  # Tumor 6
-                "st",
-                "rad",  # Tumor 7
+                "",
+                "",  # Tumor 7 (Missing events)
                 "op",  # Tumor 8
                 "op",  # Tumor 9
                 "syst",  # Tumor 10
@@ -139,7 +136,8 @@ def plot_sankey(
         }
         df = pd.DataFrame(data_demo)
         print("--- Using demo data (data_demo) ---")
-        print(df.head().to_string())  # Print first 5 rows of the DataFrame prettily
+        # Print all lines of the DataFrame
+        print(df.to_string())
         print("-----------------------------------")
 
     # --- Simplified Column Recognition based on index ---
@@ -153,46 +151,83 @@ def plot_sankey(
     df_processed = df_processed.drop_duplicates(
         subset=[id_col_name, date_col_name, event_col_name]
     )
+    
+    # Track the total number of IDs before any filtering
+    total_unique_ids = df_processed[id_col_name].nunique()
 
-    try:
-        df_processed[date_col_name] = pd.to_datetime(df_processed[date_col_name])
-    except (ValueError, TypeError):
-        print(
-            f"Error: Could not convert column '{date_col_name}' to a valid date format."
-        )
+    # --- Handle Missing Date/Event and Coerce to <NA> Event ---
+    
+    # 1. Flag rows with null/empty event names
+    is_event_missing = (df_processed[event_col_name].isna()) | \
+                    (df_processed[event_col_name].astype(str).str.strip() == '')
+
+    # 2. Convert date column to datetime, coercing errors to NaT
+    df_processed[date_col_name] = pd.to_datetime(df_processed[date_col_name], errors='coerce')
+    
+    # 3. Flag rows where date could not be parsed (NaT)
+    is_date_missing = df_processed[date_col_name].isna()
+    
+    # 4. Create a unified flag for invalid records
+    is_invalid_record = is_event_missing | is_date_missing
+
+    # 5. For invalid records, set the event name to '<NA>' and the date to a high date
+    # This keeps the record, ensuring the ID is counted, but marks it clearly.
+    # The date is set to NaT for sequencing to work correctly later (it will be filtered out 
+    # for overlap but grouped for first event).
+    df_processed.loc[is_invalid_record, event_col_name] = '<NA>'
+    # Set the date for invalid records back to NaT so they are not included in sorting/overlap checks
+    df_processed.loc[is_invalid_record, date_col_name] = pd.NaT 
+
+    # --- Now we only work with records that have valid IDs and event names (<NA> is now a valid name) ---
+    df_processed = df_processed.dropna(subset=[id_col_name]).copy()
+    
+    # If no data remains after filtering, exit early
+    if df_processed.empty:
+        print("No valid data to plot after filtering.")
         return None
 
-    # --- Handle overlap exclusion based on user selection ---
+    # --- Handle overlap exclusion based on user selection (only applies to valid date records) ---
     overlap_title_part = ""
-    if exclude_overlap_id:
+    
+    # Temporarily filter out <NA> events for overlap checks, as they don't have a valid date
+    df_overlap_check = df_processed[df_processed[event_col_name] != '<NA>'].copy()
+    
+    if exclude_overlap_id and not df_overlap_check.empty:
         overlapping_ids = (
-            df_processed.groupby([id_col_name, date_col_name])
+            df_overlap_check.groupby([id_col_name, date_col_name])
             .size()
             .loc[lambda x: x > 1]
             .index.get_level_values(id_col_name)
             .unique()
         )
+        # Exclude IDs from the main dataframe
         df_processed = df_processed[
             ~df_processed[id_col_name].isin(overlapping_ids)
         ].copy()
         overlap_title_part = ", overlap ids excluded"
-    elif exclude_overlap_event:
+    elif exclude_overlap_event and not df_overlap_check.empty:
         overlapping_event_set = set(
-            df_processed.groupby([id_col_name, date_col_name])
+            df_overlap_check.groupby([id_col_name, date_col_name])
             .size()
             .loc[lambda x: x > 1]
             .index
         )
+        # Exclude only the overlapping date-events from the main dataframe 
+        # (excluding <NA> records since they don't have a valid date)
         df_processed = df_processed[
-            ~df_processed.set_index([id_col_name, date_col_name]).index.isin(
+            ~df_processed[df_processed[event_col_name] != '<NA>'].set_index([id_col_name, date_col_name]).index.isin(
                 overlapping_event_set
             )
         ].copy()
         overlap_title_part = ", overlap events excluded"
 
+    # --- Sort: Valid Date records first, then <NA> records (which have NaT) ---
+    # Sorting by date naturally puts NaT (our <NA> records) at the end, which is fine
+    # because event_order is calculated *after* sorting.
     df_sorted = df_processed.sort_values(by=[id_col_name, date_col_name])
 
     # --- Performance Optimization: Use vectorized operations instead of loops ---
+    # Recalculate sequences based on remaining valid and <NA> records
     df_sorted["event_order"] = df_sorted.groupby(id_col_name).cumcount() + 1
 
     if max_events_per_id is not None:
@@ -202,6 +237,9 @@ def plot_sankey(
         "[" + df_sorted["event_order"].astype(str) + "] " + df_sorted[event_col_name]
     )
 
+    # Filter out IDs that were left with no events after sequencing (e.g., if max_events=0)
+    df_sorted = df_sorted.dropna(subset=['ordered_event_label'])
+    
     if df_sorted.empty:
         print("No valid data to plot after filtering.")
         return None
@@ -241,31 +279,64 @@ def plot_sankey(
     unique_labels_df["event_name"] = (
         unique_labels_df["label"].str.extract(r"\] (.*)").fillna("start")
     )
-    unique_labels_df_sorted = unique_labels_df.sort_values(
-        by=["event_order_num", "event_name"]
+    
+    # Add sort key to force <NA> to the end
+    unique_labels_df["event_name_sort_key"] = unique_labels_df["event_name"].apply(
+        lambda x: "~Z_NA_LAST" if x == "<NA>" else x
     )
+
+    # Sort primarily by order number, and secondarily by the custom sort key
+    unique_labels_df_sorted = unique_labels_df.sort_values(
+        by=["event_order_num", "event_name_sort_key"]
+    )
+    
     unique_unformatted_labels_sorted = unique_labels_df_sorted["label"].tolist()
 
     label_to_index = {
         label: i for i, label in enumerate(unique_unformatted_labels_sorted)
     }
 
-    # Calculate total unique IDs for percentage calculation
-    total_unique_ids = df_processed[id_col_name].nunique()
-
-    display_labels = []
+    # Calculate node counts and step totals for percentage calculation
     node_counts = df_sorted["ordered_event_label"].value_counts()
-    for label in unique_unformatted_labels_sorted:
-        if label == "[0] start":
-            count = total_unique_ids
-        else:
-            count = node_counts.get(label, 0)
+    
+    # Add count information to the DataFrame for easier calculation
+    unique_labels_df_sorted['node_count'] = unique_labels_df_sorted['label'].apply(
+        lambda x: total_unique_ids if x == '[0] start' else node_counts.get(x, 0)
+    )
 
-        percentage = (count / total_unique_ids) * 100
+    # Calculate the total count for each step (event_order_num)
+    step_totals = unique_labels_df_sorted.groupby('event_order_num')['node_count'].sum()
+
+    # Map the step total back to the DataFrame
+    unique_labels_df_sorted['step_total'] = unique_labels_df_sorted['event_order_num'].map(step_totals)
+
+    # --- Recalculate and format display_labels with (Total % | Step %) ---
+    display_labels = []
+    for index, row in unique_labels_df_sorted.iterrows():
+        label = row['label']
+        count = row['node_count']
+        step_total = row['step_total']
+        
         formatted_count = f"{count:,}".replace(",", "_")
-        formatted_percentage = f"({int(round(percentage, 0))}%)"
+        
+        # 1. Total Percentage (relative to total_unique_ids)
+        total_percentage = (count / total_unique_ids) * 100
+        formatted_total_percentage = f"{int(round(total_percentage, 0))}%"
+        
+        # 2. Step Percentage (relative to step_total)
+        if label == "[0] start":
+            # Step 0 is the total start, so step percentage is 100%
+            formatted_step_percentage = "100%"
+        elif step_total > 0:
+            step_percentage = (count / step_total) * 100
+            formatted_step_percentage = f"{int(round(step_percentage, 0))}%"
+        else:
+            formatted_step_percentage = "0%"
 
-        display_labels.append(f"{label} {formatted_count} {formatted_percentage}")
+        formatted_percentages = f"({formatted_total_percentage} | {formatted_step_percentage})"
+
+        display_labels.append(f"{label} {formatted_count} {formatted_percentages}")
+    # --- End of display_labels recalculation ---
 
     # Map sources and targets to indices
     sources = link_counts["source_label"].map(label_to_index).tolist()
@@ -293,7 +364,11 @@ def plot_sankey(
     for i, row in link_counts.iterrows():
         source_l = row["source_label"]
         target_l = row["ordered_event_label"]
-        if source_l == "[0] start":
+        
+        # Use a distinct color for links to/from <NA>
+        if "<NA>" in source_l or "<NA>" in target_l:
+            link_colors.append("rgba(255, 165, 0, 0.6)") # Orange for <NA> links
+        elif source_l == "[0] start":
             link_colors.append(start_link_color)
         else:
             source_event_name = re.search(r"\] (.*)", source_l).group(1)
@@ -315,7 +390,7 @@ def plot_sankey(
     if max_events_per_id is not None:
         chart_title += f", top {max_events_per_id} events"
     chart_title += overlap_title_part
-    chart_title += f", n={formatted_total_ids} ({formatted_total_rows})"
+    chart_title += f", n={formatted_total_ids} id ({formatted_total_rows} events)"
 
     fig = go.Figure(
         data=[
@@ -337,4 +412,4 @@ def plot_sankey(
 
 
     fig.update_layout(title_text=chart_title, font_size=font_size, width=width, height=height)
-    fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
+    fig.show(renderer=renderer, width=width, height=height)
