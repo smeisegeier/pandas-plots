@@ -52,11 +52,12 @@ def jupyter_to_md(
     if theme:
         os.environ["THEME"] = theme
 
-# Keep the original function name as primary, alias if needed
+# * Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):
-    """Alias function with the name you want to use"""
     return jupyter_to_md(*args, **kwargs)
 
+def j2md(*args, **kwargs):
+    return jupyter_to_md(*args, **kwargs)
 
 def test():
     """Example of a second CLI function with proper argument parsing"""
@@ -72,10 +73,10 @@ def test():
 def main():
     parser = argparse.ArgumentParser(description="Convert Jupyter notebooks to markdown")
     parser.add_argument("path", help="Path to the Jupyter notebook to convert")
-    parser.add_argument("--output_dir", "-o", default="./docs", help="Output directory (default: ./docs)")
-    parser.add_argument("--no_input", action="store_true", help="Exclude input cells in output (default: False)")
-    parser.add_argument("--no_execute", action="store_true", help="Do not execute notebook before conversion (default: False - executes by default)")
-    parser.add_argument("--chrome_path", default="/opt/homebrew/bin/chromium", 
+    parser.add_argument("--output-dir", "-o", default="./docs", help="Output directory (default: ./docs)")
+    parser.add_argument("--no-input", action="store_true", help="Exclude input cells in output (default: False)")
+    parser.add_argument("--no-execute", action="store_true", help="Do not execute notebook before conversion (default: False - executes by default)")
+    parser.add_argument("--chrome-path", default="/opt/homebrew/bin/chromium", 
                     help="Path to Chrome/Chromium executable (default: /opt/homebrew/bin/chromium)")
     
     args = parser.parse_args()

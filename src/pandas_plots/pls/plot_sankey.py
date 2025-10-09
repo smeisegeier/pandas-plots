@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import plotly.graph_objects as go
 import re
@@ -412,4 +413,4 @@ def plot_sankey(
 
 
     fig.update_layout(title_text=chart_title, font_size=font_size, width=width, height=height)
-    fig.show(renderer=renderer, width=width, height=height)
+    fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
