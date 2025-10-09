@@ -15,7 +15,7 @@ from scipy import stats
 from ..hlp.wrap_text import wrap_text
 from .print_summary import print_summary
 
-from IPython.display import display, HTML
+# from IPython.display import display, HTML
 
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
@@ -85,11 +85,11 @@ def describe_df(
         return
 
     # * check if print is enabled
-    is_print = (os.getenv("RENDERER") in ('png', 'svg'))
+    # is_print = (os.getenv("RENDERER") in ('png', 'svg'))
 
-    if is_print:
-        # * print <br> to avoid .show() bug in duckdb?
-        display(HTML("<br>"))
+    # if is_print:
+    #     # * print <br> to avoid .show() bug in duckdb?
+    #     display(HTML("<br>"))
 
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}  ")
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]})")
