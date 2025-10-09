@@ -1,5 +1,7 @@
-
+import os
 import duckdb as ddb
+from IPython.display import display, HTML
+
 
 def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
     """
@@ -14,6 +16,14 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
     Returns:
         None
     """
+    
+    is_print= os.getenv("RENDERER") in ('png', 'svg')
+    
+    width = 150 if is_print else 2000
+
+    if is_print:
+        display(HTML("<br>"))
+    
     print("pat")
     (con.sql(f"""--sql
         select
@@ -31,7 +41,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         order by z_tum_order
         """)
-        .show()
+        .show(max_width=width)
     )
     print("tod")
     (con.sql(f"""--sql
@@ -43,7 +53,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         join Tumor on tu.oBDS_RKIPatientId = Tumor.z_pat_id
         where z_tum_id = '{z_tum_id}'
         """)
-        .show()
+        .show(max_width=width)
     )
 
     print("tum1")
@@ -62,7 +72,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         order by z_tum_order
         """)
-        .show()
+        .show(max_width=width)
     )
 
     print("tum2")
@@ -81,7 +91,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         order by z_tum_order
         """)
-        .show()
+        .show(max_width=width)
     )
 
     print("op")
@@ -92,7 +102,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         order by z_op_order
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("ops")
@@ -102,7 +112,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("st")
@@ -112,7 +122,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("be")
@@ -123,7 +133,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         order by z_bestr_order
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("app")
@@ -133,7 +143,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("syst")
@@ -144,7 +154,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         order by z_syst_order
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("fo")
@@ -155,7 +165,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         order by z_fo_order
         """)
         .project("* exclude (z_tum_id, z_kkr)")
-        .show()
+        .show(max_width=width)
     )
 
     print("fo_tnm")
@@ -165,7 +175,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id, z_kkr)")
-        .show()
+        .show(max_width=width)
     )
 
     print("fo_fm")
@@ -175,7 +185,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("fo_weitere")
@@ -185,7 +195,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("diag_fm")
@@ -195,7 +205,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )
 
     print("diag_weitere")
@@ -205,5 +215,5 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         where z_tum_id = '{z_tum_id}'
         """)
         .project("* exclude (z_tum_id)")
-        .show()
+        .show(max_width=width)
     )

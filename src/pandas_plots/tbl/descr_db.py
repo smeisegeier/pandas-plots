@@ -32,7 +32,7 @@ def descr_db(
 
     if width == 0:
         # * wide tables are not properly rendered in markdown
-        width = 220 if is_print else 2000
+        width = 150 if is_print else 2000
     
     if is_print:
         display(HTML("<br>"))
@@ -43,5 +43,4 @@ def descr_db(
     if use_preview:
         db.limit(3).show(max_width=width)
     
-    print(f"is_print: {is_print}")
     return

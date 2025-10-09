@@ -3,53 +3,85 @@ import os
 import argparse
 import re
 
+
+def enclose_ascii_table_in_code_block(content):
+    """
+    Searches for blocks that start with '┌' and end with '└', 
+    and encloses the entire block with Markdown code fences (```).
+    
+    Args:
+        content (str): The full text content of the Markdown document.
+
+    Returns:
+        str: The cleaned content.
+    """
+    
+    # The regular expression uses:
+    # 1. re.DOTALL: Allows '.' to match across newlines (for the content in between).
+    # 2. re.MULTILINE: Allows '^' and '$' to match the start and end of each line.
+    
+    # Search Pattern (FIXED for multi-match reliability):
+    # (\s*┌.*?^\s*└[^\n]*)   -> Group 1: Captures the entire table block, starting with ┌, 
+    #                            non-greedily (.*?) up to the └ line, and then captures 
+    #                            content on that line, stopping BEFORE the line's newline.
+    # (\n|$)                  -> Group 2: Captures the necessary newline (\n) after the └ line 
+    #                            or the end of the string ($), forcing the match to terminate.
+    pattern = re.compile(
+        r'(\s*┌.*?^\s*└[^\n]*)(\n|$)',
+        re.DOTALL | re.MULTILINE
+    )
+    
+    # Replacement Pattern:
+    # Inserts newlines and fences, preserving the captured table block (\1) and 
+    # the trailing newline (\2).
+    replacement = r'\n\n\n\t\t```\1\n\t\t```\n\n\2'
+    # replacement = r'\n\n```\1\n```\n\2'
+    
+    new_content = re.sub(pattern, replacement, content)
+    
+    return new_content
+
+
 def remove_pandas_style_from_md(markdown_filepath):
     """
-    Removes the default Pandas HTML style block and cleans up excessive 
-    blank lines from a Markdown file.
-    
-    This function targets the <style> block often included by Pandas
-    and compresses three or more consecutive blank lines into two.
+    Removes the default Pandas HTML style block, cleans up excessive blank lines,
+    and encloses recognized ASCII tables with Markdown code fences.
     """
     try:
         # 1. Read the file content
         with open(markdown_filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        original_content = content # Keep original content to check for changes
-
-        # 2. REMOVE STYLE BLOCK
-        # Regular expression to find any <style>...</style> block.
-        style_pattern = re.compile(
-            r'<style\s*.*?>.*?</style>',
-            re.DOTALL | re.IGNORECASE
-        )
+        original_content = content 
+        
+        # 2. STEP: REMOVE HTML STYLE BLOCK
+        style_pattern = re.compile(r'<style\s*.*?>.*?</style>', re.DOTALL | re.IGNORECASE)
         content = re.sub(style_pattern, '', content)
 
-        
-        # 3. CLEAN EXCESS BLANK LINES
-        # Replace two or more blank lines (which may contain whitespace) 
-        # with just a single blank line (\n\n).
-        # We search for \n followed by zero or more spaces (\s*) and another \n, 
-        # repeated at least twice.
+        # 3. STEP: ENCLOSE ASCII TABLES WITH CODE FENCES
+        # content = enclose_ascii_table_in_code_block(content)
+
+        # 4. STEP: CLEAN UP EXCESSIVE BLANK LINES
+        # Replaces three or more consecutive blank lines with two.
         content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
         
-
+        
         if content != original_content:
-            # 4. Write the cleaned content back to the file
+            # 5. Write the cleaned content back to the file
             with open(markdown_filepath, 'w', encoding='utf-8') as f:
+                content = content.strip() # Final global strip before writing to prevent extra blank lines at EOF
                 f.write(content)
-            print(f"✅ SUCCESS: Cleaned style blocks and excess blank lines in: {markdown_filepath}")
+            print(f"✅ CLEANED: File successfully processed: {markdown_filepath}")
             return True
         else:
-            print(f"ℹ️ NO CHANGES: No style blocks or excessive blank lines found in: {markdown_filepath}")
+            print(f"ℹ️ NO CHANGES: No elements found to clean in: {markdown_filepath}")
             return False
 
     except FileNotFoundError:
         print(f"❌ ERROR: File not found at {markdown_filepath}")
         return False
     except Exception as e:
-        print(f"❌ AN ERROR OCCURRED: {e}")
+        print(f"❌ ERROR DURING PROCESSING: {e}")
         return False
 
 
