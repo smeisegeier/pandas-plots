@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main  # or your default branch
+  # Triggers manually via the GitHub Actions UI
+  workflow_dispatch:
 
 env:
   IS_PROD: true   # Change to true to run real publish and skip simulation
