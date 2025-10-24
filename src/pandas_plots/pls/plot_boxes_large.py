@@ -75,6 +75,9 @@ def plot_boxes_large(
     # * unique items (needed for title and potential ordering)
     # items = sorted(df[col_cat].unique())
 
+    # * Sort by category
+    df=df.sort_values(col_cat)
+
     # * Title and Labels
     caption = set_caption(caption)
     log_str = " (log-scale)" if use_log else ""

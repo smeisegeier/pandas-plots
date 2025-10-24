@@ -1,6 +1,7 @@
 # import warnings
 # warnings.filterwarnings("ignore")
 
+import numbers
 from typing import Literal
 
 import numpy as np
@@ -89,18 +90,14 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
         metrics.extend(["skew", "kurto"])
 
     def format_number_string(value, precision):
-        # if not isinstance(value, numbers.Number):
-        #     return str(value)
-        # if isinstance(value, (float, np.float32, np.float64)):
-        #     val_str = f"{value:_.{precision}f}"
-        # elif isinstance(value, (int, np.int32, np.int64)):
-        #     val_str = f"{value:_}"
-        # else:
-        #     return str(value)
-
-        # * Handle non-numeric CV/N/A
-
-        val_str = f"{value:_.{precision}f}"
+        if not isinstance(value, numbers.Number):
+            return str(value)
+        if isinstance(value, (float, np.float32, np.float64)):
+            val_str = f"{value:_.{precision}f}"
+        elif isinstance(value, (int, np.int32, np.int64)):
+            val_str = f"{value:_}"
+        else:
+            return str(value)
 
         return val_str
 
@@ -213,7 +210,12 @@ def print_summary(
                 last_summary = summary
 
     if show and summary_list:
-        table_output = _format_summary_table(name_list, summary_list, precision, extended)
+        table_output = _format_summary_table(
+            name_list,
+            summary_list,
+            precision,
+            extended,
+        )
         print(table_output)
 
     return last_summary

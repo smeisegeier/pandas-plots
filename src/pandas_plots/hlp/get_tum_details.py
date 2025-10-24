@@ -19,7 +19,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
     
     is_print= os.getenv("RENDERER") in ('png', 'svg')
     
-    width = 150 if is_print else 2000
+    width = 145 if is_print else 2000
 
     if is_print:
         display(HTML("<br>"))
