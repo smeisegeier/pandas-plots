@@ -141,7 +141,7 @@ def print_summary(
     show: bool = True,
     name: str = " ",
     precision: int = 3,
-    extended: bool = True,
+    extended: bool = False,
     sparse: bool = False,
 ):
     """
@@ -156,14 +156,14 @@ def print_summary(
                 The input data to summarize. If a DataFrame, only numeric columns are processed.
             show (bool, optional): 
                 If True, prints the generated summary table to the console. Defaults to True.
-            name (str, optional): 
+            name (str, optional):  DEPRECATED
                 An optional title or identifier for the overall summary. Currently unused in 
                 the implementation's output format but available for future use. Defaults to " ".
             precision (int, optional): 
                 The number of decimal places to format the numeric statistics. Defaults to 3.
             extended (bool, optional): 
-                If True, includes extended statistics like skewness, kurtosis, NaNs, and zeros 
-                in the summary. Defaults to True.
+                If True, includes extended statistics like skewness, kurtosis
+                in the summary. Defaults to False.
             sparse (bool, optional): 
                 If True, attempts to convert the input DataFrame into a sparse, wide format
                 using an inferred pivot before calculating the summary. This requires the 

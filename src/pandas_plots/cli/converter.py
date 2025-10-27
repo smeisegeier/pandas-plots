@@ -3,7 +3,6 @@ import os
 import argparse
 import re
 
-
 def enclose_ascii_table_in_code_block(content):
     """
     Searches for blocks that start with '┌' and end with '└', 
@@ -84,6 +83,54 @@ def remove_pandas_style_from_md(markdown_filepath):
         print(f"❌ ERROR DURING PROCESSING: {e}")
         return False
 
+def remove_css_style_from_md(markdown_filepath: str):
+    """
+    Reads a file (assumed to contain Markdown/HTML content), removes two 
+    specific, problematic CSS rules from the embedded <style> block, and 
+    overwrites the file with the cleaned content(these are printed as plain text in pdf)
+
+    The removed rules are:
+    1. .dataframe tbody tr th { vertical-align: top; }
+    2. .dataframe thead th { text-align: right; }
+
+    Args:
+        markdown_filepath: The path to the file (e.g., a .md or .html file) 
+                           to be read and overwritten.
+    """
+    try:
+        # Read the entire file content
+        with open(markdown_filepath, 'r', encoding='utf-8') as f:
+            html_or_md_content = f.read()
+    except FileNotFoundError:
+        print(f"Error: File not found at {markdown_filepath}")
+        return
+
+    # Define the block of CSS you want to remove.
+    css_to_remove_pattern = re.escape("""
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }""")
+
+    # The pattern must start with the newline and indentation *before* the first rule
+    css_to_remove_pattern = r'\n' + css_to_remove_pattern
+
+    # Use re.sub() to replace the unwanted block with an empty string.
+    # re.DOTALL (re.S) ensures the pattern can match across multiple lines.
+    cleaned_content = re.sub(css_to_remove_pattern, '', html_or_md_content, flags=re.DOTALL)
+
+    # Write the cleaned content back to the same file
+    try:
+        with open(markdown_filepath, 'w', encoding='utf-8') as f:
+            f.write(cleaned_content)
+        print(f"Successfully removed CSS rules and updated: {markdown_filepath}")
+    except Exception as e:
+        print(f"Error writing to file: {e}")
+
+
 
 def jupyter_to_md(
     path: str,
@@ -103,10 +150,10 @@ def jupyter_to_md(
     dfi.convert(
         path,
         to="markdown",
-        # use='latex',
+        use='latex',
         # center_df=True,
-        # max_rows=30,
-        # max_cols=10,
+        max_rows=50,
+        max_cols=25,
         execute=execute,
         save_notebook=False,
         limit=None,
@@ -129,7 +176,8 @@ def jupyter_to_md(
     target_md_path = os.path.join(output_dir, root + '.md')
 
     # 3. Call the function
-    remove_pandas_style_from_md(target_md_path)
+    # remove_pandas_style_from_md(target_md_path)
+    remove_css_style_from_md(target_md_path)
 
 # * Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):
