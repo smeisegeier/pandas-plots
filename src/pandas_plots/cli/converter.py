@@ -41,6 +41,95 @@ def enclose_ascii_table_in_code_block(content):
     return new_content
 
 
+def conditional_br_replacer(match):
+    """
+    Replacement function for re.sub that conditionally inserts a <br> tag.
+    
+    It inserts '\n\n<br>\n\n' immediately after the list line and before the 
+    subsequent content, ensuring a blank line separates the tag from the surrounding text.
+    """
+    # G1: (\n|^) - Preceding context (newline or start of string)
+    preceding_context = match.group(1)
+    
+    # G2: (\s*-\s*.*?) - The full block from list item start to ┌─
+    full_chunk = match.group(2) 
+    
+    # G3: (┌─) - The closing delimiter
+    closing_delimiter = match.group(3) 
+
+    # 1. Check if the required tag (with guaranteed separation) is already present in the full chunk.
+    # We check for any variation of <br> surrounded by at least one newline.
+    if re.search(r'\n\s*<br>\s*\n', full_chunk):
+        return match.group(0)
+
+    # 2. Split G2 into the primary list line and the rest of the content.
+    # Match the content on the list line (e.g., ' - list')
+    match_list_line = re.match(r'(\s*-\s*[^\n]*)', full_chunk)
+    
+    if not match_list_line:
+        return match.group(0)
+
+    # A: The list line content (e.g., ' - list')
+    list_line = match_list_line.group(1) 
+    
+    # B: The remaining content (e.g., '\nlore ipsum\n\n')
+    rest_of_chunk = full_chunk[len(list_line):]
+
+    # Clean the leading newline from the rest_of_chunk if it exists, 
+    # as we will explicitly provide all necessary newlines.
+    if rest_of_chunk.startswith('\n'):
+        rest_of_chunk = rest_of_chunk[1:]
+
+    # 3. Construct the new content:
+    # Inject '\n\n<br>\n\n' to ensure a blank line separates the list item from <br> 
+    # and <br> from the following content.
+    new_chunk = list_line + '\n\n<br>\n\n' + rest_of_chunk
+    
+    # Final construction: [Preceding Context] + [New Chunk] + [Delimiter]
+    return preceding_context + new_chunk + closing_delimiter
+
+
+def add_br_to_md(markdown_filepath):
+    """
+    Processes a Markdown file to find chunks starting with a list item ('-') 
+    and ending with the duckdb table start ('┌─'). If the chunk does not 
+    contain a line-separated '<br>' tag, it is inserted immediately after 
+    the list line.
+    """
+    try:
+        with open(markdown_filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        original_content = content
+        
+        # Pattern to match the target chunk:
+        # (\n|^)           -> Preceding newline or start of string (Group 1)
+        # (\s*-\s*.*?)(┌─) -> The content starting with '-', non-greedy (.*?), up to '┌─' (Groups 2 & 3)
+        
+        pattern = re.compile(
+            r'(\n|^)(\s*-\s*.*?)(┌─)', 
+            re.DOTALL | re.MULTILINE
+        )
+        
+        # Use the replacement function to conditionally insert the <br> tag
+        new_content = re.sub(pattern, conditional_br_replacer, content)
+
+        if new_content != original_content:
+            # Write the modified content back to the file
+            with open(markdown_filepath, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            print(f"✅ Successfully inserted missing line-separated <br> tags in: {markdown_filepath}")
+            return True
+        else:
+            print(f"ℹ️ All target chunks already contained the line-separated <br> tag in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ Error: File not found at {markdown_filepath}")
+    except Exception as e:
+        print(f"❌ An error occurred: {e}")
+
+
 def remove_pandas_style_from_md(markdown_filepath):
     """
     Removes the default Pandas HTML style block, cleans up excessive blank lines,
@@ -95,7 +184,7 @@ def remove_css_style_from_md(markdown_filepath: str):
 
     Args:
         markdown_filepath: The path to the file (e.g., a .md or .html file) 
-                           to be read and overwritten.
+                        to be read and overwritten.
     """
     try:
         # Read the entire file content
@@ -126,7 +215,7 @@ def remove_css_style_from_md(markdown_filepath: str):
     try:
         with open(markdown_filepath, 'w', encoding='utf-8') as f:
             f.write(cleaned_content)
-        print(f"Successfully removed CSS rules and updated: {markdown_filepath}")
+        print(f"✅ Successfully removed CSS rules and updated: {markdown_filepath}")
     except Exception as e:
         print(f"Error writing to file: {e}")
 
@@ -175,9 +264,12 @@ def jupyter_to_md(
     # 2. Construct the full path using the correct .md extension
     target_md_path = os.path.join(output_dir, root + '.md')
 
-    # 3. Call the function
+    # 3. remove style
     # remove_pandas_style_from_md(target_md_path)
     remove_css_style_from_md(target_md_path)
+    
+    # 4. add br
+    add_br_to_md(target_md_path)
 
 # * Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):
