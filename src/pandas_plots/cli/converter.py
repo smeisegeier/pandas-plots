@@ -40,13 +40,13 @@ def enclose_ascii_table_in_code_block(content):
     
     return new_content
 
-
 def conditional_br_replacer(match):
     """
     Replacement function for re.sub that conditionally inserts a <br> tag.
     
-    It inserts '\n\n<br>\n\n' immediately after the list line and before the 
-    subsequent content, ensuring a blank line separates the tag from the surrounding text.
+    It identifies the last line belonging to the list structure within the matched chunk 
+    and inserts '\n\n<br>\n\n' immediately after it, ensuring the tag is placed 
+    after all nested list elements and before the arbitrary subsequent text.
     """
     # G1: (\n|^) - Preceding context (newline or start of string)
     preceding_context = match.group(1)
@@ -57,33 +57,53 @@ def conditional_br_replacer(match):
     # G3: (┌─) - The closing delimiter
     closing_delimiter = match.group(3) 
 
-    # 1. Check if the required tag (with guaranteed separation) is already present in the full chunk.
+    # 1. Check if the required tag (with guaranteed separation) is already present.
     # We check for any variation of <br> surrounded by at least one newline.
     if re.search(r'\n\s*<br>\s*\n', full_chunk):
         return match.group(0)
 
-    # 2. Split G2 into the primary list line and the rest of the content.
-    # Match the content on the list line (e.g., ' - list')
-    match_list_line = re.match(r'(\s*-\s*[^\n]*)', full_chunk)
-    
-    if not match_list_line:
+    # 2. Split G2 (full_chunk) into list_block and text_block by finding the end of the list.
+    lines = full_chunk.splitlines(keepends=True)
+    last_list_line_index = -1
+
+    # Heuristic: A line belongs to the list structure if it starts with a hyphen/star. 
+    # The list block is considered to end immediately when the first non-list-marker, 
+    # non-blank line is encountered.
+    for i, line in enumerate(lines):
+        stripped = line.lstrip()
+        
+        # Check for explicit list marker ('-', '*')
+        is_list_marker = stripped.startswith('-') or stripped.startswith('*')
+        
+        if is_list_marker:
+            last_list_line_index = i
+        elif stripped == '':
+            # Allow blank lines within the list block (e.g., between top-level items)
+            continue
+        else:
+            # Found non-list marker, non-blank text (the arbitrary text 'lore ipsum').
+            # List structure must have ended at the line pointed to by last_list_line_index.
+            break
+
+    # If no list lines were found (shouldn't happen based on the outer regex), return unchanged.
+    if last_list_line_index == -1:
         return match.group(0)
 
-    # A: The list line content (e.g., ' - list')
-    list_line = match_list_line.group(1) 
-    
-    # B: The remaining content (e.g., '\nlore ipsum\n\n')
-    rest_of_chunk = full_chunk[len(list_line):]
+    # Combine list lines (from start up to and including the last list line found)
+    list_block = "".join(lines[:last_list_line_index + 1])
+    # Combine text lines (from after the last list line)
+    text_block = "".join(lines[last_list_line_index + 1:])
 
-    # Clean the leading newline from the rest_of_chunk if it exists, 
-    # as we will explicitly provide all necessary newlines.
-    if rest_of_chunk.startswith('\n'):
-        rest_of_chunk = rest_of_chunk[1:]
+    # 3. Clean up newlines around the injection point for precise spacing.
+    # Strip trailing newlines from list_block to add exactly two newlines.
+    list_block = list_block.rstrip('\n')
 
-    # 3. Construct the new content:
-    # Inject '\n\n<br>\n\n' to ensure a blank line separates the list item from <br> 
-    # and <br> from the following content.
-    new_chunk = list_line + '\n\n<br>\n\n' + rest_of_chunk
+    # Strip leading newlines from text_block (we will add exactly two newlines).
+    text_block = text_block.lstrip('\n')
+
+    # 4. Construct the new chunk: [List Block] + [\n\n<br>\n\n] + [Text Block]
+    # The injection adds the necessary blank lines (two newlines before, two newlines after).
+    new_chunk = list_block + '\n\n<br>\n\n' + text_block
     
     # Final construction: [Preceding Context] + [New Chunk] + [Delimiter]
     return preceding_context + new_chunk + closing_delimiter
