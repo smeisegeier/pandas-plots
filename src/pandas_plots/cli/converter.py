@@ -40,114 +40,147 @@ def enclose_ascii_table_in_code_block(content):
     
     return new_content
 
-def conditional_br_replacer(match):
+
+
+def add_br_to_md(markdown_filepath, is_debug=False):
     """
-    Replacement function for re.sub that conditionally inserts a <br> tag.
+    Processes a Markdown file line-by-line using a dynamic state machine 
+    (NO REGEX) to insert the '<br>' tag immediately after the last list item 
+    and before the subsequent arbitrary content, within chunks ending with '┌─'.
     
-    It identifies the last line belonging to the list structure within the matched chunk 
-    and inserts '\n\n<br>\n\n' immediately after it, ensuring the tag is placed 
-    after all nested list elements and before the arbitrary subsequent text.
-    """
-    # G1: (\n|^) - Preceding context (newline or start of string)
-    preceding_context = match.group(1)
-    
-    # G2: (\s*-\s*.*?) - The full block from list item start to ┌─
-    full_chunk = match.group(2) 
-    
-    # G3: (┌─) - The closing delimiter
-    closing_delimiter = match.group(3) 
-
-    # 1. Check if the required tag (with guaranteed separation) is already present.
-    # We check for any variation of <br> surrounded by at least one newline.
-    if re.search(r'\n\s*<br>\s*\n', full_chunk):
-        return match.group(0)
-
-    # 2. Split G2 (full_chunk) into list_block and text_block by finding the end of the list.
-    lines = full_chunk.splitlines(keepends=True)
-    last_list_line_index = -1
-
-    # Heuristic: A line belongs to the list structure if it starts with a hyphen/star. 
-    # The list block is considered to end immediately when the first non-list-marker, 
-    # non-blank line is encountered.
-    for i, line in enumerate(lines):
-        stripped = line.lstrip()
+    Args:
+        markdown_filepath (str): Path to the Markdown file.
+        is_debug (bool): If True, logs insertion details and prints final result messages.
         
-        # Check for explicit list marker ('-', '*')
-        is_list_marker = stripped.startswith('-') or stripped.startswith('*')
-        
-        if is_list_marker:
-            last_list_line_index = i
-        elif stripped == '':
-            # Allow blank lines within the list block (e.g., between top-level items)
-            continue
-        else:
-            # Found non-list marker, non-blank text (the arbitrary text 'lore ipsum').
-            # List structure must have ended at the line pointed to by last_list_line_index.
-            break
-
-    # If no list lines were found (shouldn't happen based on the outer regex), return unchanged.
-    if last_list_line_index == -1:
-        return match.group(0)
-
-    # Combine list lines (from start up to and including the last list line found)
-    list_block = "".join(lines[:last_list_line_index + 1])
-    # Combine text lines (from after the last list line)
-    text_block = "".join(lines[last_list_line_index + 1:])
-
-    # 3. Clean up newlines around the injection point for precise spacing.
-    # Strip trailing newlines from list_block to add exactly two newlines.
-    list_block = list_block.rstrip('\n')
-
-    # Strip leading newlines from text_block (we will add exactly two newlines).
-    text_block = text_block.lstrip('\n')
-
-    # 4. Construct the new chunk: [List Block] + [\n\n<br>\n\n] + [Text Block]
-    # The injection adds the necessary blank lines (two newlines before, two newlines after).
-    new_chunk = list_block + '\n\n<br>\n\n' + text_block
+    Returns:
+        bool: True if changes were made, False otherwise.
+    """
+    import os 
     
-    # Final construction: [Preceding Context] + [New Chunk] + [Delimiter]
-    return preceding_context + new_chunk + closing_delimiter
-
-
-def add_br_to_md(markdown_filepath):
-    """
-    Processes a Markdown file to find chunks starting with a list item ('-') 
-    and ending with the duckdb table start ('┌─'). If the chunk does not 
-    contain a line-separated '<br>' tag, it is inserted immediately after 
-    the list line.
-    """
     try:
         with open(markdown_filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
+            lines = f.readlines()
 
-        original_content = content
+        new_lines = []
+        changes_made = False
         
-        # Pattern to match the target chunk:
-        # (\n|^)           -> Preceding newline or start of string (Group 1)
-        # (\s*-\s*.*?)(┌─) -> The content starting with '-', non-greedy (.*?), up to '┌─' (Groups 2 & 3)
+        # State machine variables for reconstruction
+        in_chunk = False
+        last_list_line_content = None  # String content of the last list item line
+        post_list_lines = []           # Lines between last list item and delimiter
         
-        pattern = re.compile(
-            r'(\n|^)(\s*-\s*.*?)(┌─)', 
-            re.DOTALL | re.MULTILINE
-        )
-        
-        # Use the replacement function to conditionally insert the <br> tag
-        new_content = re.sub(pattern, conditional_br_replacer, content)
+        current_line_num = 0
 
-        if new_content != original_content:
-            # Write the modified content back to the file
+        for line in lines:
+            current_line_num += 1
+            stripped = line.strip()
+            is_list_marker = stripped.startswith('-') or stripped.startswith('*')
+            
+            
+            if not in_chunk:
+                # --- INITIAL STATE: Search for chunk start ---
+                if is_list_marker:
+                    # Found the start of a target chunk
+                    in_chunk = True
+                    last_list_line_content = line
+                    post_list_lines = []
+                else:
+                    new_lines.append(line)
+                continue
+            
+            # --- IN_CHUNK STATE ---
+            
+            # 1. Update Last List Item Found (If list item continues)
+            if is_list_marker:
+                # Flush previous list item and accumulated post-list lines directly to output, 
+                # as they are now known to be non-insertion-point content.
+                if last_list_line_content is not None:
+                    new_lines.append(last_list_line_content)
+                new_lines.extend(post_list_lines)
+
+                # Track the new last list item
+                last_list_line_content = line
+                post_list_lines = []
+                continue
+
+            # 2. End Condition Found (Trigger Insertion or Flush)
+            if '┌─' in stripped:
+                
+                # Check for idempotence: If <br> is already in the post-list content, bypass insertion.
+                post_list_content = "".join(post_list_lines)
+                if '<br>' in post_list_content:
+                    # Flush the chunk without change
+                    if last_list_line_content is not None:
+                        new_lines.append(last_list_line_content)
+                    new_lines.extend(post_list_lines)
+                    new_lines.append(line)
+                else:
+                    # --- PERFORM INSERTION ---
+                    
+                    # A. Append the list line (without its trailing newline)
+                    new_lines.append(last_list_line_content.rstrip('\n')) 
+                    
+                    # B. Insert the required tag (the full \n\n<br>\n\n structure)
+                    new_lines.append('\n\n<br>\n\n')
+                    
+                    # C. Append the content between the list and the delimiter (stripped of leading \n)
+                    text_content_stripped = post_list_content.lstrip('\n')
+                    new_lines.append(text_content_stripped)
+                    
+                    # D. Append the closing delimiter line
+                    new_lines.append(line)
+                    
+                    changes_made = True
+                    if is_debug:
+                        # Calculate insertion line for logging
+                        insertion_line = current_line_num - len(post_list_lines)
+                        print(f"DEBUG: INSERTED after Line {insertion_line} in file {os.path.basename(markdown_filepath)}")
+
+                # Reset state
+                in_chunk = False
+                last_list_line_content = None
+                post_list_lines = []
+                continue
+
+            # 3. Arbitrary Content (Collect post-list lines)
+            post_list_lines.append(line)
+            
+        # --- FINAL FLUSH ---
+        # If the file ended while still in a chunk, append the remaining buffered content.
+        if in_chunk:
+            if last_list_line_content is not None:
+                new_lines.append(last_list_line_content)
+            if post_list_lines:
+                new_lines.extend(post_list_lines)
+            
+        # --- WRITE OUTPUT ---
+        
+        if changes_made:
+            # Join lines and use f.write() for safer output when newlines have been manipulated
+            final_content = "".join(new_lines)
             with open(markdown_filepath, 'w', encoding='utf-8') as f:
-                f.write(new_content)
-            print(f"✅ Successfully inserted missing line-separated <br> tags in: {markdown_filepath}")
+                f.write(final_content)
+            
+            # Print success message regardless of is_debug value
+            print(f"✅ SUCCESS: File successfully processed: {markdown_filepath}. Missing <br> tags inserted.")
             return True
         else:
-            print(f"ℹ️ All target chunks already contained the line-separated <br> tag in: {markdown_filepath}")
+            # Print no-change message regardless of is_debug value
+            print(f"ℹ️ NO CHANGES: All target chunks already contained the line-separated <br> tag in: {markdown_filepath} or no targets found.")
             return False
 
     except FileNotFoundError:
-        print(f"❌ Error: File not found at {markdown_filepath}")
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
     except Exception as e:
-        print(f"❌ An error occurred: {e}")
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
+
+
+
+
+
 
 
 def remove_pandas_style_from_md(markdown_filepath):
@@ -289,7 +322,7 @@ def jupyter_to_md(
     remove_css_style_from_md(target_md_path)
     
     # 4. add br
-    add_br_to_md(target_md_path)
+    add_br_to_md(target_md_path, is_debug=True)
 
 # * Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):
