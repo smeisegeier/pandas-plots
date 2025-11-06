@@ -3,6 +3,10 @@ import os
 import argparse
 import re
 
+import subprocess
+import shlex # Used for robust command line argument handling
+
+
 def enclose_ascii_table_in_code_block(content):
     """
     Searches for blocks that start with '┌' and end with '└', 
@@ -280,34 +284,95 @@ def jupyter_to_md(
     no_input=False,
     execute=True,  # Default to True, can be overridden with --no_execute
     chrome_path="/opt/homebrew/bin/chromium",
+    convert_tables_to_png=True,
 ):
     # * ensure output directory exists
+    """
+    Converts a Jupyter notebook into a Markdown file with embedded plotly digrams 
+    and styled dataframes. Supports optional execution of the notebook before 
+    conversion, and conditional removal of input cells.
+
+    Args:
+        path (str): The path to the Jupyter notebook file.
+        output_dir (str, optional): The directory where the Markdown file will be generated. Defaults to "./docs".
+        no_input (bool, optional): Whether to remove input cells from the Markdown output. Defaults to False.
+        execute (bool, optional): Whether to execute the notebook before conversion. Defaults to True.
+        chrome_path (str, optional): The path to the Chrome executable. Defaults to "/opt/homebrew/bin/chromium".
+        convert_tables_to_png (bool, optional): Whether to convert dataframes to PNGs using dataframe-image. Defaults to True.
+
+    Returns:
+        None
+    """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     # * if this isnt set, plotly digrams will not be rendered
     os.environ["RENDERER"] = "svg"
 
-    # * convert
-    dfi.convert(
-        path,
-        to="markdown",
-        use='latex',
-        # center_df=True,
-        max_rows=50,
-        max_cols=25,
-        execute=execute,
-        save_notebook=False,
-        limit=None,
-        document_name=None,
-        table_conversion="chrome",
-        chrome_path=chrome_path,
-        latex_command=None,
-        output_dir=output_dir,
-        no_input=no_input,
-    )
+    if convert_tables_to_png:
+        # 1. Build the base CLI command
+        command = [
+            "dataframe_image",
+            shlex.quote(path),  # Safely quote the notebook path
+            "--to=markdown",
+            f"--output-dir={shlex.quote(output_dir)}",
+            f"--chrome-path={shlex.quote(chrome_path)}",
+            "--table-conversion=chrome",
+            # "--center_df",
+            # "--max_rows=50",
+            # "--max_cols=25",
+        ]
 
-    # * reset
+        # 2. Add optional/conditional arguments
+        if not execute:
+            command.append("--no-execute")
+            
+        if no_input:
+            command.append("--no-input")
+            
+        # Note: save_notebook=False, limit=None, document_name=None, 
+        # and latex_command=None are handled by default/don't exist in the CLI call.
+
+        # 3. Execute the command
+        try:
+            print(f"Executing command: {' '.join(command)}")
+            # Use subprocess.run for simple command execution
+            result = subprocess.run(
+                command, 
+                check=True,  # Raises CalledProcessError for non-zero exit codes
+                capture_output=True, 
+                text=True
+            )
+            # print("Conversion successful.")
+            # print("Output:\n", result.stdout) # Uncomment for debug output
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Error during CLI conversion (Exit Code {e.returncode}):")
+            print("Stderr:\n", e.stderr)
+            # You might want to reraise the exception or handle it here
+            raise
+
+    else:
+        # * use python API - this wont convert tables to PNG!
+        dfi.convert(
+            path,
+            to="markdown",
+            # use='latex',
+            center_df=True,
+            max_rows=50,
+            max_cols=25,
+            execute=execute,
+            save_notebook=False,
+            limit=None,
+            document_name=None,
+            table_conversion="chrome",
+            chrome_path=chrome_path,
+            latex_command=None,
+            output_dir=output_dir,
+            no_input=no_input,
+        )
+
+    # * reset RENDERER
     os.environ["RENDERER"] = ""  # <None> does not work
     
     # * remove style block
