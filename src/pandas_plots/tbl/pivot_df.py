@@ -2,7 +2,8 @@
 # warnings.filterwarnings("ignore")
 
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
+from ..hlp.group_kkr import group_kkr
 
 import pandas as pd
 
@@ -36,6 +37,7 @@ def pivot_df(
     col1_width: int = 0,
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
+    kkr_col: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
@@ -74,6 +76,8 @@ def pivot_df(
         col1_width (int, optional): The width of the first column in px. Defaults to 0.
         png_path (str | Path, optional): The path to save the output PNG file. Defaults to None.
         png_conversion (Literal["chrome", "selenium"], optional): The conversion method for the PNG file. Defaults to "selenium".
+        kkr_col (str): Edge case: Name of the column that contains kkr name to ensure all kkr are shown
+
 
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -98,6 +102,10 @@ def pivot_df(
         return
 
     df = df.copy()
+
+    if kkr_col:
+        df = group_kkr(df=df, kkr_col=kkr_col)
+
 
     col_index = df.columns[0]
     col_column = df.columns[1]
@@ -163,5 +171,4 @@ def pivot_df(
         col1_width=col1_width,
         png_path=png_path,
         png_conversion=png_conversion,
-        
     )

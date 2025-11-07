@@ -36,7 +36,7 @@ def plot_stacked_bars(
     show_other: bool = False,
     show_pct_all: bool = False,
     show_pct_bar: bool = False,
-    kkr_col: Optional[str] = None
+    kkr_col: Optional[str] = None,
     
 ) -> None:
     """
@@ -69,6 +69,7 @@ def plot_stacked_bars(
     - sort_values_color (bool): If True, sorts the columns categories by group sum
     - show_pct_all (bool): If True, formats the bar text with percentages from the total n.
     - show_pct_bar (bool): If True, formats the bar text with percentages from the bar's total.
+    - kkr_col (str): Edge case: Name of the column that contains kkr name to ensure all kkr are shown
 
     Returns: None
     """

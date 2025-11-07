@@ -138,7 +138,7 @@ def add_br_to_md(markdown_filepath, is_debug=False):
                     if is_debug:
                         # Calculate insertion line for logging
                         insertion_line = current_line_num - len(post_list_lines)
-                        print(f"DEBUG: INSERTED after Line {insertion_line} in file {os.path.basename(markdown_filepath)}")
+                        print(f"└ DEBUG: INSERTED after Line {insertion_line} in file {os.path.basename(markdown_filepath)}")
 
                 # Reset state
                 in_chunk = False
@@ -166,11 +166,11 @@ def add_br_to_md(markdown_filepath, is_debug=False):
                 f.write(final_content)
             
             # Print success message regardless of is_debug value
-            print(f"✅ SUCCESS: File successfully processed: {markdown_filepath}. Missing <br> tags inserted.")
+            print(f"└ ✅ SUCCESS: File successfully processed: {markdown_filepath}. Missing <br> tags inserted.")
             return True
         else:
             # Print no-change message regardless of is_debug value
-            print(f"ℹ️ NO CHANGES: All target chunks already contained the line-separated <br> tag in: {markdown_filepath} or no targets found.")
+            print(f"└ ℹ️ NO CHANGES: All target chunks already contained the line-separated <br> tag in: {markdown_filepath} or no targets found.")
             return False
 
     except FileNotFoundError:
@@ -216,10 +216,10 @@ def remove_pandas_style_from_md(markdown_filepath):
             with open(markdown_filepath, 'w', encoding='utf-8') as f:
                 content = content.strip() # Final global strip before writing to prevent extra blank lines at EOF
                 f.write(content)
-            print(f"✅ CLEANED: File successfully processed: {markdown_filepath}")
+            print(f"└ ✅ CLEANED: File successfully processed: {markdown_filepath}")
             return True
         else:
-            print(f"ℹ️ NO CHANGES: No elements found to clean in: {markdown_filepath}")
+            print(f"└ ℹ️ NO CHANGES: No elements found to clean in: {markdown_filepath}")
             return False
 
     except FileNotFoundError:
@@ -272,25 +272,23 @@ def remove_css_style_from_md(markdown_filepath: str):
     try:
         with open(markdown_filepath, 'w', encoding='utf-8') as f:
             f.write(cleaned_content)
-        print(f"✅ Successfully removed CSS rules and updated: {markdown_filepath}")
+        print(f"└ ✅ Successfully removed CSS rules and updated: {markdown_filepath}")
     except Exception as e:
-        print(f"Error writing to file: {e}")
+        print(f"└ Error writing to file: {e}")
 
 
 
 def jupyter_to_md(
     path: str,
     output_dir: str = "./docs",
-    no_input=False,
-    execute=True,  # Default to True, can be overridden with --no_execute
+    no_input=True,
+    execute=False,
     chrome_path="/opt/homebrew/bin/chromium",
-    convert_tables_to_png=True,
 ):
-    # * ensure output directory exists
     """
     Converts a Jupyter notebook into a Markdown file with embedded plotly digrams 
-    and styled dataframes. Supports optional execution of the notebook before 
-    conversion, and conditional removal of input cells.
+    and styled dataframes.  
+    ⚠️ `execute=True` will force the tables as html output due to conversion processes
 
     Args:
         path (str): The path to the Jupyter notebook file.
@@ -308,69 +306,71 @@ def jupyter_to_md(
 
     # * if this isnt set, plotly digrams will not be rendered
     os.environ["RENDERER"] = "svg"
+    
+    if execute:
+        print("⚠️ execute=True will force the tables as html output insteda of png")
 
-    if convert_tables_to_png:
-        # 1. Build the base CLI command
-        command = [
-            "dataframe_image",
-            shlex.quote(path),  # Safely quote the notebook path
-            "--to=markdown",
-            f"--output-dir={shlex.quote(output_dir)}",
-            f"--chrome-path={shlex.quote(chrome_path)}",
-            "--table-conversion=chrome",
-            # "--center_df",
-            # "--max_rows=50",
-            # "--max_cols=25",
-        ]
+    # # 1. Build the base CLI command
+    # command = [
+    #     "dataframe_image",
+    #     shlex.quote(path),  # Safely quote the notebook path
+    #     "--to=markdown",
+    #     f"--output-dir={shlex.quote(output_dir)}",
+    #     f"--chrome-path={shlex.quote(chrome_path)}",
+    #     "--table-conversion=chrome",
+    #     # "--center_df",
+    #     # "--max_rows=50",
+    #     # "--max_cols=25",
+    # ]
 
-        # 2. Add optional/conditional arguments
-        if not execute:
-            command.append("--no-execute")
-            
-        if no_input:
-            command.append("--no-input")
-            
-        # Note: save_notebook=False, limit=None, document_name=None, 
-        # and latex_command=None are handled by default/don't exist in the CLI call.
+    # # 2. Add optional/conditional arguments
+    # if execute:
+    #     command.append("--execute=True")
+        
+    # if no_input:
+    #     command.append("--no-input")
+        
+    # # Note: save_notebook=False, limit=None, document_name=None, 
+    # # and latex_command=None are handled by default/don't exist in the CLI call.
 
-        # 3. Execute the command
-        try:
-            print(f"Executing command: {' '.join(command)}")
-            # Use subprocess.run for simple command execution
-            result = subprocess.run(
-                command, 
-                check=True,  # Raises CalledProcessError for non-zero exit codes
-                capture_output=True, 
-                text=True
-            )
-            # print("Conversion successful.")
-            # print("Output:\n", result.stdout) # Uncomment for debug output
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Error during CLI conversion (Exit Code {e.returncode}):")
-            print("Stderr:\n", e.stderr)
-            # You might want to reraise the exception or handle it here
-            raise
+    # # 3. Execute the command
+    # try:
+    #     print(f"Executing command: {' '.join(command)}")
+    #     # Use subprocess.run for simple command execution
+    #     result = subprocess.run(
+    #         command,
+    #         check=True,  # Raises CalledProcessError for non-zero exit codes
+    #         capture_output=True, 
+    #         text=True
+    #     )
+    #     # print("Conversion successful.")
+    #     # print("Output:\n", result.stdout) # Uncomment for debug output
+        
+    # except subprocess.CalledProcessError as e:
+    #     print(f"└ Error during CLI conversion (Exit Code {e.returncode}):")
+    #     print("└ Stderr:\n", e.stderr)
+    #     # You might want to reraise the exception or handle it here
+    #     raise
 
-    else:
-        # * use python API - this wont convert tables to PNG!
-        dfi.convert(
-            path,
-            to="markdown",
-            # use='latex',
-            center_df=True,
-            max_rows=50,
-            max_cols=25,
-            execute=execute,
-            save_notebook=False,
-            limit=None,
-            document_name=None,
-            table_conversion="chrome",
-            chrome_path=chrome_path,
-            latex_command=None,
-            output_dir=output_dir,
-            no_input=no_input,
-        )
+    # * use python API - this wont convert tables to PNG!
+    print(f"Converting {path} to Markdown using dataframe-image python API ..")
+    dfi.convert(
+        path,
+        to="markdown",
+        # use='latex',
+        center_df=True,
+        max_rows=50,
+        max_cols=25,
+        execute=execute,
+        save_notebook=False,        # * don't save notebook, it will duplicate the file
+        limit=None,
+        document_name=None,
+        table_conversion="chrome",
+        chrome_path=chrome_path,
+        latex_command=None,
+        output_dir=output_dir,
+        no_input=no_input,
+    )
 
     # * reset RENDERER
     os.environ["RENDERER"] = ""  # <None> does not work

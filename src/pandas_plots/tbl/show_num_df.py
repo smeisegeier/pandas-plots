@@ -4,11 +4,10 @@ warnings.filterwarnings("ignore")
 import os
 from collections import abc
 from pathlib import Path
-from typing import Literal, get_args
+from typing import Literal, Optional, get_args
 
 import numpy as np
 import dataframe_image as dfi
-
 
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
@@ -108,9 +107,11 @@ def show_num_df(
             return
 
     theme = os.getenv("THEME") or "light"
+    
+    df = df.copy()
 
     # * copy df, do not reference original
-    df_ = df.copy() if not swap else df.T.copy()
+    df_ = df if not swap else df.T
 
     # * get minmax values before totals are added
     tbl_min = df_.min().min()
