@@ -23,26 +23,29 @@ def _calculate_summary_ser(
     ser_cleaned = ser.dropna()
     cnt = len(ser_cleaned) # Non-missing count
 
-    # 2. Missings calculation (always calculate if not sparse)
+    # 2. Present Share calculation (always calculate if not sparse)
+    present_share_value = None
+    
     if not sparse:
-        missing_count = original_total_count - cnt
+        present_count = cnt # cnt is the non-missing count
+        
         if original_total_count > 0:
-            # Truncate/floor the percentage
-            missing_percent = int(missing_count / original_total_count * 100) 
+            # Non-Null Share (User requested content for the 'present' column)
+            present_percent = int(present_count / original_total_count * 100) 
+            formatted_present_count = _format_int_with_underscores(present_count)
+            present_share_value = f"{formatted_present_count} ({present_percent}%)"
             
-            formatted_missing_count = _format_int_with_underscores(missing_count)
-            formatted_missings = f"{formatted_missing_count} ({missing_percent}%)"
         else:
-            formatted_missings = "0 (N/A)"
+            present_share_value = "0 (N/A)"
     
     # 3. All-NaN check: Handle case where no values exist for stats but counts are present
     if ser_cleaned.empty:
         if original_total_count > 0 and not sparse:
-            # If all NaNs (not sparse), counts are based on total, stats are N/A.
-            # Use 100% missing value calculated above
+            # If all NaNs (not sparse), the present share is 0 (0%)
             summary = {
-                "count": original_total_count, # Keep this key for consistency
-                "missings": formatted_missings,
+                "count": original_total_count, # Total N
+                # The 'missings' key holds the 'present count/share' value
+                "missings": "0 (0%)", 
                 "min": "N/A", "lower": "N/A", "q25": "N/A", "median": "N/A", 
                 "mean": "N/A", "q75": "N/A", "upper": "N/A", "max": "N/A", 
                 "std": "N/A", "cv": "N/A",
@@ -80,7 +83,6 @@ def _calculate_summary_ser(
 
     summary = {
         # Keep 'count' key: len(df) if not sparse, else non-missing count.
-        # This will be used in format_summary_table only for sparse=True alignment.
         "count": original_total_count if not sparse else cnt, 
         "min": min_val,
         "lower": lower,
@@ -94,9 +96,9 @@ def _calculate_summary_ser(
         "cv": cv,
     }
 
-    # Insert missings right after count if not sparse, but don't duplicate 'count' key
+    # Insert present share into the 'missings' key if not sparse
     if not sparse:
-        new_summary = {"count": summary["count"], "missings": formatted_missings}
+        new_summary = {"count": summary["count"], "missings": present_share_value}
         
         # Add the rest of the keys (starting from 'min')
         for k, v in summary.items():
@@ -132,8 +134,9 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
     metrics = ["count", "min", "lower", "q25", "median", "mean", "q75", "upper", "max", "std", "cv"]
     
     if not sparse:
-        # User requested: Remove the 'count' column when not sparse, and insert 'missings'
+        # Remove the internal 'count' key (which holds N)
         metrics.remove("count")
+        # The 'missings' key (which now holds the present count/share) is the first metric
         metrics.insert(0, "missings")
         
     if extended:
@@ -142,7 +145,7 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
 
     def format_number_string(value, precision):
         if not isinstance(value, numbers.Number):
-            # Handles 'N/A' and the formatted 'missings' string
+            # Handles 'N/A' and the formatted 'present count/share' string
             return str(value)
         if isinstance(value, (float, np.float32, np.float64)):
             val_str = f"{value:_.{precision}f}"
@@ -156,7 +159,7 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
     # --- Calculation of widths ---
     name_col_label_base = "item" if sparse else "column" # Renamed header here
 
-    # Format total count for display in the header (UPDATED FORMAT)
+    # Format total count for display in the header
     formatted_total_count = f"(n = {total_df_count:_})"
     name_col_label = f"{name_col_label_base} {formatted_total_count}"
     
@@ -177,7 +180,12 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
     separator = f"{'-' * name_width}"
 
     for metric in metrics:
-        header += f" | {metric:^{col_widths[metric]}}"
+        metric_label = metric
+        # User requested: Rename 'missings' column label to 'present' when not sparse
+        if not sparse and metric == "missings":
+            metric_label = "present"
+            
+        header += f" | {metric_label:^{col_widths[metric]}}"
         separator += f"-+-{'-' * col_widths[metric]}"
 
     output = f"\n{header}\n{separator}\n"

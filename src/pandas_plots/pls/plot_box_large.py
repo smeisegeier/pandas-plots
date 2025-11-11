@@ -66,7 +66,7 @@ def plot_box_large(
 
     # * drop na to keep scipy sane
     n_ = len(ser)
-    ser.dropna(inplace=True)
+    # ser.dropna(inplace=True)
 
     # ----------------------------------------------------
     # --- Data and Layout Setup ---
