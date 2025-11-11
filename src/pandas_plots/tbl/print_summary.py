@@ -1,86 +1,87 @@
 import numbers
-from typing import Literal
-
 import numpy as np
 import pandas as pd
 from scipy import stats
+from typing import Literal
 
 from ..hlp.get_sparse_df import get_sparse_df
+
 
 def _calculate_summary_ser(
     ser: pd.Series,
     precision: int = 2,
     extended: bool = False,
+    sparse: bool = False,
 ):
     """Calculates the statistics for a single Series (helper function)."""
 
-    # Helper for formatting integers with underscores
     def _format_int_with_underscores(n):
         return f"{n:_}"
-
-    # 1. Calculate missings and total count from the original series
-    missing_count = ser.isna().sum()
-    total_count = len(ser) # This is the total number of observations (including NaNs)
-
-    # Calculate and format missing percentage (whole number)
-    if total_count > 0:
-        # CHANGED: Use int() for floor operation on percentage calculation
-        missing_percent = int(missing_count / total_count * 100)
-        # Format the count part of the string with underscores
-        formatted_missings_count = _format_int_with_underscores(missing_count)
-        formatted_missings = f"{formatted_missings_count} ({missing_percent}%)"
-    else:
-        # For a truly empty input Series
-        formatted_missings = "0 (N/A)"
-
-
-    # 2. Drop NaNs to get the clean data for statistics
-    ser = ser.dropna()
     
-    # 3. Handle series with zero non-missing values
-    if ser.empty:
-        if total_count == 0:
-            return None # Input was an entirely empty Series
+    # 1. Counts
+    original_total_count = len(ser)
+    ser_cleaned = ser.dropna()
+    cnt = len(ser_cleaned) # Non-missing count
+
+    # 2. Missings calculation (always calculate if not sparse)
+    if not sparse:
+        missing_count = original_total_count - cnt
+        if original_total_count > 0:
+            # Truncate/floor the percentage
+            missing_percent = int(missing_count / original_total_count * 100) 
+            
+            formatted_missing_count = _format_int_with_underscores(missing_count)
+            formatted_missings = f"{formatted_missing_count} ({missing_percent}%)"
+        else:
+            formatted_missings = "0 (N/A)"
+    
+    # 3. All-NaN check: Handle case where no values exist for stats but counts are present
+    if ser_cleaned.empty:
+        if original_total_count > 0 and not sparse:
+            # If all NaNs (not sparse), counts are based on total, stats are N/A.
+            # Use 100% missing value calculated above
+            summary = {
+                "count": original_total_count, # Keep this key for consistency
+                "missings": formatted_missings,
+                "min": "N/A", "lower": "N/A", "q25": "N/A", "median": "N/A", 
+                "mean": "N/A", "q75": "N/A", "upper": "N/A", "max": "N/A", 
+                "std": "N/A", "cv": "N/A",
+            }
+            if extended:
+                 summary.update({"sum": "N/A", "skew": "N/A", "kurto": "N/A"})
+            return summary
         
-        # This handles the all-NaN case (total_count > 0, non-missing count is 0)
-        summary = {
-            "count": total_count, # NOW: Total observations (int, will be formatted by table function)
-            "missings": formatted_missings, # Now includes formatted count and percentage
-            "min": "N/A", "lower": "N/A", "q25": "N/A", "median": "N/A", 
-            "mean": "N/A", "q75": "N/A", "upper": "N/A", "max": "N/A", 
-            "std": "N/A", "cv": "N/A",
-        }
-        if extended:
-            summary.update({"sum": "N/A", "skew": "N/A", "kurto": "N/A"})
-        return summary
+        # If original_total_count is 0 or sparse mode (where count is 0), return None.
+        return None 
 
-    # --- Calculations for non-empty data start here ---
 
-    iqr_value = stats.iqr(ser)
-    q1 = round(stats.scoreatpercentile(ser, 25), precision)
-    q3 = round(stats.scoreatpercentile(ser, 75), precision)
-    min_val = round(ser.min(), precision)
-    med = round(ser.median(), precision)
-    # upper = round(q3 + 1.5 * iqr_value, precision)
-    # lower = round(q1 - 1.5 * iqr_value, precision)
-    upper = round(ser[ser <= q3 + 1.5 * iqr_value].max(), precision)
-    lower = round(ser[ser >= q1 - 1.5 * iqr_value].min(), precision)
+    # --- Stats Calculation (using cleaned series) ---
+    iqr_value = stats.iqr(ser_cleaned)
+    q1 = round(stats.scoreatpercentile(ser_cleaned, 25), precision)
+    q3 = round(stats.scoreatpercentile(ser_cleaned, 75), precision)
+    min_val = round(ser_cleaned.min(), precision)
+    med = round(ser_cleaned.median(), precision)
     
+    # Calculate fences and apply to series to find actual min/max within fences
+    upper = round(ser_cleaned[ser_cleaned <= q3 + 1.5 * iqr_value].max(), precision)
+    lower = round(ser_cleaned[ser_cleaned >= q1 - 1.5 * iqr_value].min(), precision)
+    
+    mean = round(ser_cleaned.mean(), precision)
+    std = round(ser_cleaned.std(), precision)
 
-    mean = round(ser.mean(), precision)
-    std = round(ser.std(), precision)
-
-    cv = ser.std() / ser.mean() if ser.mean() != 0 and ser.std() != 0 else np.nan
+    cv = ser_cleaned.std() / ser_cleaned.mean() if ser_cleaned.mean() != 0 and ser_cleaned.std() != 0 else np.nan
     cv = round(cv, precision) if not np.isnan(cv) else "N/A"
 
-    max_val = round(ser.max(), precision)
-
+    max_val = round(ser_cleaned.max(), precision)
+    
+    # Ensure lower and upper fences don't cut off min/max if they are not outliers
     lower = min_val if lower < min_val else lower
     upper = max_val if upper > max_val else upper
 
     summary = {
-        "count": total_count, # Total number of observations (incl. missings)
-        "missings": formatted_missings, # Now includes formatted count and percentage
+        # Keep 'count' key: len(df) if not sparse, else non-missing count.
+        # This will be used in format_summary_table only for sparse=True alignment.
+        "count": original_total_count if not sparse else cnt, 
         "min": min_val,
         "lower": lower,
         "q25": q1,
@@ -93,10 +94,21 @@ def _calculate_summary_ser(
         "cv": cv,
     }
 
+    # Insert missings right after count if not sparse, but don't duplicate 'count' key
+    if not sparse:
+        new_summary = {"count": summary["count"], "missings": formatted_missings}
+        
+        # Add the rest of the keys (starting from 'min')
+        for k, v in summary.items():
+            if k != "count":
+                new_summary[k] = v
+        summary = new_summary
+
+
     if extended:
-        sum_val = round(ser.sum(), precision)
-        skew = round(stats.skew(ser.tolist()), precision)
-        kurto = round(stats.kurtosis(ser.tolist()), precision)
+        sum_val = round(ser_cleaned.sum(), precision)
+        skew = round(stats.skew(ser_cleaned.tolist()), precision)
+        kurto = round(stats.kurtosis(ser_cleaned.tolist()), precision)
         summary["sum"] = sum_val
         summary["skew"] = skew
         summary["kurto"] = kurto
@@ -104,39 +116,51 @@ def _calculate_summary_ser(
     return summary
 
 
-def _format_summary_table(name_list: list[str], summaries: list[dict], precision: int, extended: bool):
+def _format_summary_table(name_list: list[str], summaries: list[dict], precision: int, extended: bool, sparse: bool, total_df_count: int):
     """
     Formats the list of summaries into a table-like string with simplified formatting.
     All numbers are formatted using f"{{value:_.{precision}f}}" and then the decimal
     point is replaced by an underscore.
+    
+    The function now accepts 'total_df_count' to display in the header.
     """
 
     if not summaries or not name_list:
         return ""
 
-    # Define metrics list, conditional on 'extended'. 'missings' remains after 'count'.
-    metrics = ["count", "missings", "min", "lower", "q25", "median", "mean", "q75", "upper", "max", "std", "cv"]
+    # Define base metrics list
+    metrics = ["count", "min", "lower", "q25", "median", "mean", "q75", "upper", "max", "std", "cv"]
+    
+    if not sparse:
+        # User requested: Remove the 'count' column when not sparse, and insert 'missings'
+        metrics.remove("count")
+        metrics.insert(0, "missings")
+        
     if extended:
+        # Include 'sum' and other extended metrics only if extended is True
         metrics.extend(["sum", "skew", "kurto"])
 
     def format_number_string(value, precision):
-        # The 'missings' value is now a pre-formatted string (e.g., "10_000 (10%)"),
-        # so we just return its string representation.
         if not isinstance(value, numbers.Number):
-            return str(value) 
-        
+            # Handles 'N/A' and the formatted 'missings' string
+            return str(value)
         if isinstance(value, (float, np.float32, np.float64)):
             val_str = f"{value:_.{precision}f}"
         elif isinstance(value, (int, np.int32, np.int64)):
-            # 'count' is an integer, formatted without decimals
-            val_str = f"{value:_}" 
+            val_str = f"{value:_}"
         else:
             return str(value)
 
         return val_str
 
-    # --- Calculation of widths (using the new format_number_string) ---
-    name_width = max(len("column"), max(len(n) for n in name_list))
+    # --- Calculation of widths ---
+    name_col_label_base = "item" if sparse else "column" # Renamed header here
+
+    # Format total count for display in the header (UPDATED FORMAT)
+    formatted_total_count = f"(n = {total_df_count:_})"
+    name_col_label = f"{name_col_label_base} {formatted_total_count}"
+    
+    name_width = max(len(name_col_label), max(len(n) for n in name_list))
     col_widths = {}
 
     for metric in metrics:
@@ -148,8 +172,8 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
 
         col_widths[metric] = max(len(metric), max(len(v) for v in value_strs))
 
-    # --- Build the Table Header and Rows (using the new format_number_string) ---
-    header = f"{'column':<{name_width}}"
+    # --- Build the Table Header and Rows ---
+    header = f"{name_col_label:<{name_width}}"
     separator = f"{'-' * name_width}"
 
     for metric in metrics:
@@ -183,7 +207,7 @@ def print_summary(
         as a single, neatly aligned table with simplified f-string formatting.
 
         The function calculates standard descriptive statistics (count, mean, std, min,
-        max, quartiles) and, optionally, extended statistics (skewness, kurtosis, NaNs, zeros).
+        max, quartiles) and, optionally, extended statistics (sum, skewness, kurtosis).
 
         Args:
             df (pd.DataFrame | pd.Series): 
@@ -196,7 +220,7 @@ def print_summary(
             precision (int, optional): 
                 The number of decimal places to format the numeric statistics. Defaults to 3.
             extended (bool, optional): 
-                If True, includes extended statistics like skewness, kurtosis
+                If True, includes extended statistics like sum, skewness, kurtosis
                 in the summary. Defaults to False.
             sparse (bool, optional): 
                 If True, attempts to convert the input DataFrame into a sparse, wide format
@@ -215,6 +239,8 @@ def print_summary(
     if df.empty:
         return
     
+    total_df_count = len(df) # Calculate total count before sparse conversion
+    
     if sparse:
         df = get_sparse_df(df)
 
@@ -224,13 +250,12 @@ def print_summary(
 
     if isinstance(df, pd.Series):
         name_ser = df.name if df.name else "Series"
-        last_summary = _calculate_summary_ser(ser=df, precision=precision, extended=extended)
+        last_summary = _calculate_summary_ser(ser=df, precision=precision, extended=extended, sparse=sparse)
         if last_summary:
             summary_list.append(last_summary)
             name_list.append(name_ser)
 
     elif isinstance(df, pd.DataFrame):
-        # Only process numeric columns
         numeric_cols = df.select_dtypes(include=np.number).columns
         if numeric_cols.empty:
             print("❌ DataFrame contains no numeric columns for summary calculation.")
@@ -238,16 +263,11 @@ def print_summary(
 
         for col_name in numeric_cols:
             ser = df[col_name]
-            summary = _calculate_summary_ser(ser=ser, precision=precision, extended=extended)
+            summary = _calculate_summary_ser(ser=ser, precision=precision, extended=extended, sparse=sparse)
             if summary:
                 summary_list.append(summary)
                 name_list.append(str(col_name))
                 last_summary = summary
-        
-        if not summary_list:
-            print("❌ DataFrame contains no numeric columns to summarize.")
-            return
-
 
     if show and summary_list:
         table_output = _format_summary_table(
@@ -255,6 +275,8 @@ def print_summary(
             summary_list,
             precision,
             extended,
+            sparse,
+            total_df_count, # Pass the total count
         )
         print(table_output)
 
