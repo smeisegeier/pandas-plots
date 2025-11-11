@@ -34,8 +34,8 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
                 Verstorben,
                 Geburtsdatum,
                 Geburtsdatum_Genauigkeit,
-                DatumVitalstatus,
-                DatumVitalstatus_Genauigkeit,
+                Datum_Vitalstatus,
+                Datum_Vitalstatus_Genauigkeit,
         from Patient
         join Tumor on Patient.oBDS_RKIPatientId = Tumor.z_pat_id
         where z_tum_id = '{z_tum_id}'

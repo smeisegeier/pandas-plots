@@ -308,7 +308,7 @@ def jupyter_to_md(
     os.environ["RENDERER"] = "svg"
     
     if execute:
-        print("⚠️ execute=True will force the tables as html output insteda of png")
+        print("⚠️ execute=True will force the tables as html output instead of png")
 
     # # 1. Build the base CLI command
     # command = [
