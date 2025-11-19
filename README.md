@@ -91,6 +91,7 @@ tbl.show_num_df(
   - `find_cols()` finds all columns in a list of columns that contain any of the given stubs
   - `add_measures_to_pyg_config()` adds measures to a pygwalker config file to avoid frequent manual update
   - `get_tum_details()` prints the details of a specific tumor (needs con to clinical cancer data)
+  - `get_duckdb_filter_n()` print rowcounts for cascading filters in duckdb with ansi bars
   <!-- - `set_theme()` sets the theme for pandas-plots notebooks. ensures light theme upon printing. -->
 
 <br>

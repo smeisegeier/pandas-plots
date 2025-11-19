@@ -17,6 +17,7 @@ from .add_measures_to_pyg_config import add_measures_to_pyg_config
 from .get_tum_details import get_tum_details
 from .get_sparse_df import get_sparse_df
 from .set_theme import set_theme
+from .get_duckdb_filter_n import get_duckdb_filter_n
 
 __all__ = [
     "mean_confidence_interval",
@@ -34,4 +35,5 @@ __all__ = [
     "get_tum_details",
     "get_sparse_df",
     "set_theme",
+    "get_duckdb_filter_n",
 ]
