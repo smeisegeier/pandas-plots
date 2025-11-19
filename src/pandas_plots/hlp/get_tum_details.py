@@ -108,9 +108,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("ops")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
-        from OPS
-        where z_tum_id = '{z_tum_id}'
+        select ops.* exclude (z_kkr)
+        from OPS ops
+        join OP on ops.OP_TypId = OP.OPId
+        where ops.z_tum_id = '{z_tum_id}'
+        order by z_op_order
         """)
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
@@ -139,9 +141,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("app")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
-        from Applikationsart
-        where z_tum_id = '{z_tum_id}'
+        select app.* exclude (z_kkr)
+        from Applikationsart app
+        join Bestrahlung bestr on app.BestrahlungId = bestr.BestrahlungId
+        where app.z_tum_id = '{z_tum_id}'
+        order by z_bestr_order
         """)
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
@@ -160,9 +164,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("subst")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
-        from Substanz
-        where z_tum_id = '{z_tum_id}'
+        select sub.* exclude (z_kkr)
+        from Substanz sub
+        join SYST syst on sub.SYSTId = syst.SYSTId
+        where sub.z_tum_id = '{z_tum_id}'
+        order by z_syst_order
         """)
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
@@ -170,9 +176,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("prot")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
-        from Protokoll
-        where z_tum_id = '{z_tum_id}'
+        select prot.* exclude (z_kkr)
+        from Protokoll prot
+        join SYST syst on prot.SYSTId = syst.SYSTId
+        where prot.z_tum_id = '{z_tum_id}'
+        order by z_syst_order
         """)
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
@@ -190,9 +198,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("fo_tnm")
     (con.sql(f"""--sql
-        select *
-        from Folgeereignis_TNM
-        where z_tum_id = '{z_tum_id}'
+        select tnm.*
+        from Folgeereignis_TNM tnm
+        join Folgeereignis fo on tnm.FolgeereignisId = fo.FolgeereignisId
+        where tnm.z_tum_id = '{z_tum_id}'
+        order by z_fo_order
         """)
         .project("* exclude (z_tum_id, z_kkr)")
         .show(max_width=width)
@@ -200,9 +210,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("fo_fm")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
-        from Folgeereignis_Fernmetastase
-        where z_tum_id = '{z_tum_id}'
+        select fm.* exclude (z_kkr)
+        from Folgeereignis_Fernmetastase fm
+        join Folgeereignis fo on fm.FolgeereignisId = fo.FolgeereignisId
+        where fm.z_tum_id = '{z_tum_id}'
+        order by z_fo_order
         """)
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
@@ -210,9 +222,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
 
     print("fo_weitere")
     (con.sql(f"""--sql
-        select * exclude (z_kkr)
-        from Folgeereignis_WeitereKlassifikation
-        where z_tum_id = '{z_tum_id}'
+        select wei.* exclude (z_kkr)
+        from Folgeereignis_WeitereKlassifikation wei
+        join Folgeereignis fo on wei.FolgeereignisId = fo.FolgeereignisId
+        where wei.z_tum_id = '{z_tum_id}'
+        order by z_fo_order
         """)
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
