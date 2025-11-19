@@ -24,6 +24,7 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
     if is_print:
         display(HTML("<br>"))
     
+    print(f"tum_id: {z_tum_id}\n")
     print("pat")
     (con.sql(f"""--sql
         select
@@ -157,6 +158,25 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         .show(max_width=width)
     )
 
+    print("subst")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Substanz
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show(max_width=width)
+    )
+
+    print("prot")
+    (con.sql(f"""--sql
+        select * exclude (z_kkr)
+        from Protokoll
+        where z_tum_id = '{z_tum_id}'
+        """)
+        .project("* exclude (z_tum_id)")
+        .show(max_width=width)
+    )
     print("fo")
     (con.sql(f"""--sql
         select *
