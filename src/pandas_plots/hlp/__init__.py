@@ -18,6 +18,7 @@ from .get_tum_details import get_tum_details
 from .get_sparse_df import get_sparse_df
 from .set_theme import set_theme
 from .get_duckdb_filter_n import get_duckdb_filter_n
+from .group_kkr import group_kkr
 
 __all__ = [
     "mean_confidence_interval",
@@ -36,4 +37,5 @@ __all__ = [
     "get_sparse_df",
     "set_theme",
     "get_duckdb_filter_n",
+    "group_kkr"
 ]
