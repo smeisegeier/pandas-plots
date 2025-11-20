@@ -99,8 +99,6 @@ def plot_stacked_bars(
 
     if kkr_col:
         df = group_kkr(df=df, kkr_col=kkr_col)
-        display(df)
-        # return
 
     # * add count column[2] as a service if none is present
     if len(df.columns) == 2:
