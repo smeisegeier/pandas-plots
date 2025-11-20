@@ -5,8 +5,9 @@ from typing import Literal
 import pandas as pd
 import plotly.express as px
 
-from ..hlp import *
 from ..helper import set_caption
+from ..hlp import *
+
 
 def plot_bars(
     df_in: pd.Series | pd.DataFrame,
@@ -17,7 +18,7 @@ def plot_bars(
     orientation: Literal["h", "v"] = "v",
     sort_values: bool = False,
     normalize: bool = True,
-    height: int = 500,
+    height: int = 600,
     width: int = 1600,
     title: str = None,
     use_ci: bool = False,
@@ -67,14 +68,14 @@ def plot_bars(
     # * if df, check if valid
     if isinstance(df_in, pd.DataFrame):
         if len(df_in.columns) == 1:
-            if not (df_in.iloc[:, 0].dtype.kind in ["O", "b"]):
+            if df_in.iloc[:, 0].dtype.kind not in ["O", "b"]:
                 print("❌ df must have 1 column of object or bool type.")
                 return
             else:
                 df_in = df_in.value_counts(dropna=dropna).to_frame().reset_index()
                 use_ci = False
         elif len(df_in.columns) == 2:
-            if not (df_in.iloc[:, 0].dtype.kind in ["O", "b"]) or not (df_in.iloc[:, 1].dtype.kind in ["i", "f"]):
+            if df_in.iloc[:, 0].dtype.kind not in ["O", "b"] or df_in.iloc[:, 1].dtype.kind not in ["i", "f"]:
                 print("❌ df must have string and numeric columns (in that order).")
                 return
         else:
@@ -111,7 +112,7 @@ def plot_bars(
         orientation = "v"
         normalize = False
         dropna = True
-        df['margin'] = df['margin'].fillna(0)
+        df["margin"] = df["margin"].fillna(0)
     else:
         df = df_in.groupby(col_index, dropna=dropna)[col_name].sum().reset_index()
 
@@ -179,7 +180,7 @@ def plot_bars(
     _title_str_n = f", n={n_len:_} ({n:_})" if not use_ci else f", n={n_len:_})<br><sub>ci(95) on {ci_agg}s<sub>"
 
     # * title str na
-    _title_str_null = f", NULL excluded" if dropna else ""
+    _title_str_null = ", NULL excluded" if dropna else ""
 
     # * layot caption if provided
     caption = set_caption(caption)

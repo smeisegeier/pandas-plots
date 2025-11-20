@@ -15,7 +15,7 @@ def plot_boxes(
     points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
-    width: int = 1200,
+    width: int = 1600,
     annotations: bool = False,
     summary: bool = True,
     title: str = None,
