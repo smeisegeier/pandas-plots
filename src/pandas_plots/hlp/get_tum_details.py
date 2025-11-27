@@ -1,6 +1,6 @@
 import os
 import duckdb as ddb
-from IPython.display import display, HTML
+from IPython.display import display, HTML, Markdown
 
 
 def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
@@ -19,10 +19,11 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
     
     is_print= os.getenv("RENDERER") in ('png', 'svg')
     
-    width = 145 if is_print else 2000
+    width = 120 if is_print else 1600
 
     if is_print:
-        display(HTML("<br>"))
+        # display(HTML("<br>"))
+        display(Markdown("<!-- START_TOKEN -->"))
     
     print(f"tum_id: {z_tum_id}\n")
     print("pat")
@@ -251,3 +252,5 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         .project("* exclude (z_tum_id)")
         .show(max_width=width)
     )
+    if is_print:
+        display(Markdown("<!-- END_TOKEN -->"))

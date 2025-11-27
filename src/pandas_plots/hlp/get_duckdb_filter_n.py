@@ -1,4 +1,5 @@
 import duckdb
+from IPython.display import display, Markdown
 
 def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar_length=30, distinct_metric=None):
     """
@@ -27,6 +28,8 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
     BLOCK_FILLED = "█" 
     BLOCK_EMPTY = "░"  
     BOX_CORNER = "└" 
+
+    display(Markdown("<!-- START_TOKEN -->"))
     
     # --- Example Mode Setup ---
     if con is None:
@@ -195,6 +198,8 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
         
         print(final_line)
 
+    display(Markdown("<!-- END_TOKEN -->"))
+
     # Clean up the connection ONLY if it was created inside this function (in example mode)
     if connection_is_ephemeral: 
-         con.close()
+        con.close()

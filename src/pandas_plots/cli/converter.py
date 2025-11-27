@@ -3,46 +3,158 @@ import os
 import argparse
 import re
 
-import subprocess
-import shlex # Used for robust command line argument handling
-
-
-def enclose_ascii_table_in_code_block(content):
+def enclose_block_as_code(markdown_filepath: str, start_token: str, stop_token: str, language: str = 'python', remove_token_lines: bool = True) -> bool:
     """
-    Searches for blocks that start with '┌' and end with '└', 
-    and encloses the entire block with Markdown code fences (```).
+    Processes a Markdown file to find a block defined by single, unique start and stop tokens.
+    It encloses the content *between* them in a Markdown code block, modifying the file in-place.
     
     Args:
-        content (str): The full text content of the Markdown document.
+        markdown_filepath (str): Path to the Markdown file.
+        start_token (str): The token marking the beginning of the content block (must be line prefix).
+        stop_token (str): The token marking the end of the content block (must be line prefix).
+        language (str): The language tag for the Markdown code block. Defaults to 'python'.
+        remove_token_lines (bool): If True (default), the lines containing the start and stop tokens
+                                   are removed from the final output file. If False, they are included
+                                   *inside* the resulting code block.
 
     Returns:
-        str: The cleaned content.
+        bool: True if changes were made, False otherwise.
     """
     
-    # The regular expression uses:
-    # 1. re.DOTALL: Allows '.' to match across newlines (for the content in between).
-    # 2. re.MULTILINE: Allows '^' and '$' to match the start and end of each line.
-    
-    # Search Pattern (FIXED for multi-match reliability):
-    # (\s*┌.*?^\s*└[^\n]*)   -> Group 1: Captures the entire table block, starting with ┌, 
-    #                            non-greedily (.*?) up to the └ line, and then captures 
-    #                            content on that line, stopping BEFORE the line's newline.
-    # (\n|$)                  -> Group 2: Captures the necessary newline (\n) after the └ line 
-    #                            or the end of the string ($), forcing the match to terminate.
-    pattern = re.compile(
-        r'(\s*┌.*?^\s*└[^\n]*)(\n|$)',
-        re.DOTALL | re.MULTILINE
-    )
-    
-    # Replacement Pattern:
-    # Inserts newlines and fences, preserving the captured table block (\1) and 
-    # the trailing newline (\2).
-    replacement = r'\n\n\n\t\t```\1\n\t\t```\n\n\2'
-    # replacement = r'\n\n```\1\n```\n\2'
-    
-    new_content = re.sub(pattern, replacement, content)
-    
-    return new_content
+    try:
+        with open(markdown_filepath, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        new_lines = []
+        changes_made = False
+        block_buffer = []
+        just_enclosed_block = False # New flag to track when a block was just processed
+        
+        state = 0 # 0: Searching, 1: Collecting
+        
+        block_start_line_index = -1 
+        block_end_line_index = -1   
+
+        for i, line in enumerate(lines):
+            # Use lstrip() for the check to ignore line indentation, but keep the raw 'line' 
+            # for content collection to preserve internal indentation.
+            lstripped = line.lstrip()
+            
+            # --- Blank Line Consumption (Highest Priority) ---
+            if just_enclosed_block:
+                if not line.strip():
+                    # If we just enclosed a block and the current line is blank, consume it (skip append).
+                    continue
+                else:
+                    # Non-blank line found, stop consuming and process the line as normal.
+                    just_enclosed_block = False
+            
+            # --- State 0: Searching for Start (or processing after a block) ---
+            if state == 0:
+                if lstripped.startswith(start_token):
+                    # Start found.
+                    
+                    if not remove_token_lines:
+                        # INCLUDE TOKEN: Add the token line to the block buffer.
+                        block_buffer.append(line)
+                        block_start_line_index = i # Token line is the start
+                    else:
+                        # EXCLUDE TOKEN: Do not append line to new_lines, effectively removing it.
+                        block_start_line_index = i + 1 # Content starts next line
+                        
+                    
+                    state = 1
+                else:
+                    new_lines.append(line)
+                continue
+
+            # --- State 1: Collecting Content until Stop ---
+            elif state == 1:
+                
+                if lstripped.startswith(stop_token):
+                    # Stop found.
+                    
+                    if not remove_token_lines:
+                        # INCLUDE TOKEN: Add the token line to the block buffer.
+                        block_buffer.append(line)
+                        block_end_line_index = i # Token line is the end
+                    else:
+                        # EXCLUDE TOKEN: The content ended on the previous line.
+                        block_end_line_index = i - 1 
+
+                    # 1. Check for idempotence using the raw buffer content
+                    content_raw = "".join(block_buffer)
+                    
+                    if not content_raw.strip().startswith(f"```{language}"):
+                        # Block is NOT enclosed. Time to clean and enclose.
+                        
+                        # Filter out empty/blank lines from buffer before joining
+                        cleaned_buffer = [line for line in block_buffer if line.strip()]
+                        content_to_enclose_cleaned = "".join(cleaned_buffer)
+                        
+                        # 2. Enclose the cleaned content
+                        # Use .rstrip() to remove any final trailing newline inside the code block
+                        code_block = f"\n```{language}\n{content_to_enclose_cleaned.rstrip()}\n```\n\n"
+                        new_lines.append(code_block)
+                        changes_made = True
+                        just_enclosed_block = True # Set flag to consume next blank lines
+                    else:
+                        # Block IS enclosed. Extend raw content to new_lines.
+                        new_lines.extend(block_buffer)
+                    
+                    # 3. Handle the stop token line itself (if removed, it's already consumed)
+                    
+                    # 4. Reset state and buffer
+                    state = 0
+                    block_buffer = []
+                    continue
+                
+                # Standard collection (content between tokens)
+                block_buffer.append(line)
+                continue
+                
+        # --- FINAL POST-LOOP CHECK (EOF hit while in State 1) ---
+        if state == 1:
+            # Block started but stop token was not found (or EOF hit)
+            content_raw = "".join(block_buffer)
+
+            if not content_raw.strip().startswith(f"```{language}"):
+                # Filter out empty/blank lines from buffer before joining
+                cleaned_buffer = [line for line in block_buffer if line.strip()]
+                content_to_enclose_cleaned = "".join(cleaned_buffer)
+                
+                # Use .rstrip() to remove any final trailing newline inside the code block
+                code_block = f"\n```{language}\n{content_to_enclose_cleaned.rstrip()}\n```\n\n" 
+                new_lines.append(code_block)
+                changes_made = True
+            else:
+                new_lines.extend(block_buffer)
+            
+            if block_end_line_index == -1 and block_start_line_index != -1:
+                 # If EOF hit, the end line is the last line processed.
+                 block_end_line_index = len(lines) - 1 
+
+        # --- WRITE OUTPUT ---
+        
+        if changes_made:
+            final_content = "".join(new_lines)
+
+            with open(markdown_filepath, 'w', encoding='utf-8') as f:
+                f.write(final_content)
+            
+            # Output only the requested line numbers (1-based for the user)
+            print(f"└ ✅ SUCCESS: Block enclosed from line {block_start_line_index + 1} to {block_end_line_index + 1}. Tokens were {'included' if not remove_token_lines else 'removed'}.")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No block found between '{start_token}' and '{stop_token}' in: {markdown_filepath} or block already enclosed.")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
 
 
 
@@ -59,8 +171,6 @@ def add_br_to_md(markdown_filepath, is_debug=False):
     Returns:
         bool: True if changes were made, False otherwise.
     """
-    import os 
-    
     try:
         with open(markdown_filepath, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -387,7 +497,26 @@ def jupyter_to_md(
     remove_css_style_from_md(target_md_path)
     
     # 4. add br
-    add_br_to_md(target_md_path, is_debug=True)
+    # add_br_to_md(target_md_path, is_debug=True)
+
+    enclose_block_as_code(
+        markdown_filepath=target_md_path,
+        start_token="<!-- START_TOKEN -->",
+        stop_token="<!-- END_TOKEN -->",
+        language="python",
+        remove_token_lines=True,
+    )
+    enclose_block_as_code(
+        markdown_filepath=target_md_path,
+        start_token="┌──────",
+        stop_token="└─────────",
+        language="python",
+        remove_token_lines=False,
+    )
+
+    
+    
+
 
 # * Keep the original function name as primary, alias if needed
 def jupyter_2_md(*args, **kwargs):

@@ -1,4 +1,4 @@
-# from IPython.display import display, HTML
+from IPython.display import display, Markdown
 import os
 
 import duckdb as ddb
@@ -34,15 +34,21 @@ def descr_db(
 
     if width == 0:
         # * wide tables are not properly rendered in markdown
-        width = 145 if is_print else 2000
-
-    # if is_print:
-    #     display(HTML("<br>"))
+        width = 120 if is_print else 1600
 
     cols = ", ".join(db.columns)
+    
+    # # * enclose output in tags to ensure markdown cleanup in post processing
+    if is_print:
+        display(Markdown("<!-- START_TOKEN -->"))
+    
     print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
+
+    if is_print:
+        display(Markdown("<!-- END_TOKEN -->"))
 
     if use_preview:
         db.limit(3).show(max_width=width)
+    
 
     return

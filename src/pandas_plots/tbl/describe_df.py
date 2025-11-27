@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
-from scipy import stats
 
 from ..hlp.wrap_text import wrap_text
 from .print_summary import print_summary
@@ -145,7 +144,7 @@ def describe_df(
                     f"{_h} {wrap_text(_u[:top_n_uniques], max_items_in_line=70, use_apo=is_str)}  "
                 )
 
-    print("🟠 column stats numeric  ")
+    print("\n🟠 column stats numeric  ")
     # * only show numerics
     # for col in df.select_dtypes("number").columns:
     #     _u, _h = get_uniques_header(col)
