@@ -96,6 +96,59 @@ def get_tum_details(z_tum_id: str, con: ddb.DuckDBPyConnection) -> None:
         .show(max_width=width)
     )
 
+    print("tum3")
+    (con.sql(f"""--sql
+        select
+                Grading,
+                Morphologie_Code,
+                Topographie_Code,
+                Inzidenzort,
+                Diagnosesicherung,
+                Seitenlokalisation,
+                DCN,
+        from Tumor
+        where z_tum_id = '{z_tum_id}'
+        order by z_tum_order
+        """)
+        .show(max_width=width)
+    )
+
+    print("tum4")
+    (con.sql(f"""--sql
+        select
+                z_t_p_0,
+                z_n_p_0,
+                z_m_p_0,
+                UICC_Stadium_p,
+                Her2neuStatus,
+                Praetherapeutischer_Menopausenstatus,
+                HormonrezeptorStatus_Oestrogen,
+                HormonrezeptorStatus_Progesteron,
+        from Tumor
+        where z_tum_id = '{z_tum_id}'
+        order by z_tum_order
+        """)
+        .show(max_width=width)
+    )
+
+    print("tum5")
+    (con.sql(f"""--sql
+        select
+                TumorgroesseInvasiv,
+                TumorgroesseDCIS,
+                RASMutation,
+                ScoreErgebnis,
+                PSA,
+                Tumordicke,
+                LDH,
+                Ulzeration,
+        from Tumor
+        where z_tum_id = '{z_tum_id}'
+        order by z_tum_order
+        """)
+        .show(max_width=width)
+    )
+
     print("op")
     (con.sql(f"""--sql
         select * exclude (z_kkr)
