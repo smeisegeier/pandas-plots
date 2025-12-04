@@ -47,7 +47,7 @@ tbl.show_num_df(
 `pandas-plots` is a package to help you examine and visualize data that are organized in a pandas DataFrame. It provides a high level api to pandas / plotly with some selected functions and predefined options:
 
 - `tbl` utilities for table descriptions
-  - `show_num_df()` displays a table as styled version with additional information
+  - `show_num_df()` displays a table as styled version with addi  tional information
   - `describe_df()` an alternative version of pandas `describe()` function
   - `descr_db()` a very short descr for a `duckdb` relation
   - `pivot_df()` gets a pivot table of a 3 column dataframe (or 2 columns if no weights are given)
@@ -70,6 +70,7 @@ tbl.show_num_df(
     - `plot_box_large()`
     - `plot_boxes_large()`
     - `plot_histogram_large()`
+  - `plot_upset()` generates an upset plot, based on [UpSetPlot](https://github.com/jnothman/UpSetPlot)
 
 <br>
 

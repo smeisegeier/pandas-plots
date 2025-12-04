@@ -1,6 +1,6 @@
 [project]
 name = "pandas-plots"
-version = "0.23.1"
+version = "0.24.0"
 description = "A collection of helper for table handling and visualization"
 long_description = "file: README.md"
 long_description_content_type = "text/markdown"
@@ -26,7 +26,7 @@ dependencies = [
     "plotly>=6.2", # upgrade from 5.24
     "kaleido>=1", # needed for plotly export, must be manually added
     "matplotlib>=3.8.2",
-    "matplotlib-inline",    # nneded after matplotlib 3.8
+    "matplotlib-inline", # nneded after matplotlib 3.8
     "matplotlib-venn==0.11.10",
     "seaborn>=0.13.2",
     "Jinja2>=3.1.4",
@@ -37,6 +37,7 @@ dependencies = [
     "nbformat>=4.2.0",
     "dataframe_image>=0.2.7",
     "connection-helper>=0.13.1",
+    "upsetplot>=0.9.0",
 ]
 
 [project.scripts]

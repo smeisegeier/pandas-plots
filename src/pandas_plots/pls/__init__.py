@@ -17,6 +17,7 @@ from .plot_pie import plot_pie
 from .plot_quadrants import plot_quadrants
 from .plot_sankey import plot_sankey
 from .plot_stacked_bars import plot_stacked_bars
+from .plot_upset import plot_upset
 
 # Re-export all functions to maintain the same interface
 __all__ = [
@@ -33,6 +34,7 @@ __all__ = [
     "plot_facet_stacked_bars",
     "plot_sankey",
     "plot_pie",
+    "plot_upset",
 ]
 
 # Add methods to pandas DataFrame to enable chaining
@@ -48,3 +50,4 @@ pd.DataFrame.plot_histogram = plot_histogram
 pd.DataFrame.plot_joint = plot_joint
 pd.DataFrame.plot_sankey = plot_sankey
 pd.DataFrame.plot_pie = plot_pie
+pd.DataFrame.plot_upset = plot_upset
