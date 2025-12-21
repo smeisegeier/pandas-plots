@@ -1,7 +1,7 @@
 import duckdb
 from IPython.display import display, Markdown
 
-def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar_length=30, distinct_metric=None):
+def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar_length=30, distinct_metric=None) -> str:
     """
     Executes a series of cascading queries on a DuckDB connection,
     calculates row counts (or distinct counts of a specified metric) and percentages, 
@@ -17,6 +17,9 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
                             If set to 0, the bars are hidden.
         distinct_metric (str): If set (e.g., 'user_id'), the function calculates 
                             COUNT(DISTINCT <distinct_metric>) instead of COUNT(*).
+
+    Returns:
+        str: A string containing the given filter dict reduced to sql code.
     """
     # --- Flag to track if the connection was created here ---
     connection_is_ephemeral = False
@@ -203,3 +206,6 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
     # Clean up the connection ONLY if it was created inside this function (in example mode)
     if connection_is_ephemeral: 
         con.close()
+    
+    # * Return the final filter string
+    return '\nand '.join([i[0] for i in filters])
