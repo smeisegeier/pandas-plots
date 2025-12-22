@@ -71,6 +71,7 @@ tbl.show_num_df(
     - `plot_boxes_large()`
     - `plot_histogram_large()`
   - `plot_upset()` generates an upset plot, based on [UpSetPlot](https://github.com/jnothman/UpSetPlot)
+  - `plot_uml_graph()` generates a UML graph based on [Mermaid](https://mermaid-js.github.io/mermaid/) for structured data
 
 <br>
 

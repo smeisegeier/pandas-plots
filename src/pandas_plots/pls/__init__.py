@@ -18,6 +18,7 @@ from .plot_quadrants import plot_quadrants
 from .plot_sankey import plot_sankey
 from .plot_stacked_bars import plot_stacked_bars
 from .plot_upset import plot_upset
+from .plot_uml_graph import plot_uml_graph
 
 # Re-export all functions to maintain the same interface
 __all__ = [
@@ -35,6 +36,7 @@ __all__ = [
     "plot_sankey",
     "plot_pie",
     "plot_upset",
+    "plot_uml_graph",
 ]
 
 # Add methods to pandas DataFrame to enable chaining
@@ -51,3 +53,4 @@ pd.DataFrame.plot_joint = plot_joint
 pd.DataFrame.plot_sankey = plot_sankey
 pd.DataFrame.plot_pie = plot_pie
 pd.DataFrame.plot_upset = plot_upset
+pd.DataFrame.plot_uml_graph = plot_uml_graph
