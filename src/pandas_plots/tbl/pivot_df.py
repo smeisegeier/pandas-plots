@@ -27,6 +27,7 @@ def pivot_df(
     heatmap_axis: Literal["x", "y", "xy", None] = None,
     total_mode: TOTAL_LITERAL = "sum",
     total_axis: Literal["x", "y", "xy", None] = "xy",
+    total_exclude: bool = False,
     kpi_rag_list: list[float] = None,
     kpi_mode: KPI_LITERAL = None,
     kpi_shape: Literal["squad", "circle"] = "squad",
@@ -60,6 +61,7 @@ def pivot_df(
         heatmap_axis (Literal["x","y","xy", None], optional): The axis for displaying heatmaps. Defaults to None.
         total_mode (Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"], optional): The aggregation mode for displaying totals. Defaults to "sum".
         total_axis (Literal["x", "y", "xy", None], optional): The axis for displaying totals. Defaults to "xy".
+        total_exclude (bool, optional): Whether to exclude totals from the table. Defaults to False.
         kpi_mode: a Literal indicating the mode for displaying KPIs ["rag_abs","rag_rel", "min_max_xy", "max_min_xy", "min_max_x", "max_min_x"]
             rag_abs: rag lights (red amber green) based on tresholds given in kpi_rag_list
             rag_rel: rag lights (red amber green) based on percentiles given in kpi_rag_list (0-1)
@@ -171,4 +173,5 @@ def pivot_df(
         col1_width=col1_width,
         png_path=png_path,
         png_conversion=png_conversion,
+        total_exclude=total_exclude,
     )
