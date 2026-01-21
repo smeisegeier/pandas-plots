@@ -11,17 +11,16 @@ a comprehensive python package for enhanced **data visualization** and **analysi
     - [🚀 features](#%F0%9F%9A%80-features)
     - [📦 installation](#%F0%9F%93%A6-installation)
     - [🛠️ usage](#%F0%9F%9B%A0%EF%B8%8F-usage)
-        - [quick start](#quick-start)
-        - [examples](#examples)
-            - [styled table](#styled-table)
-            - [table description](#table-description)
-            - [upset plot](#upset-plot)
-            - [uml graph](#uml-graph)
-            - [set filter](#set-filter)
-            - [sankey diagram](#sankey-diagram)
-            - [box plot with violin overlay](#box-plot-with-violin-overlay)
-            - [box plot with statistics](#box-plot-with-statistics)
-            - [venn diagrams](#venn-diagrams)
+    - [examples](#examples)
+        - [styled table](#styled-table)
+        - [table description](#table-description)
+        - [upset plot](#upset-plot)
+        - [uml graph](#uml-graph)
+        - [set filter](#set-filter)
+        - [sankey diagram](#sankey-diagram)
+        - [box plot with violin overlay](#box-plot-with-violin-overlay)
+        - [box plot with statistics](#box-plot-with-statistics)
+        - [venn diagrams](#venn-diagrams)
     - [📚 api reference](#%F0%9F%93%9A-api-reference)
         - [table utilities tbl](#table-utilities-tbl)
         - [plotting functions pls](#plotting-functions-pls)
@@ -306,6 +305,8 @@ os.environ['RENDERER'] = 'svg'
 
 - **python 3.10+**: compatible with python versions 3.10 - 3.13
 - **[uv](https://github.com/astral-sh/uv/)**: uv is recommended for package management
+
+> ⚠️ this package depends on `numpy<2.0.0` since `UpSetPlot` is still tied to the previous versions
 
 ## 🤝 contributing
 <a id="markdown-%F0%9F%A4%9D-contributing" name="%F0%9F%A4%9D-contributing"></a>
