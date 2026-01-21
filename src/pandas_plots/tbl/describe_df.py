@@ -39,6 +39,7 @@ def describe_df(
     top_n_chars_in_index: int = 0,
     top_n_chars_in_columns: int = 0,
     missing_figsize: tuple[int, int] = (26, 6),
+    dupl_cols: list[str] = None,
 ):
     """
     This function takes a pandas DataFrame and a caption as input parameters and prints out the caption as a styled header, followed by the shape of the DataFrame and the list of column names. For each column, it prints out the column name, the number of unique values, and the column data type. If the column is a numeric column with more than 100 unique values, it also prints out the minimum, mean, maximum, and sum values. Otherwise, it prints out the first 100 unique values of the column.
@@ -92,7 +93,21 @@ def describe_df(
 
     print(f"🔵 {'*'*3} df: {caption} {'*'*3}  ")
     print(f"🟣 shape: ({df.shape[0]:_}, {df.shape[1]})")
-    print(f"🟣 duplicates: {df.duplicated().sum():_}  ")
+
+    # Calculate duplicates respecting dupl_cols parameter
+    # Calculate percentage of duplicates
+    total_rows = len(df)
+
+    if dupl_cols is None:
+        # Use all columns if dupl_cols is not specified
+        duplicate_count = df.duplicated().sum()
+        duplicate_percentage = (duplicate_count / total_rows * 100) if total_rows > 0 else 0
+        print(f"🟣 duplicates: {duplicate_count:_} ({duplicate_percentage:.0f}%)  ")
+    else:
+        # Use only the specified columns for duplicate detection
+        duplicate_count = df.duplicated(subset=dupl_cols).sum()
+        duplicate_percentage = (duplicate_count / total_rows * 100) if total_rows > 0 else 0
+        print(f"🟣 duplicates for {dupl_cols}: {duplicate_count:_} ({duplicate_percentage:.0f}%)  ")
     # print(f"🟣 uniques: {wrap_text(str({col: f'{df[col].nunique():_}' for col in df})) }  ")
     # print(f"🟣 uniques: { {col: f'{df[col].nunique():_}' for col in df} }")
     # print(f"🟣 uniques: {{ {', '.join(f'{col}: {df[col].nunique():_}' for col in df)} }}")
@@ -106,24 +121,24 @@ def describe_df(
         # * Calculate Missing Values
         n_missing = df[col].isna().sum()
         percent_missing = (n_missing / n_rows) * 100
-        
+
         # * Prep column for unique value count
         if df[col].dtype == "object":
             # Convert object to string to handle mixed types gracefully when counting uniques
             col_series = df[col].astype(str)
         else:
             col_series = df[col]
-            
+
         # * Get unique values and count
         unis = list(col_series.value_counts(dropna=False).sort_index().index)
         n_uniques = len(unis)
-        
+
         # * Format the header string: 🟠 col_name (dtype | uniques | missings)
         header = (
             f"- {col} ({df[col].dtype} | {n_uniques:_} | "
             f"{n_missing:_} ({percent_missing:.0f}%))"
         )
-        
+
         return unis, header
 
 
@@ -131,13 +146,13 @@ def describe_df(
     if use_columns:
         print("🟠 column stats all (dtype | uniques | missings) [values]  ")
         print(f"- index {wrap_text(df.index.tolist()[:top_n_uniques])}  ")
-        
+
     for col in df.columns[:]:
         _u, _h = get_uniques_header(col)
-        
+
         # * check col type (use the original dtype for wrapping)
         is_str = df.loc[:, col].dtype.kind == "O"
-        
+
         # * wrap output
         if use_columns:
                 print(
@@ -160,7 +175,7 @@ def describe_df(
         # * also make bool -> str for plot to have the <NA> values shown
         datetime_cols = df.select_dtypes(include=['datetime64','boolean']).columns
         df[datetime_cols] = df[datetime_cols].astype(str)
-        
+
         # * fix bug where empty Int64 columns are not plotted
         # * get Int64 columns that are all null -> set to object
         mask = df.dtypes.astype(str).str.lower().isin(['int64', 'float64'])
@@ -258,7 +273,7 @@ def describe_df(
             width=fig_width * fig_cols,  # <-- Set width here
             height=fig_rowheight * fig_rows,  # <-- Set height here
         )
-    
+
     if use_missing:
         import missingno as msno
         msno.matrix(df_, figsize=missing_figsize)
