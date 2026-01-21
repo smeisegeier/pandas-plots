@@ -60,6 +60,7 @@ def describe_df(
     top_n_chars_in_index (int): number of characters to display on index axis on the plot (value range)
     top_n_chars_in_columns (int): number of characters to display as subplot title (column name). If set, minimum is 10.
     missing_figsize (tuple[int, int]): figsize for missing plot (default (26, 6)
+    dupl_cols (list[str]): list of columns to check for duplicates
 
     usage:
     describe_df(
