@@ -20,6 +20,8 @@ from .set_theme import set_theme
 from .get_duckdb_filter_n import get_duckdb_filter_n
 from .group_kkr import group_kkr
 from .print_filter import print_filter
+from .is_ipynb import is_ipynb
+from .prepend_uv_header import prepend_uv_header
 
 __all__ = [
     "mean_confidence_interval",
@@ -39,5 +41,7 @@ __all__ = [
     "set_theme",
     "get_duckdb_filter_n",
     "group_kkr",
-    "print_filter"
+    "print_filter",
+    "is_ipynb",
+    "prepend_uv_header",
 ]

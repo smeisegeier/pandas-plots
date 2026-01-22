@@ -283,6 +283,8 @@ _df, _details = ven.show_venn3(
 | `get_tum_details()` | prints details of a specific tumor (requires connection to clinical cancer data) |
 | `get_duckdb_filter_n()` | print rowcounts for cascading filters in duckdb with ansi bars |
 | `print_filter()` | print filter as markdown sql codeblock |
+| `is_ipynb()` | detects if code is running in jupyter notebook |
+| `prepend_uv_header()` | prepends uv header to a .py script to make it executable for `uv run` command |
 
 ## ⚙️ configuration
 <a id="markdown-%E2%9A%99%EF%B8%8F-configuration" name="%E2%9A%99%EF%B8%8F-configuration"></a>
