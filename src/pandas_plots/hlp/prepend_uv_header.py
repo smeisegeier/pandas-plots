@@ -1,3 +1,5 @@
+import os
+
 def prepend_uv_header(target_script, toml_path):
     """
     Prepends a header to a target script which lists its dependencies.
@@ -25,7 +27,7 @@ def prepend_uv_header(target_script, toml_path):
     import tomllib
     from pathlib import Path
     
-    if not toml_path.exists():
+    if not os.path.exists(toml_path):
         raise FileNotFoundError(f"Required pyproject.toml not found at: {toml_path.resolve()}")
 
     # Get deps
