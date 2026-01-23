@@ -40,6 +40,7 @@ args_list = [
 ]
 file_db, dataset_name, filter_tum = create_py_script(args_list, "../../pyproject.toml")
     ```
+    then use: `uv run <ipynb-filename>.py --help`
     """
 
     def get_dynamic_args(args_list):
