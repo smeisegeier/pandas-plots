@@ -393,7 +393,9 @@ def jupyter_to_md(
     output_dir: str = "./docs",
     no_input=True,
     execute=False,
-    chrome_path="/opt/homebrew/bin/chromium",
+    # chrome_path="/opt/homebrew/bin/chromium",
+    # * change to ungoogled-chromium since chromium is depr
+    chrome_path='/Applications/Chromium.app/Contents/MacOS/Chromium',
 ):
     """
     Converts a Jupyter notebook into a Markdown file with embedded plotly digrams 

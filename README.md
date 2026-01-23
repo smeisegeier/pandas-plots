@@ -285,6 +285,7 @@ _df, _details = ven.show_venn3(
 | `print_filter()` | print filter as markdown sql codeblock |
 | `is_ipynb()` | detects if code is running in jupyter notebook |
 | `prepend_uv_header()` | prepends uv header to a .py script to make it executable for `uv run` command |
+| `create_py_script()` | creates a .py script from a .ipynb file |
 
 ## ⚙️ configuration
 <a id="markdown-%E2%9A%99%EF%B8%8F-configuration" name="%E2%9A%99%EF%B8%8F-configuration"></a>
