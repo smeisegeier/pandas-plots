@@ -3,11 +3,13 @@ import os
 
 import duckdb as ddb
 
+from ..hlp.is_ipynb import is_ipynb
 
 def descr_db(
     db: ddb.DuckDBPyRelation,
     caption: str = "db",
     use_preview: bool = True,
+    use_sumary: bool = True,
     width: int = 0,
 ) -> None:
     """
@@ -21,6 +23,8 @@ def descr_db(
         A caption to be printed left of the description. Defaults to "db".
     use_preview: bool, optional
         Whether to print a preview of the first 3 rows of the relation. Defaults to True.
+    use_sumary: bool, optional
+        Whether to print a summary of the relation. Defaults to True.
     width: int, optional
         The maximum width of the table. Defaults to 0.
 
@@ -30,7 +34,7 @@ def descr_db(
     """
 
     # * check if print is enabled
-    is_print = os.getenv("RENDERER") in ("png", "svg")
+    is_print = os.getenv("RENDERER") in ("png", "svg") and is_ipynb
 
     if width == 0:
         # * wide tables are not properly rendered in markdown
@@ -41,8 +45,9 @@ def descr_db(
     # # * enclose output in tags to ensure markdown cleanup in post processing
     if is_print:
         display(Markdown("<!-- START_TOKEN -->"))
-    
-    print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
+
+    if use_sumary:
+        print(f'🗄️ {caption}\t{db.count("*").fetchone()[0]:_}, {db.columns.__len__()}\n\t("{cols}")')
 
     if is_print:
         display(Markdown("<!-- END_TOKEN -->"))

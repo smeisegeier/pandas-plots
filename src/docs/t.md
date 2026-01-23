@@ -2,12 +2,15 @@
 
 ### load
 
-    🐍 3.12.9 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.1 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 0.20.7 | 📦 connection-helper: 0.13.1
+    🐍 3.12.8 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.2.1 | 📦 connection-helper: 0.13.1
+
+
+    /Users/MeisegeierS-Dev/tmp/2025-11-11_data_clin.duckdb
 
 
 
     
-![png](t_files/output_3_0.png)
+![png](t_files/output_4_0.png)
     
 
 
@@ -27,7 +30,13 @@
     └ [z_icd10_3d in ('C18','C19','C20')]:   n = 226_382   (7.0%) ░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
 ```
 
-![png](t_files/output_6_0.png)
+    "z_dy between 2020 and 2023\nand z_kkr_label is not null\nand z_ag05 is not null\nand z_icd10_3d in ('C18','C19','C20')"
+
+
+
+
+    
+![png](t_files/output_7_0.png)
     
 
 
@@ -116,9 +125,13 @@
     └ [z_icd10_3d in ('C18','C19','C20')]:   n = 226_382   (7.0%) ░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
 ```
 
+    "z_dy between 2020 and 2023\nand z_kkr_label is not null\nand z_ag05 is not null\nand z_icd10_3d in ('C18','C19','C20')"
+
+
+
     🔵 *** df: <unknown> ***  
     🟣 shape: (4, 3)
-    🟣 duplicates: 0  
+    🟣 duplicates: 0 (0%)  
     🟠 column stats all (dtype | uniques | missings) [values]  
     - index [0, 1, 2, 3,]  
     - Item (object | 4 | 0 (0%)) ['Apple', 'Banana', 'Carrot', 'Date',]  
@@ -132,16 +145,28 @@
     Sales          | 4 (100%) |  85 |    85 | 133.750 | 180.000 | 186.250 | 232.500 |   300 | 300 | 91.413 | 0.491
     Cost           | 4 (100%) |  45 |    45 |  48.750 |  80.000 |  88.750 | 120.000 |   150 | 150 | 50.394 | 0.568
     
-
-
-
     
-![png](t_files/output_12_1.png)
-    
+    🟠 sample 3 rows  
 
 
 
-    
-![svg](t_files/output_12_2.svg)
+
+```python
+
+```
+
+
+```python
+    ┌─────────┬───────┬───────┐
+    │  Item   │ Sales │ Cost  │
+    │ varchar │ int64 │ int64 │
+    ├─────────┼───────┼───────┤
+    │ Apple   │   150 │    50 │
+    │ Banana  │   210 │   110 │
+    │ Carrot  │    85 │    45 │
+    └─────────┴───────┴───────┘
+```
+
+![svg](t_files/output_13_4.svg)
     
 

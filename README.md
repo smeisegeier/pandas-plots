@@ -49,10 +49,9 @@ a comprehensive python package for enhanced **data visualization** and **analysi
 ```bash
 # using uv (recommended)
 uv add -U pandas-plots
-
-# using pip
-pip install pandas-plots -U
 ```
+
+🚨 this package relies on installed `ungoogled-chromium` to make static image conversion work. regular `chromium` is deprecated
 
 ## 🛠️ usage
 <a id="markdown-%F0%9F%9B%A0%EF%B8%8F-usage" name="%F0%9F%9B%A0%EF%B8%8F-usage"></a>

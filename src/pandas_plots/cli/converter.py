@@ -2,6 +2,8 @@ import dataframe_image as dfi
 import os
 import argparse
 import re
+PATH_CHROME = '/Applications/Chromium.app/Contents/MacOS/Chromium'
+# os.environ["BROWSER_PATH"] = PATH_CHROME
 
 def enclose_block_as_code(markdown_filepath: str, start_token: str, stop_token: str, language: str = 'python', remove_token_lines: bool = True) -> bool:
     """
@@ -395,7 +397,7 @@ def jupyter_to_md(
     execute=False,
     # chrome_path="/opt/homebrew/bin/chromium",
     # * change to ungoogled-chromium since chromium is depr
-    chrome_path='/Applications/Chromium.app/Contents/MacOS/Chromium',
+    chrome_path=PATH_CHROME,
 ):
     """
     Converts a Jupyter notebook into a Markdown file with embedded plotly digrams 

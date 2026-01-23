@@ -1,10 +1,12 @@
 # import warnings
 # warnings.filterwarnings("ignore")
 
+import dis
 import math
 import os
 from typing import Literal
 from IPython.display import display
+import duckdb as ddb
 
 import numpy as np
 import pandas as pd
@@ -13,6 +15,7 @@ from plotly.subplots import make_subplots
 
 from ..hlp.wrap_text import wrap_text
 from .print_summary import print_summary
+from .descr_db import descr_db
 
 # from IPython.display import display, HTML
 
@@ -50,7 +53,7 @@ def describe_df(
     use_plot (bool): display plot?
     use_columns (bool): display columns values?
     use_missing (bool): display missing values? (no support for dark theme)
-    renderer (Literal["png", "svg", None]): renderer for plot
+    renderer (Literal["png", "svg", None]): renderer for plot.
     fig_cols (int): number of columns in plot
     fig_offset (int): offset for plots as iloc Argument. None = no offset, -1 = omit last plot
     fig_rowheight (int): row height for plot (default 300)
@@ -168,7 +171,10 @@ def describe_df(
     print_summary(df=df)
 
     #  * show first 3 rows
-    display(df[:3])
+    print("\n🟠 sample 3 rows  ")
+    # display(df.head(3))
+    db = ddb.from_df(df)
+    descr_db(db, use_sumary=False)
 
     # ! *** PLOTS ***
     if use_plot:

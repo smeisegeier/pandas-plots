@@ -3,7 +3,7 @@ import ipynbname
 import subprocess
 from . import is_ipynb, prepend_uv_header
 
-def create_py_script(args_list, toml_path):
+def create_py_script(args_list: list, toml_path: str, write_py: bool = True):
     """
     Creates a .py script from a .ipynb file.
     - generates argument parsing off of a list of arguments
@@ -19,6 +19,8 @@ def create_py_script(args_list, toml_path):
         toml_path : str
             The path to the toml file which lists the dependencies of the
             target script.
+        write_py : bool
+            Whether to write the .py script
 
     Returns
     -------
@@ -76,7 +78,7 @@ file_db, dataset_name, filter_tum = create_py_script(args_list, "../../pyproject
     out = get_dynamic_args(args_list)
 
     # * 2) if in ipynb
-    if is_ipynb():
+    if is_ipynb() and write_py:
         # * 2a) convert ipynb to py, get path of current ipynb
         nb_path = ipynbname.path().as_posix()
         # * use subprocess to run the terminal command safely
