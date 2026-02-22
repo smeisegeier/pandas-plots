@@ -17,6 +17,7 @@ def plot_boxes(
     height: int = 600,
     width: int = 1600,
     annotations: bool = False,
+    facet_col: str = None,
     summary: bool = True,
     title: str = None,
     use_log: bool = False,
@@ -25,10 +26,11 @@ def plot_boxes(
     renderer: Literal["png", "svg", None] = None,
 ) -> None:
     """
-    [Experimental] Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
+    Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
 
-    ⚠️ ⚠️ DEPRECATION WARNING: on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
+    ⚠️: on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
 
+    if facet_col is not None, the plot will be faceted by facet_col. facet_col must be last column
 
     Args:
         df (pd.DataFrame): The input DataFrame with two columns, where the first column is string or bool type and the second column is numeric.
@@ -38,6 +40,7 @@ def plot_boxes(
         height (int): The height of the plot.
         width (int): The width of the plot.
         annotations (bool): Whether to add annotations to the plot.
+        facet_col (str): The column to facet the plot by.
         summary (bool): Whether to add a summary to the plot.
         use_log (bool): Whether to use logarithmic scale for the plot (cannot show negative values).
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
@@ -47,11 +50,14 @@ def plot_boxes(
     """
 
     if (
-        len(df.columns) != 2
-        or not ((pd.api.types.is_object_dtype(df.iloc[:, 0])) or (pd.api.types.is_bool_dtype(df.iloc[:, 0])))
+        len(df.columns) not in (2, 3)
+        or not (
+            (pd.api.types.is_object_dtype(df.iloc[:, 0]))
+            or (pd.api.types.is_bool_dtype(df.iloc[:, 0]))
+            )
         or not pd.api.types.is_numeric_dtype(df.iloc[:, 1])
     ):
-        print(f"❌ df must have 2 columns: [0] str or bool, [1] num")
+        print(f"❌ df must have 2 or 3 columns: [0] str or bool, [1] num, [2] (optional) str")
         return
     # * layout gaps
     xlvl1 = -50
@@ -75,6 +81,7 @@ def plot_boxes(
         x=df.iloc[:, 0],
         y=df.iloc[:, 1],
         color=df.iloc[:, 0],
+        facet_col=facet_col,
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         orientation="v",
         points=points,

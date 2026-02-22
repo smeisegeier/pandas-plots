@@ -183,7 +183,7 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
         metric_label = metric
         # User requested: Rename 'missings' column label to 'present' when not sparse
         if not sparse and metric == "missings":
-            metric_label = "present"
+            metric_label = "notnull"
             
         header += f" | {metric_label:^{col_widths[metric]}}"
         separator += f"-+-{'-' * col_widths[metric]}"
