@@ -29,7 +29,98 @@
 
 ### <a id='toc1_1_1_'></a>[load](#toc0_)
 
-    🐍 3.12.9 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.1 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 0.23.1 | 📦 connection-helper: 0.13.1
+    🐍 3.12.9 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.2.2 | 📦 connection-helper: 0.13.1
+
+
+
+
+
+    True
+
+
+
+
+<div style="margin-bottom: 20px;"><strong>Legend:</strong> <span style="background-color:#f96; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Access</span> <span style="background-color:#9cf; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Boss</span> <span style="background-color:#dfd; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Boss_Drop</span> <span style="background-color:#fdb; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Dungeon</span> <span style="background-color:#dff; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Leveling</span> <span style="background-color:#ccf; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Quest</span> <span style="background-color:#ffd1dc; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Quest_Chain</span> <span style="background-color:#e0bbff; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Raid</span> <span style="background-color:#b3e5fc; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Raid_Step</span> <span style="background-color:#c8e6c9; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Reputation</span> <span style="background-color:#f96; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Vendor</span></div>
+
+
+
+```mermaid
+graph LR
+    classDef Access fill:#f96,stroke:#333,stroke-width:1px,color:#000;
+    classDef Boss fill:#9cf,stroke:#333,stroke-width:1px,color:#000;
+    classDef Boss_Drop fill:#dfd,stroke:#333,stroke-width:1px,color:#000;
+    classDef Dungeon fill:#fdb,stroke:#333,stroke-width:1px,color:#000;
+    classDef Leveling fill:#dff,stroke:#333,stroke-width:1px,color:#000;
+    classDef Quest fill:#ccf,stroke:#333,stroke-width:1px,color:#000;
+    classDef Quest_Chain fill:#ffd1dc,stroke:#333,stroke-width:1px,color:#000;
+    classDef Raid fill:#e0bbff,stroke:#333,stroke-width:1px,color:#000;
+    classDef Raid_Step fill:#b3e5fc,stroke:#333,stroke-width:1px,color:#000;
+    classDef Reputation fill:#c8e6c9,stroke:#333,stroke-width:1px,color:#000;
+    classDef Vendor fill:#f96,stroke:#333,stroke-width:1px,color:#000;
+    classDef Root fill:#eee,stroke:#999,stroke-dasharray: 5 5,color:#666;
+    Akama_Alliance -- Raid --> Black_Temple
+    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
+    Level_68 -- Quest --> Karazhan_Key_Chain
+    Level_70 -- Reputation --> Lower_City_Honored
+    Cipher_of_Damnation -- Quest --> Black_Temple_Chain
+    The_Eye -- Boss_Drop --> The_Vials_of_Eternity
+    Key_of_Time -- Access --> Heroic_Black_Morass
+    Black_Temple_Chain -- Quest --> Akama_Alliance
+    Serpentshrine_Cavern -- Boss_Drop --> The_Vials_of_Eternity
+    Level_68 -- Leveling --> Level_70
+    Level_70 -- Quest_Chain --> Trial_of_the_Naaru
+    Cenarion_Expedition_Honored -- Dungeon --> Heroic_Slave_Pens
+    Lower_City_Honored -- Vendor --> Auchenai_Key
+    Level_70 -- Reputation --> Cenarion_Expedition_Honored
+    Karazhan_Raid -- Quest --> Cipher_of_Damnation
+    Battle_for_Mount_Hyjal -- Raid_Step --> Akama_Alliance
+    Level_70 -- Reputation --> Keepers_of_Time_Honored
+    Magtheridon_Raid -- Boss_Drop --> Trial_of_the_Naaru
+    Level_70 -- Reputation --> Honor_Hold_Honored
+    Karazhan_Raid -- Boss --> Nightbane
+    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
+    Trial_of_the_Naaru -- Raid --> The_Eye
+    Heroic_Slave_Pens -- Quest --> Cudgel_of_Kardesh_Quest
+    Flamewrought_Key -- Access --> Heroic_Shattered_Halls
+    Keepers_of_Time_Honored -- Vendor --> Key_of_Time
+    Karazhan_Key_Chain -- Raid --> Karazhan_Raid
+    Karazhan_Raid -- Boss_Drop --> Cudgel_of_Kardesh_Quest
+    Cudgel_of_Kardesh_Quest -- Raid --> Serpentshrine_Cavern
+    Honor_Hold_Honored -- Vendor --> Flamewrought_Key
+    class Black_Temple Raid;
+    class Battle_for_Mount_Hyjal Raid;
+    class Karazhan_Key_Chain Quest;
+    class Lower_City_Honored Reputation;
+    class Black_Temple_Chain Quest;
+    class The_Vials_of_Eternity Boss_Drop;
+    class Heroic_Black_Morass Access;
+    class Level_68 Root;
+    class Akama_Alliance Quest;
+    class Level_70 Leveling;
+    class Trial_of_the_Naaru Quest_Chain;
+    class Heroic_Slave_Pens Dungeon;
+    class Auchenai_Key Vendor;
+    class Cenarion_Expedition_Honored Reputation;
+    class Cipher_of_Damnation Quest;
+    class Keepers_of_Time_Honored Reputation;
+    class Honor_Hold_Honored Reputation;
+    class Nightbane Boss;
+    class Heroic_Shadow_Labyrinth Access;
+    class The_Eye Raid;
+    class Cudgel_of_Kardesh_Quest Quest;
+    class Heroic_Shattered_Halls Access;
+    class Key_of_Time Vendor;
+    class Karazhan_Raid Raid;
+    class Serpentshrine_Cavern Raid;
+    class Magtheridon_Raid Root;
+    class Flamewrought_Key Vendor;
+```
+
+
+
+    
+![png](test_files/output_4_2.png)
+    
 
 
 
@@ -74,7 +165,7 @@
 
 
     
-![png](test_files/output_9_1.png)
+![png](test_files/output_10_1.png)
     
 
 
@@ -88,15 +179,15 @@
 
 
     
-![png](test_files/output_13_0.png)
-    
-
-
-
-
-
-    
 ![png](test_files/output_14_0.png)
+    
+
+
+
+
+
+    
+![png](test_files/output_15_0.png)
     
 
 
@@ -109,7 +200,7 @@
 
 
     
-![png](test_files/output_14_2.png)
+![png](test_files/output_15_2.png)
     
 
 
@@ -117,12 +208,12 @@
 
 
     
-![png](test_files/output_16_0.png)
+![png](test_files/output_17_0.png)
     
 
 
     
-    column (n = 6_433) |   present    |  min  | lower |  q25  | median | mean  |  q75  | upper |  max   |  std  |  cv  
+    column (n = 6_433) |   notnull    |  min  | lower |  q25  | median | mean  |  q75  | upper |  max   |  std  |  cv  
     -------------------+--------------+-------+-------+-------+--------+-------+-------+-------+--------+-------+------
     distance           | 6_433 (100%) | 0.000 | 0.000 | 0.980 |  1.640 | 3.025 | 3.210 | 6.550 | 36.700 | 3.828 | 1.266
     
@@ -132,14 +223,33 @@
 
 
     
-![png](test_files/output_19_0.png)
+![png](test_files/output_20_0.png)
     
 
 
     
-    column (n = 45) |  present  |  min  | lower |  q25  | median | mean  |  q75   | upper  |  max   |  std   |  cv  
+    column (n = 45) |  notnull  |  min  | lower |  q25  | median | mean  |  q75   | upper  |  max   |  std   |  cv  
     ----------------+-----------+-------+-------+-------+--------+-------+--------+--------+--------+--------+------
     distance        | 45 (100%) | 0.000 | 0.000 | 0.000 |  0.900 | 7.171 | 12.600 | 26.350 | 36.660 | 10.708 | 1.493
+    
+
+
+
+
+    
+    column (n = 6_433) |   notnull    | min  | lower | q25  | median | mean | q75  | upper |  max  | std  |  cv 
+    -------------------+--------------+------+-------+------+--------+------+------+-------+-------+------+-----
+    distance           | 6_433 (100%) | 0.00 |  0.00 | 0.98 |   1.64 | 3.02 | 3.21 |  6.55 | 36.70 | 3.83 | 1.27
+    
+    
+    item (n = 6_433) | count |  min  | lower |  q25  | median | mean  |  q75  | upper |  max  |  std  |  cv 
+    -----------------+-------+-------+-------+-------+--------+-------+-------+-------+-------+-------+-----
+    Bronx            |   137 |  0.00 |  0.00 |  2.36 |   4.31 |  6.61 |  9.44 | 19.62 | 24.20 |  5.95 | 0.90
+    Brooklyn         |   501 |  0.00 |  0.00 |  1.53 |   3.63 |  5.03 |  7.30 | 15.70 | 26.92 |  4.49 | 0.89
+    Manhattan        | 5_206 |  0.00 |  0.00 |  0.91 |   1.50 |  2.39 |  2.60 |  5.13 | 30.23 |  2.91 | 1.21
+    Queens           |   542 |  0.00 |  0.00 |  1.34 |   3.56 |  5.96 |  9.89 | 22.51 | 36.70 |  5.89 | 0.99
+    Staten Island    |     2 | 15.51 | 15.51 | 15.68 |  15.86 | 15.86 | 16.03 | 16.20 | 16.20 |  0.49 | 0.03
+    nan              |    45 |  0.00 |  0.00 |  0.00 |   0.90 |  7.17 | 12.60 | 26.35 | 36.66 | 10.71 | 1.49
     
 
 
@@ -161,12 +271,12 @@
 
 
     
-![png](test_files/output_20_1.png)
+![png](test_files/output_22_1.png)
     
 
 
     
-    column (n = 6_433) |   present    | min  | lower | q25  | median | mean | q75  | upper |  max  | std  |  cv 
+    column (n = 6_433) |   notnull    | min  | lower | q25  | median | mean | q75  | upper |  max  | std  |  cv 
     -------------------+--------------+------+-------+------+--------+------+------+-------+-------+------+-----
     distance           | 6_433 (100%) | 0.00 |  0.00 | 0.98 |   1.64 | 3.02 | 3.21 |  6.55 | 36.70 | 3.83 | 1.27
     
@@ -186,7 +296,7 @@
 
 
     
-![png](test_files/output_23_0.png)
+![png](test_files/output_25_0.png)
     
 
 
@@ -194,7 +304,7 @@
 
 
     
-![png](test_files/output_25_0.png)
+![png](test_files/output_27_0.png)
     
 
 
@@ -239,7 +349,7 @@
 ### <a id='toc1_3_1_'></a>[print_summary()](#toc0_)
 
     
-    column (n = 6_433) |   present    |  min  | lower |  q25   | median |  mean  |  q75   | upper  |   max   |  std   |  cv   |     sum     | skew  | kurto 
+    column (n = 6_433) |   notnull    |  min  | lower |  q25   | median |  mean  |  q75   | upper  |   max   |  std   |  cv   |     sum     | skew  | kurto 
     -------------------+--------------+-------+-------+--------+--------+--------+--------+--------+---------+--------+-------+-------------+-------+-------
     passengers         | 6_433 (100%) |     0 |     0 |  1.000 |  1.000 |  1.539 |  2.000 |      3 |       6 |  1.204 | 0.782 |       9_902 | 2.359 |  4.881
     distance           | 6_433 (100%) | 0.000 | 0.000 |  0.980 |  1.640 |  3.025 |  3.210 |  6.550 |  36.700 |  3.828 | 1.266 |  19_457.360 | 3.008 | 11.135
@@ -252,15 +362,9 @@
 
 ### <a id='toc1_3_2_'></a>[describe_df()](#toc0_)
 
-
-    
-![png](test_files/output_32_0.png)
-    
-
-
-    🔵 *** df: <unknown> ***  
-    🟣 shape: (6_433, 16)
-    🟣 duplicates: 0  
+    🔵 *** df: taxis ***  
+    🟣 shape: (6_433, 14)
+    🟣 duplicates for ['color']: 6_431 (100%)  
     🟠 column stats all (dtype | uniques | missings) [values]  
     - index [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,]  
     - pickup (datetime64[ns] | 6_414 | 0 (0%)) [2019-02-28 23:29:03, 2019-03-01 00:03:29, 2019-03-01 00:08:32, 2019-03-01 00:15:53,  
@@ -283,35 +387,39 @@
     'Baisley Park', 'Bath Beach', 'Battery Park', 'Battery Park City', 'Bay Ridge',]  
     - pickup_borough (object | 5 | 26 (0%)) ['<NA>', 'Bronx', 'Brooklyn', 'Manhattan', 'Queens',]  
     - dropoff_borough (object | 6 | 45 (1%)) ['<NA>', 'Bronx', 'Brooklyn', 'Manhattan', 'Queens', 'Staten Island',]  
-    - lol (float64 | 1 | 6_433 (100%)) [nan,]  
-    - xd (int64 | 1 | 0 (0%)) [2027,]  
     
     🟠 column stats numeric  
     
-    column (n = 6_433) |   present    |  min  | lower |    q25    |  median   |   mean    |    q75    | upper  |   max   |  std   |  cv  
-    -------------------+--------------+-------+-------+-----------+-----------+-----------+-----------+--------+---------+--------+------
-    passengers         | 6_433 (100%) |     0 |     0 |     1.000 |     1.000 |     1.539 |     2.000 |      3 |       6 |  1.204 | 0.782
-    distance           | 6_433 (100%) | 0.000 | 0.000 |     0.980 |     1.640 |     3.025 |     3.210 |  6.550 |  36.700 |  3.828 | 1.266
-    fare               | 6_433 (100%) | 1.000 | 1.000 |     6.500 |     9.500 |    13.091 |    15.000 | 27.540 | 150.000 | 11.552 | 0.882
-    tip                | 6_433 (100%) | 0.000 | 0.000 |     0.000 |     1.700 |     1.979 |     2.800 |  6.960 |  33.200 |  2.449 | 1.237
-    tolls              | 6_433 (100%) | 0.000 | 0.000 |     0.000 |     0.000 |     0.325 |     0.000 |  0.000 |  24.020 |  1.415 | 4.351
-    total              | 6_433 (100%) | 1.300 | 1.300 |    10.800 |    14.160 |    18.518 |    20.300 | 34.550 | 174.820 | 13.816 | 0.746
-    lol                |       0 (0%) |   N/A |   N/A |       N/A |       N/A |       N/A |       N/A |    N/A |     N/A |    N/A |   N/A
-    xd                 | 6_433 (100%) | 2_027 | 2_027 | 2_027.000 | 2_027.000 | 2_027.000 | 2_027.000 |  2_027 |   2_027 |  0.000 |   N/A
+    column (n = 6_433) |   notnull    |  min  | lower |  q25   | median |  mean  |  q75   | upper  |   max   |  std   |  cv  
+    -------------------+--------------+-------+-------+--------+--------+--------+--------+--------+---------+--------+------
+    passengers         | 6_433 (100%) |     0 |     0 |  1.000 |  1.000 |  1.539 |  2.000 |      3 |       6 |  1.204 | 0.782
+    distance           | 6_433 (100%) | 0.000 | 0.000 |  0.980 |  1.640 |  3.025 |  3.210 |  6.550 |  36.700 |  3.828 | 1.266
+    fare               | 6_433 (100%) | 1.000 | 1.000 |  6.500 |  9.500 | 13.091 | 15.000 | 27.540 | 150.000 | 11.552 | 0.882
+    tip                | 6_433 (100%) | 0.000 | 0.000 |  0.000 |  1.700 |  1.979 |  2.800 |  6.960 |  33.200 |  2.449 | 1.237
+    tolls              | 6_433 (100%) | 0.000 | 0.000 |  0.000 |  0.000 |  0.325 |  0.000 |  0.000 |  24.020 |  1.415 | 4.351
+    total              | 6_433 (100%) | 1.300 | 1.300 | 10.800 | 14.160 | 18.518 | 20.300 | 34.550 | 174.820 | 13.816 | 0.746
     
-
-
-
     
-![png](test_files/output_32_2.png)
+    🟠 sample 3 rows  
+
+```python
+    ┌─────────────────────┬─────────────────────┬────────────┬──────────┬────────┬────────┬────────┬────────┬─────────┬─────────────┬───────────────────────┬───────────────────────┬────────────────┬─────────────────┐
+    │       pickup        │       dropoff       │ passengers │ distance │  fare  │  tip   │ tolls  │ total  │  color  │   payment   │      pickup_zone      │     dropoff_zone      │ pickup_borough │ dropoff_borough │
+    │    timestamp_ns     │    timestamp_ns     │   int64    │  double  │ double │ double │ double │ double │ varchar │   varchar   │        varchar        │        varchar        │    varchar     │     varchar     │
+    ├─────────────────────┼─────────────────────┼────────────┼──────────┼────────┼────────┼────────┼────────┼─────────┼─────────────┼───────────────────────┼───────────────────────┼────────────────┼─────────────────┤
+    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │      1.6 │    7.0 │   2.15 │    0.0 │  12.95 │ yellow  │ credit card │ Lenox Hill West       │ UN/Turtle Bay South   │ Manhattan      │ Manhattan       │
+    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │     0.79 │    5.0 │    0.0 │    0.0 │    9.3 │ yellow  │ cash        │ Upper West Side South │ Upper West Side South │ Manhattan      │ Manhattan       │
+    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │     1.37 │    7.5 │   2.36 │    0.0 │  14.16 │ yellow  │ credit card │ Alphabet City         │ West Village          │ Manhattan      │ Manhattan       │
+    └─────────────────────┴─────────────────────┴────────────┴──────────┴────────┴────────┴────────┴────────┴─────────┴─────────────┴───────────────────────┴───────────────────────┴────────────────┴─────────────────┘
+```
+
+![svg](test_files/output_34_1.svg)
     
-
-
 
 
     🔵 *** df: <unknown> ***  
     🟣 shape: (1_000, 105)
-    🟣 duplicates: 0  
+    🟣 duplicates: 0 (0%)  
     🟠 column stats all (dtype | uniques | missings) [values]  
     - index [0, 1, 2, 3, 4,]  
     - oBDS_RKIPatientTumorId (object | 1_000 | 0 (0%)) ['00427dbf-4acf-468e-9b5c-8f5f5a7cf1d3', '00e61412-981d-4b2f-b330-6a32e8632f08',  
@@ -432,7 +540,7 @@
     
     🟠 column stats numeric  
     
-    column (n = 1_000)           |   present    |   min   | lower  |    q25    |  median   |   mean    |    q75    | upper  |   max   |    std    |  cv  
+    column (n = 1_000)           |   notnull    |   min   | lower  |    q25    |  median   |   mean    |    q75    | upper  |   max   |    std    |  cv  
     -----------------------------+--------------+---------+--------+-----------+-----------+-----------+-----------+--------+---------+-----------+------
     LK_befallen                  |    171 (17%) |       0 |      0 |     0.000 |     0.000 |     1.064 |     1.000 |      2 |      27 |     3.068 | 2.883
     LK_untersucht                |    196 (19%) |       0 |      0 |     0.000 |    12.000 |    13.337 |    20.250 |     45 |      80 |    13.506 | 1.013
@@ -455,13 +563,19 @@
     z_period_diag_death_day      |    300 (30%) |       0 |      0 |    52.750 |   260.000 |   685.807 |   687.000 |  1_552 |   8_399 | 1_242.187 | 1.811
     z_period_diag_psa_day        |       0 (0%) |     N/A |    N/A |       N/A |       N/A |       N/A |       N/A |    N/A |     N/A |       N/A |   N/A
     
-
-
-
     
-![png](test_files/output_33_1.png)
-    
+    🟠 sample 3 rows  
 
+```python
+    ┌──────────────────────┬──────────────────────┬─────────────────────┬──────────────────────┬─────────────┬─────────────────────┬──────────────────────┬──────────────────┬─────────────────────┬───────────────────┬───────────────┬────────────┬────────────┬────────────┬────────────┬───────────────────┬─────────┬───────────────────┬─────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────────────┬───────────────┬────────────┬────────────┬────────────┬────────────┬───────────────────┬─────────┬───────────────────┬─────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────────────┬─────────┬─────────────┬───────────────┬──────────────────┬─────────────────────┬──────────────────────┬──────────────────────┬──────────────────────┬───────────────┬─────────────────────┬──────────────────┬─────────────┬──────────────────────┬─────────────┬───────────────┬───────────────┬────────────────────┬───────┬───────────┬──────────────────────┬────────────┬───────┬────────────┬────────────────────┬─────────┬──────────────────────┬──────────────────────┬───────┬────────────────────────┬─────────────┬───────┬────────┬─────────┬─────────┬────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬──────────┬──────────┬───────────────────┬────────────────┬────────────────┬────────────────┬────────────────┬───────────────────┬──────────────────────────────┬───────────────┬──────────┬─────────────┬─────────────┬─────────┬─────────────────────────┬───────────────────────┐
+    │ oBDS_RKIPatientTum…  │  oBDS_RKIPatientId   │    Diagnosedatum    │ Diagnosedatum_Gena…  │ Inzidenzort │ Diagnose_ICD10_Code │ Diagnose_ICD10_Ver…  │ Topographie_Code │ Topographie_Version │ Diagnosesicherung │ TNM_Auflage_c │ y_Symbol_c │ r_Symbol_c │ a_Symbol_c │ m_Symbol_c │ c_p_u_Praefix_T_c │   T_c   │ c_p_u_Praefix_N_c │   N_c   │ c_p_u_Praefix_M_c │   M_c   │   L_c   │   V_c   │  Pn_c   │   S_c   │ UICC_Stadium_c │ TNM_Auflage_p │ y_Symbol_p │ r_Symbol_p │ a_Symbol_p │ m_Symbol_p │ c_p_u_Praefix_T_p │   T_p   │ c_p_u_Praefix_N_p │   N_p   │ c_p_u_Praefix_M_p │   M_p   │   L_p   │   V_p   │  Pn_p   │   S_p   │ UICC_Stadium_p │ Grading │ LK_befallen │ LK_untersucht │ Morphologie_Code │ Morphologie_Version │ Praetherapeutische…  │ HormonrezeptorStat…  │ HormonrezeptorStat…  │ Her2neuStatus │ TumorgroesseInvasiv │ TumorgroesseDCIS │ RASMutation │ RektumAbstandAnoku…  │ GradPrimaer │ GradSekundaer │ ScoreErgebnis │ AnlassGleasonScore │  PSA  │ DatumPSA  │ DatumPSA_Genauigkeit │ Tumordicke │  LDH  │ Ulzeration │ Seitenlokalisation │   DCN   │ Anzahl_Tage_Diagno…  │       z_tum_id       │ z_kkr │        z_pat_id        │ z_kkr_label │ z_dy  │ z_age  │ z_ag05  │ z_icd10 │ z_icd10_3d │ z_t_c_0 │ z_t_c_1 │ z_t_p_0 │ z_t_p_1 │ z_n_c_0 │ z_n_c_1 │ z_n_p_0 │ z_n_p_1 │ z_m_c_0 │ z_m_c_1 │ z_m_p_0 │ z_m_p_1 │ z_m_pc_1 │ z_is_dco │ z_last_tum_status │ z_tum_op_count │ z_tum_st_count │ z_tum_sy_count │ z_tum_fo_count │ z_first_treatment │ z_first_treatment_after_days │ z_event_order │ z_events │ z_class_hpv │ z_tum_order │  z_sex  │ z_period_diag_death_day │ z_period_diag_psa_day │
+    │       varchar        │       varchar        │      timestamp      │       varchar        │   varchar   │       varchar       │       varchar        │     varchar      │       varchar       │      varchar      │    varchar    │   int32    │   int32    │   int32    │  varchar   │      varchar      │ varchar │      varchar      │ varchar │      varchar      │ varchar │ varchar │ varchar │ varchar │ varchar │    varchar     │    varchar    │  varchar   │   int32    │   int32    │  varchar   │      varchar      │ varchar │      varchar      │ varchar │      varchar      │ varchar │ varchar │ varchar │ varchar │ varchar │    varchar     │ varchar │    int32    │     int32     │     varchar      │       varchar       │        int32         │        int32         │        int32         │     int32     │        int32        │      int32       │    int32    │        int32         │    int32    │     int32     │     int32     │       int32        │ float │ timestamp │        int32         │   float    │ int32 │   int32    │      varchar       │ varchar │        int32         │       varchar        │ int8  │        varchar         │   varchar   │ int16 │ double │ varchar │ varchar │  varchar   │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar  │ boolean  │      varchar      │     int16      │     int16      │     int16      │     int16      │      varchar      │            int32             │    varchar    │ varchar  │   varchar   │    int8     │ varchar │          int32          │         int32         │
+    ├──────────────────────┼──────────────────────┼─────────────────────┼──────────────────────┼─────────────┼─────────────────────┼──────────────────────┼──────────────────┼─────────────────────┼───────────────────┼───────────────┼────────────┼────────────┼────────────┼────────────┼───────────────────┼─────────┼───────────────────┼─────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────────────┼───────────────┼────────────┼────────────┼────────────┼────────────┼───────────────────┼─────────┼───────────────────┼─────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────────────┼─────────┼─────────────┼───────────────┼──────────────────┼─────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼───────────────┼─────────────────────┼──────────────────┼─────────────┼──────────────────────┼─────────────┼───────────────┼───────────────┼────────────────────┼───────┼───────────┼──────────────────────┼────────────┼───────┼────────────┼────────────────────┼─────────┼──────────────────────┼──────────────────────┼───────┼────────────────────────┼─────────────┼───────┼────────┼─────────┼─────────┼────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────────┼──────────┼───────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼───────────────────┼──────────────────────────────┼───────────────┼──────────┼─────────────┼─────────────┼─────────┼─────────────────────────┼───────────────────────┤
+    │ 6f105957-7bbb-41f3…  │ 6fe288a8-24d6-451d…  │ 2022-12-15 00:00:00 │ T                    │ 05382       │ C44.3               │ 102022GM             │ C44.3            │ 33                  │ 7                 │ 8             │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 8             │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ U       │        NULL │          NULL │ 8097/3           │ 33                  │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ L                  │ N       │                 NULL │ 6f105957-7bbb-41f3…  │     5 │ 6fe288a8-24d6-451d-b…  │ 05-NW       │  2022 │   62.0 │ a60b64  │ C44.3   │ C44        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ false    │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                    NULL │                  NULL │
+    │ 2334f59e-74ee-477c…  │ c2490ae9-4489-4b9a…  │ 2022-05-15 00:00:00 │ T                    │ 05162       │ C16.0               │ 102022GM             │ C16.0            │ 33                  │ 7                 │ 8             │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 8             │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 3       │        NULL │          NULL │ 8490/3           │ 33                  │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ T                  │ N       │                  143 │ 2334f59e-74ee-477c…  │     5 │ c2490ae9-4489-4b9a-8…  │ 05-NW       │  2022 │  44.08 │ a40b44  │ C16.0   │ C16        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ false    │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                     143 │                  NULL │
+    │ eb2ae3f0-31a2-4d2f…  │ 32d7f226-18c2-41b8…  │ 2023-10-15 00:00:00 │ T                    │ 04011       │ C80.0               │ 102023GM             │ C80.9            │ 33                  │ 0                 │ NULL          │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ NULL          │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ U       │        NULL │          NULL │ 8000/3           │ NULL                │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ U                  │ J       │                    0 │ eb2ae3f0-31a2-4d2f…  │     4 │ 32d7f226-18c2-41b8-a…  │ 04-HB       │  2023 │  92.25 │ a85plus │ C80.0   │ C80        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ true     │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                       0 │                  NULL │
+    └──────────────────────┴──────────────────────┴─────────────────────┴──────────────────────┴─────────────┴─────────────────────┴──────────────────────┴──────────────────┴─────────────────────┴───────────────────┴───────────────┴────────────┴────────────┴────────────┴────────────┴───────────────────┴─────────┴───────────────────┴─────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴────────────────┴───────────────┴────────────┴────────────┴────────────┴────────────┴───────────────────┴─────────┴───────────────────┴─────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴────────────────┴─────────┴─────────────┴───────────────┴──────────────────┴─────────────────────┴──────────────────────┴──────────────────────┴──────────────────────┴───────────────┴─────────────────────┴──────────────────┴─────────────┴──────────────────────┴─────────────┴───────────────┴───────────────┴────────────────────┴───────┴───────────┴──────────────────────┴────────────┴───────┴────────────┴────────────────────┴─────────┴──────────────────────┴──────────────────────┴───────┴────────────────────────┴─────────────┴───────┴────────┴─────────┴─────────┴────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────┴──────────┴───────────────────┴────────────────┴────────────────┴────────────────┴────────────────┴───────────────────┴──────────────────────────────┴───────────────┴──────────┴─────────────┴─────────────┴─────────┴─────────────────────────┴───────────────────────┘
+```
 
 ### <a id='toc1_3_3_'></a>[descr_db()](#toc0_)
 
@@ -473,13 +587,13 @@
     │ z_kkr_label │ z_first_treatment_after_days │ z_first_treatment │
     │   varchar   │            int32             │      varchar      │
     ├─────────────┼──────────────────────────────┼───────────────────┤
-    │ 12-BB       │                           22 │ sy                │
-    │ 05-NW       │                           27 │ sy                │
-    │ 08-BW       │                           61 │ sy                │
+    │ 01-SH       │                           46 │ sy                │
+    │ 03-NI       │                           71 │ st                │
+    │ 11-BE       │                           33 │ sy                │
     └─────────────┴──────────────────────────────┴───────────────────┘
 ```
 
-![png](test_files/output_36_0.png)
+![png](test_files/output_38_0.png)
     
 
 
@@ -491,7 +605,7 @@
 
     🔵 *** df: taxis ***  
     🟣 shape: (6_433, 4)
-    🟣 duplicates: 4_803  
+    🟣 duplicates: 4_803 (75%)  
     🟠 column stats all (dtype | uniques | missings) [values]  
     - index [0, 1, 2, 3, 4,]  
     - color (object | 2 | 0 (0%)) ['green', 'yellow',]  
@@ -501,53 +615,39 @@
     
     🟠 column stats numeric  
     
-    column (n = 6_433) |   present    |  min  | lower |  q25   | median |  mean  |  q75   | upper  |   max   |  std   |  cv  
+    column (n = 6_433) |   notnull    |  min  | lower |  q25   | median |  mean  |  q75   | upper  |   max   |  std   |  cv  
     -------------------+--------------+-------+-------+--------+--------+--------+--------+--------+---------+--------+------
     total              | 6_433 (100%) | 1.300 | 1.300 | 10.800 | 14.160 | 18.518 | 20.300 | 34.550 | 174.820 | 13.816 | 0.746
     
-
-
-
     
-![png](test_files/output_40_1.png)
-    
-
-
-
-
-    🗄️ taxis	6_433, 16
-    	("pickup, dropoff, passengers, distance, fare, tip, tolls, total, color, payment, pickup_zone, dropoff_zone, pickup_borough, dropoff_borough, lol, xd")
+    🟠 sample 3 rows  
 
 ```python
-    ┌─────────────────────┬─────────────────────┬────────────┬──────────┬────────┬────────┬────────┬────────┬─────────┬─────────────┬───────────────────────┬───────────────────────┬────────────────┬─────────────────┬────────┬───────┐
-    │       pickup        │       dropoff       │ passengers │ distance │  fare  │  tip   │ tolls  │ total  │  color  │   payment   │      pickup_zone      │     dropoff_zone      │ pickup_borough │ dropoff_borough │  lol   │  xd   │
-    │    timestamp_ns     │    timestamp_ns     │   int64    │  double  │ double │ double │ double │ double │ varchar │   varchar   │        varchar        │        varchar        │    varchar     │     varchar     │ double │ int64 │
-    ├─────────────────────┼─────────────────────┼────────────┼──────────┼────────┼────────┼────────┼────────┼─────────┼─────────────┼───────────────────────┼───────────────────────┼────────────────┼─────────────────┼────────┼───────┤
-    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │      1.6 │    7.0 │   2.15 │    0.0 │  12.95 │ yellow  │ credit card │ Lenox Hill West       │ UN/Turtle Bay South   │ Manhattan      │ Manhattan       │   NULL │  2027 │
-    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │     0.79 │    5.0 │    0.0 │    0.0 │    9.3 │ yellow  │ cash        │ Upper West Side South │ Upper West Side South │ Manhattan      │ Manhattan       │   NULL │  2027 │
-    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │     1.37 │    7.5 │   2.36 │    0.0 │  14.16 │ yellow  │ credit card │ Alphabet City         │ West Village          │ Manhattan      │ Manhattan       │   NULL │  2027 │
-    └─────────────────────┴─────────────────────┴────────────┴──────────┴────────┴────────┴────────┴────────┴─────────┴─────────────┴───────────────────────┴───────────────────────┴────────────────┴─────────────────┴────────┴───────┘
+    ┌─────────┬─────────────┬────────────────┬────────┐
+    │  color  │   payment   │ pickup_borough │ total  │
+    │ varchar │   varchar   │    varchar     │ double │
+    ├─────────┼─────────────┼────────────────┼────────┤
+    │ yellow  │ credit card │ Manhattan      │  12.95 │
+    │ yellow  │ cash        │ Manhattan      │    9.3 │
+    │ yellow  │ credit card │ Manhattan      │  14.16 │
+    └─────────┴─────────────┴────────────────┴────────┘
+```
+
+    🗄️ taxis	6_433, 14
+    	("pickup, dropoff, passengers, distance, fare, tip, tolls, total, color, payment, pickup_zone, dropoff_zone, pickup_borough, dropoff_borough")
+
+```python
+    ┌─────────────────────┬─────────────────────┬────────────┬──────────┬────────┬────────┬────────┬────────┬─────────┬─────────────┬───────────────────────┬───────────────────────┬────────────────┬─────────────────┐
+    │       pickup        │       dropoff       │ passengers │ distance │  fare  │  tip   │ tolls  │ total  │  color  │   payment   │      pickup_zone      │     dropoff_zone      │ pickup_borough │ dropoff_borough │
+    │    timestamp_ns     │    timestamp_ns     │   int64    │  double  │ double │ double │ double │ double │ varchar │   varchar   │        varchar        │        varchar        │    varchar     │     varchar     │
+    ├─────────────────────┼─────────────────────┼────────────┼──────────┼────────┼────────┼────────┼────────┼─────────┼─────────────┼───────────────────────┼───────────────────────┼────────────────┼─────────────────┤
+    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │      1.6 │    7.0 │   2.15 │    0.0 │  12.95 │ yellow  │ credit card │ Lenox Hill West       │ UN/Turtle Bay South   │ Manhattan      │ Manhattan       │
+    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │     0.79 │    5.0 │    0.0 │    0.0 │    9.3 │ yellow  │ cash        │ Upper West Side South │ Upper West Side South │ Manhattan      │ Manhattan       │
+    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │     1.37 │    7.5 │   2.36 │    0.0 │  14.16 │ yellow  │ credit card │ Alphabet City         │ West Village          │ Manhattan      │ Manhattan       │
+    └─────────────────────┴─────────────────────┴────────────┴──────────┴────────┴────────┴────────┴────────┴─────────┴─────────────┴───────────────────────┴───────────────────────┴────────────────┴─────────────────┘
 ```
 
 ## <a id='toc1_4_'></a>[show num](#toc0_)
-
-
-    
-![png](test_files/output_43_0.png)
-    
-
-
-
-    
-![png](test_files/output_44_0.png)
-    
-
-
-
-    
-![png](test_files/output_45_0.png)
-    
-
 
 
     
@@ -557,7 +657,25 @@
 
 
     
-![png](test_files/output_46_1.png)
+![png](test_files/output_47_0.png)
+    
+
+
+
+    
+![png](test_files/output_48_0.png)
+    
+
+
+
+    
+![png](test_files/output_49_0.png)
+    
+
+
+
+    
+![png](test_files/output_49_1.png)
     
 
 
@@ -568,7 +686,7 @@
 
 
     
-![png](test_files/output_48_1.png)
+![png](test_files/output_51_1.png)
     
 
 
@@ -580,7 +698,7 @@
 
 
     
-![png](test_files/output_49_1.png)
+![png](test_files/output_52_1.png)
     
 
 
@@ -624,7 +742,7 @@
 
 
     
-![png](test_files/output_51_1.png)
+![png](test_files/output_54_1.png)
     
 
 
@@ -1001,7 +1119,7 @@
 
 
     
-![png](test_files/output_58_1.png)
+![png](test_files/output_61_1.png)
     
 
 

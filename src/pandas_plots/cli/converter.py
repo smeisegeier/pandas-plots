@@ -395,6 +395,7 @@ def jupyter_to_md(
     output_dir: str = "./docs",
     no_input=True,
     execute=False,
+    center_df=True,
     # chrome_path="/opt/homebrew/bin/chromium",
     # * change to ungoogled-chromium since chromium is depr
     chrome_path=PATH_CHROME,
@@ -409,6 +410,7 @@ def jupyter_to_md(
         output_dir (str, optional): The directory where the Markdown file will be generated. Defaults to "./docs".
         no_input (bool, optional): Whether to remove input cells from the Markdown output. Defaults to False.
         execute (bool, optional): Whether to execute the notebook before conversion. Defaults to True.
+        center_df (bool, optional): Whether to center the dataframes. Defaults to True.
         chrome_path (str, optional): The path to the Chrome executable. Defaults to "/opt/homebrew/bin/chromium".
         convert_tables_to_png (bool, optional): Whether to convert dataframes to PNGs using dataframe-image. Defaults to True.
 
@@ -472,9 +474,9 @@ def jupyter_to_md(
         path,
         to="markdown",
         # use='latex',
-        center_df=True,
-        max_rows=50,
-        max_cols=25,
+        center_df=center_df,
+        max_rows=None,
+        max_cols=None,
         execute=execute,
         save_notebook=False,        # * don't save notebook, it will duplicate the file
         limit=None,
