@@ -147,7 +147,7 @@ def show_num_df(
     out = df_.style
 
     color_highlight = "lightblue" if theme == "light" else "#666666"
-    color_zeros = "grey" if theme == "light" else "grey"
+    color_zeros = "#A9A9A9" if theme == "light" else "#888888"
     color_pct = "grey" if theme == "light" else "yellow"
     color_values = "black" if theme == "light" else "white"
     color_minus = "red" if theme == "light" else "red"

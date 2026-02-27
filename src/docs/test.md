@@ -29,101 +29,111 @@
 
 ### <a id='toc1_1_1_'></a>[load](#toc0_)
 
-    🐍 3.12.9 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.2.2 | 📦 connection-helper: 0.13.1
-
-
-
-
-
+    🐍 3.12.8 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.2.1 | 📦 connection-helper: 0.13.1
     True
-
-
-
-
-<div style="margin-bottom: 20px;"><strong>Legend:</strong> <span style="background-color:#f96; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Access</span> <span style="background-color:#9cf; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Boss</span> <span style="background-color:#dfd; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Boss_Drop</span> <span style="background-color:#fdb; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Dungeon</span> <span style="background-color:#dff; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Leveling</span> <span style="background-color:#ccf; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Quest</span> <span style="background-color:#ffd1dc; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Quest_Chain</span> <span style="background-color:#e0bbff; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Raid</span> <span style="background-color:#b3e5fc; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Raid_Step</span> <span style="background-color:#c8e6c9; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Reputation</span> <span style="background-color:#f96; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Vendor</span></div>
 
 
 
 ```mermaid
 graph LR
-    classDef Access fill:#f96,stroke:#333,stroke-width:1px,color:#000;
-    classDef Boss fill:#9cf,stroke:#333,stroke-width:1px,color:#000;
-    classDef Boss_Drop fill:#dfd,stroke:#333,stroke-width:1px,color:#000;
-    classDef Dungeon fill:#fdb,stroke:#333,stroke-width:1px,color:#000;
-    classDef Leveling fill:#dff,stroke:#333,stroke-width:1px,color:#000;
-    classDef Quest fill:#ccf,stroke:#333,stroke-width:1px,color:#000;
-    classDef Quest_Chain fill:#ffd1dc,stroke:#333,stroke-width:1px,color:#000;
-    classDef Raid fill:#e0bbff,stroke:#333,stroke-width:1px,color:#000;
-    classDef Raid_Step fill:#b3e5fc,stroke:#333,stroke-width:1px,color:#000;
-    classDef Reputation fill:#c8e6c9,stroke:#333,stroke-width:1px,color:#000;
-    classDef Vendor fill:#f96,stroke:#333,stroke-width:1px,color:#000;
-    classDef Root fill:#eee,stroke:#999,stroke-dasharray: 5 5,color:#666;
-    Akama_Alliance -- Raid --> Black_Temple
-    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
+    classDef default fill:#222,stroke:#444,color:#aaa;
+    classDef Root fill:#222,stroke:#444,stroke-dasharray: 5 5,color:#aaa;
+    Karazhan_Key_Chain -- Raid --> Karazhan_Raid
+    Karazhan_Raid -- Boss_Drop --> Cudgel_of_Kardesh_Quest
+    Cudgel_of_Kardesh_Quest -- Raid --> Serpentshrine_Cavern
+    Key_of_Time -- Access --> Heroic_Black_Morass
     Level_68 -- Quest --> Karazhan_Key_Chain
     Level_70 -- Reputation --> Lower_City_Honored
     Cipher_of_Damnation -- Quest --> Black_Temple_Chain
-    The_Eye -- Boss_Drop --> The_Vials_of_Eternity
-    Key_of_Time -- Access --> Heroic_Black_Morass
-    Black_Temple_Chain -- Quest --> Akama_Alliance
-    Serpentshrine_Cavern -- Boss_Drop --> The_Vials_of_Eternity
+    Akama_Alliance -- Raid --> Black_Temple
+    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
+    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
+    Battle_for_Mount_Hyjal -- Raid_Step --> Akama_Alliance
     Level_68 -- Leveling --> Level_70
     Level_70 -- Quest_Chain --> Trial_of_the_Naaru
     Cenarion_Expedition_Honored -- Dungeon --> Heroic_Slave_Pens
     Lower_City_Honored -- Vendor --> Auchenai_Key
     Level_70 -- Reputation --> Cenarion_Expedition_Honored
     Karazhan_Raid -- Quest --> Cipher_of_Damnation
-    Battle_for_Mount_Hyjal -- Raid_Step --> Akama_Alliance
-    Level_70 -- Reputation --> Keepers_of_Time_Honored
     Magtheridon_Raid -- Boss_Drop --> Trial_of_the_Naaru
     Level_70 -- Reputation --> Honor_Hold_Honored
     Karazhan_Raid -- Boss --> Nightbane
-    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
+    The_Eye -- Boss_Drop --> The_Vials_of_Eternity
+    Keepers_of_Time_Honored -- Vendor --> Key_of_Time
+    Serpentshrine_Cavern -- Boss_Drop --> The_Vials_of_Eternity
+    Black_Temple_Chain -- Quest --> Akama_Alliance
     Trial_of_the_Naaru -- Raid --> The_Eye
     Heroic_Slave_Pens -- Quest --> Cudgel_of_Kardesh_Quest
     Flamewrought_Key -- Access --> Heroic_Shattered_Halls
-    Keepers_of_Time_Honored -- Vendor --> Key_of_Time
-    Karazhan_Key_Chain -- Raid --> Karazhan_Raid
-    Karazhan_Raid -- Boss_Drop --> Cudgel_of_Kardesh_Quest
-    Cudgel_of_Kardesh_Quest -- Raid --> Serpentshrine_Cavern
     Honor_Hold_Honored -- Vendor --> Flamewrought_Key
-    class Black_Temple Raid;
-    class Battle_for_Mount_Hyjal Raid;
+    Level_70 -- Reputation --> Keepers_of_Time_Honored
+    class Karazhan_Raid Raid;
+    class Cudgel_of_Kardesh_Quest Boss_Drop;
+    class Serpentshrine_Cavern Raid;
+    class Magtheridon_Raid Root;
+    class Heroic_Black_Morass Access;
     class Karazhan_Key_Chain Quest;
     class Lower_City_Honored Reputation;
     class Black_Temple_Chain Quest;
-    class The_Vials_of_Eternity Boss_Drop;
-    class Heroic_Black_Morass Access;
-    class Level_68 Root;
-    class Akama_Alliance Quest;
+    class Black_Temple Raid;
+    class Battle_for_Mount_Hyjal Raid;
+    class Heroic_Shadow_Labyrinth Access;
+    class Akama_Alliance Raid_Step;
     class Level_70 Leveling;
     class Trial_of_the_Naaru Quest_Chain;
     class Heroic_Slave_Pens Dungeon;
     class Auchenai_Key Vendor;
     class Cenarion_Expedition_Honored Reputation;
     class Cipher_of_Damnation Quest;
-    class Keepers_of_Time_Honored Reputation;
     class Honor_Hold_Honored Reputation;
     class Nightbane Boss;
-    class Heroic_Shadow_Labyrinth Access;
-    class The_Eye Raid;
-    class Cudgel_of_Kardesh_Quest Quest;
-    class Heroic_Shattered_Halls Access;
+    class The_Vials_of_Eternity Boss_Drop;
     class Key_of_Time Vendor;
-    class Karazhan_Raid Raid;
-    class Serpentshrine_Cavern Raid;
-    class Magtheridon_Raid Root;
+    class Level_68 Root;
+    class The_Eye Raid;
+    class Heroic_Shattered_Halls Access;
     class Flamewrought_Key Vendor;
+    class Keepers_of_Time_Honored Reputation;
 ```
 
 
 
-    
-![png](test_files/output_4_2.png)
-    
-
-
-
+```python
+    ┌─────────────────────────────┬─────────────┬──────────────┬────────┬─────────────────────┬─────────────┐
+    │        current_item         │  category   │ total_weight │ degree │      closeness      │ betweenness │
+    │           varchar           │   varchar   │    double    │ int64  │       double        │   double    │
+    ├─────────────────────────────┼─────────────┼──────────────┼────────┼─────────────────────┼─────────────┤
+    │ Black_Temple                │ Raid        │          9.0 │      1 │                 0.1 │         5.0 │
+    │ Akama_Alliance              │ Raid_Step   │          8.0 │      3 │  0.1111111111111111 │         4.5 │
+    │ Battle_for_Mount_Hyjal      │ Raid        │          7.0 │      2 │               0.125 │         4.0 │
+    │ The_Vials_of_Eternity       │ Boss_Drop   │          6.0 │      3 │ 0.14285714285714285 │         3.5 │
+    │ Serpentshrine_Cavern        │ Raid        │          5.0 │      2 │ 0.16666666666666666 │         3.0 │
+    │ Heroic_Shattered_Halls      │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
+    │ Cudgel_of_Kardesh_Quest     │ Quest       │          4.0 │      3 │                 0.2 │         2.5 │
+    │ Heroic_Shadow_Labyrinth     │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
+    │ Black_Temple_Chain          │ Quest       │          4.0 │      2 │                 0.2 │         2.5 │
+    │ Heroic_Black_Morass         │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
+    │ Cipher_of_Damnation         │ Quest       │          3.0 │      2 │                0.25 │         2.0 │
+    │ Auchenai_Key                │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ Nightbane                   │ Boss        │          3.0 │      1 │                0.25 │         2.0 │
+    │ The_Eye                     │ Raid        │          3.0 │      2 │                0.25 │         2.0 │
+    │ Flamewrought_Key            │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ Key_of_Time                 │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ Heroic_Slave_Pens           │ Dungeon     │          3.0 │      2 │                0.25 │         2.0 │
+    │ Karazhan_Raid               │ Raid        │          2.0 │      4 │  0.3333333333333333 │         1.5 │
+    │ Honor_Hold_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Cenarion_Expedition_Honored │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Trial_of_the_Naaru          │ Quest_Chain │          2.0 │      3 │  0.3333333333333333 │         1.5 │
+    │ Lower_City_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Keepers_of_Time_Honored     │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Level_70                    │ Leveling    │          1.0 │      6 │                 0.5 │         1.0 │
+    │ Karazhan_Key_Chain          │ Quest       │          1.0 │      2 │                 0.5 │         1.0 │
+    │ Level_68                    │ Root        │          0.0 │      2 │                 1.0 │         0.5 │
+    │ Magtheridon_Raid            │ Root        │          0.0 │      1 │                 1.0 │         0.5 │
+    ├─────────────────────────────┴─────────────┴──────────────┴────────┴─────────────────────┴─────────────┤
+    │ 27 rows                                                                                     6 columns │
+    └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ```python
     counts: rows
@@ -704,6 +714,26 @@ graph LR
 
 ## <a id='toc1_6_'></a>[hlp](#toc0_)
 
+
+
+```python
+    # filter
+        DJ between 2020 and 2024
+        and DCO = 2
+        and (
+        left(ICDGM10, 1) ='C' 
+        and
+            (
+                right(left(ICDGM10,3), 2)::int8 between 00 and 33
+                or right(left(ICDGM10,3), 2)::int8 between 50 and 57
+                or right(left(ICDGM10,3), 2)::int8 between 63 and 68
+                or right(left(ICDGM10,3), 2)::int8 = 60
+            )
+        and left(HISC,4)::int between 8010 and 8576
+        and GKZbl::int between 1 and 16
+        )
+```
+
     ## 📊 Sample Data & Explanation
     ---
     ### Original Sample DataFrame
@@ -742,7 +772,7 @@ graph LR
 
 
     
-![png](test_files/output_54_1.png)
+![png](test_files/output_55_1.png)
     
 
 
@@ -1119,7 +1149,7 @@ graph LR
 
 
     
-![png](test_files/output_61_1.png)
+![png](test_files/output_62_1.png)
     
 
 

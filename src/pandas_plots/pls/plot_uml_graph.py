@@ -148,7 +148,14 @@ def plot_uml_graph(df=None, orientation='v', debug=False):
     
     display(Markdown(f"```mermaid\n" + "\n".join(mermaid_lines) + "\n```"))
     
-    display(res_df.sort_values('total_weight', ascending=False).drop_duplicates('current_item')
-            [['current_item', 'category', 'total_weight', 'degree', 'closeness', 'betweenness']])
+    
+    out =(
+        res_df.sort_values('total_weight', ascending=False)
+        .drop_duplicates('current_item')
+            [['current_item', 'category', 'total_weight', 'degree', 'closeness', 'betweenness']]
+    )
+    
+    # display(out)
+    con.from_df(out).show(max_rows=30)
     
     return res_df

@@ -6,6 +6,6 @@ def print_filter(
 ) -> None:
     display(Markdown("<!-- START_TOKEN -->"))
     print("# filter")
-    print(filter)
+    print(filter.replace("--sql", ""))
     display(Markdown("<!-- END_TOKEN -->"))
     return
