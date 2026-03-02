@@ -32,7 +32,7 @@ def plot_stacked_bars(
     precision: int = 0,
     png_path: Path | str = None,
     color_palette: str = "Plotly",
-    null_label: str = "<NA>",
+    null_label: str = "(NA)",
     show_other: bool = False,
     show_pct_all: bool = False,
     show_pct_bar: bool = False,

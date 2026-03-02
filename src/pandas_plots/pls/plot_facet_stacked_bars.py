@@ -16,7 +16,7 @@ def plot_facet_stacked_bars(
     top_n_index: int = 0,
     top_n_color: int = 0,
     top_n_facet: int = 0,
-    null_label: str = "<NA>",
+    null_label: str = "(NA)",
     subplot_size: int = 300,
     color_palette: str = "Plotly",
     caption: str = "",

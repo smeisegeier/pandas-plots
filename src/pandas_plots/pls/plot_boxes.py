@@ -148,7 +148,7 @@ def plot_boxes(
 
     fig.update_xaxes(title_text=df.columns[0])
     fig.update_yaxes(title_text=df.columns[1])
-    fig.update_layout(boxmode="group")  # Ensures boxes are not too compressed
+    fig.update_layout(boxmode="group", height=height, width=width)  # Ensures boxes are not too compressed
     fig.update_layout(showlegend=False)
     fig.update_traces(marker=dict(size=5), width=box_width)  # Adjust width (default ~0.5)
 

@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
+OTHER_LABEL = '(other)'
+
 # * cleanse all variations of None
 def clean_set(_set: set) -> set:
     return _set - set([np.nan, None, ""])
@@ -76,7 +78,7 @@ def aggregate_data(
         top_n_color (int): top N values of the second column to keep. 0 means take all.
         top_n_facet (int): top N values of the third column to keep. 0 means take all.
         null_label (str): Label for null values.
-        show_other (bool): Whether to include "<other>" for columns not in top_n_color. Defaults to False.
+        show_other (bool): Whether to include "(other)" for columns not in top_n_color. Defaults to False.
         sort_values (bool): Whether to sort values in descending order based on group sum. Defaults to False.
 
     Returns:
@@ -119,10 +121,10 @@ def aggregate_data(
     aggregated_df = aggregated_df[aggregated_df["col"].isin(top_colors)]
     if show_other and top_n_color > 0 and not others_df.empty:
         other_agg = others_df.groupby(["index", "facet"], as_index=False)["value"].sum()
-        other_agg["col"] = "<other>"
+        other_agg["col"] = OTHER_LABEL
         other_agg = other_agg[["index", "col", "facet", "value"]]
         aggregated_df = pd.concat([aggregated_df, other_agg], ignore_index=True)
-        top_colors = [*top_colors, "<other>"]
+        top_colors = [*top_colors, OTHER_LABEL]
 
     if sort_values_facet:
         top_facets = (

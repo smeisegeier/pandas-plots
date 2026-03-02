@@ -7,6 +7,7 @@ from ..hlp.group_kkr import group_kkr
 
 import pandas as pd
 
+NA_EVENT = '(NA)'
 
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
@@ -114,8 +115,8 @@ def pivot_df(
     col_value: str = df.columns[2]
 
     if not dropna:
-        df[col_index] = df[col_index].fillna("<NA>")
-        df[col_index] = df[col_index].fillna("<NA>")
+        df[col_index] = df[col_index].fillna(NA_EVENT)
+        df[col_column] = df[col_column].fillna(NA_EVENT)
     else:
         df.dropna(inplace=True, subset=[col_index])
         df.dropna(inplace=True, subset=[col_column])

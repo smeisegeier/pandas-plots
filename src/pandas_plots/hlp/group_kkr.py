@@ -19,7 +19,7 @@ def group_kkr(df: pd.DataFrame, kkr_col: str) -> pd.DataFrame:
     """
     
     # Define constants
-    NA_CATEGORY_STR = '<NA>'
+    NA_CATEGORY_STR = '(NA)'
     MASTER_KKR_CATEGORIES = [
         '01-SH', '02-HH', '03-NI', '04-HB', '05-NW', '06-HE', '07-RP', '08-BW', 
         '09-BY', '10-SL', '11-BE', '12-BB', '13-MV', '14-SN', '15-ST', '16-TH'

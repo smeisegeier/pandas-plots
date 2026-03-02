@@ -122,7 +122,7 @@ def plot_bars(
     if dropna:
         df = df.dropna()
     else:
-        df = df.fillna("<NA>")
+        df = df.fillna("(NA)")
 
     # * get n, col1 now is always numeric
     n = df[df.columns[1]].sum()

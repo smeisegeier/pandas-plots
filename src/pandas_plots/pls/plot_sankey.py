@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import re
 
+NA_EVENT = '(NA)'
+
 def plot_sankey(
     df=None,
     max_events_per_id=None,
@@ -171,15 +173,15 @@ def plot_sankey(
     # 4. Create a unified flag for invalid records
     is_invalid_record = is_event_missing | is_date_missing
 
-    # 5. For invalid records, set the event name to '<NA>' and the date to a high date
+    # 5. For invalid records, set the event name to '(NA)' and the date to a high date
     # This keeps the record, ensuring the ID is counted, but marks it clearly.
-    # The date is set to NaT for sequencing to work correctly later (it will be filtered out 
+    # The date is set to NaT for sequencing to work correctly later (it will be filtered out
     # for overlap but grouped for first event).
-    df_processed.loc[is_invalid_record, event_col_name] = '<NA>'
+    df_processed.loc[is_invalid_record, event_col_name] = NA_EVENT
     # Set the date for invalid records back to NaT so they are not included in sorting/overlap checks
-    df_processed.loc[is_invalid_record, date_col_name] = pd.NaT 
+    df_processed.loc[is_invalid_record, date_col_name] = pd.NaT
 
-    # --- Now we only work with records that have valid IDs and event names (<NA> is now a valid name) ---
+    # --- Now we only work with records that have valid IDs and event names ((NA) is now a valid name) ---
     df_processed = df_processed.dropna(subset=[id_col_name]).copy()
     
     # If no data remains after filtering, exit early
@@ -189,9 +191,9 @@ def plot_sankey(
 
     # --- Handle overlap exclusion based on user selection (only applies to valid date records) ---
     overlap_title_part = ""
-    
-    # Temporarily filter out <NA> events for overlap checks, as they don't have a valid date
-    df_overlap_check = df_processed[df_processed[event_col_name] != '<NA>'].copy()
+
+    # Temporarily filter out (NA) events for overlap checks, as they don't have a valid date
+    df_overlap_check = df_processed[df_processed[event_col_name] != NA_EVENT].copy()
     
     if exclude_overlap_id and not df_overlap_check.empty:
         overlapping_ids = (
@@ -213,22 +215,22 @@ def plot_sankey(
             .loc[lambda x: x > 1]
             .index
         )
-        # Exclude only the overlapping date-events from the main dataframe 
-        # (excluding <NA> records since they don't have a valid date)
+        # Exclude only the overlapping date-events from the main dataframe
+        # (excluding (NA) records since they don't have a valid date)
         df_processed = df_processed[
-            ~df_processed[df_processed[event_col_name] != '<NA>'].set_index([id_col_name, date_col_name]).index.isin(
+            ~df_processed[df_processed[event_col_name] != NA_EVENT].set_index([id_col_name, date_col_name]).index.isin(
                 overlapping_event_set
             )
         ].copy()
         overlap_title_part = ", overlap events excluded"
 
-    # --- Sort: Valid Date records first, then <NA> records (which have NaT) ---
-    # Sorting by date naturally puts NaT (our <NA> records) at the end, which is fine
+    # --- Sort: Valid Date records first, then (NA) records (which have NaT) ---
+    # Sorting by date naturally puts NaT (our (NA) records) at the end, which is fine
     # because event_order is calculated *after* sorting.
     df_sorted = df_processed.sort_values(by=[id_col_name, date_col_name])
 
     # --- Performance Optimization: Use vectorized operations instead of loops ---
-    # Recalculate sequences based on remaining valid and <NA> records
+    # Recalculate sequences based on remaining valid and (NA) records
     df_sorted["event_order"] = df_sorted.groupby(id_col_name).cumcount() + 1
 
     if max_events_per_id is not None:
@@ -281,9 +283,9 @@ def plot_sankey(
         unique_labels_df["label"].str.extract(r"\] (.*)").fillna("start")
     )
     
-    # Add sort key to force <NA> to the end
+    # Add sort key to force (NA) to the end
     unique_labels_df["event_name_sort_key"] = unique_labels_df["event_name"].apply(
-        lambda x: "~Z_NA_LAST" if x == "<NA>" else x
+        lambda x: "~Z_NA_LAST" if x == NA_EVENT else x
     )
 
     # Sort primarily by order number, and secondarily by the custom sort key
@@ -366,9 +368,9 @@ def plot_sankey(
         source_l = row["source_label"]
         target_l = row["ordered_event_label"]
         
-        # Use a distinct color for links to/from <NA>
-        if "<NA>" in source_l or "<NA>" in target_l:
-            link_colors.append("rgba(255, 165, 0, 0.6)") # Orange for <NA> links
+        # Use a distinct color for links to/from (NA)
+        if NA_EVENT in source_l or NA_EVENT in target_l:
+            link_colors.append("rgba(255, 165, 0, 0.6)") # Orange for (NA) links
         elif source_l == "[0] start":
             link_colors.append(start_link_color)
         else:

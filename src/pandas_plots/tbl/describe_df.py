@@ -194,7 +194,7 @@ def describe_df(
 
         # * now set all empty object columns to <NA>
         null_cols = df.columns[df.dtypes == 'object'][df.loc[:, df.dtypes == 'object'].isnull().all()]
-        df[null_cols] = "<NA>"
+        df[null_cols] = "(NA)"
 
         # * reduce column names len if selected
         if top_n_chars_in_columns > 0:
