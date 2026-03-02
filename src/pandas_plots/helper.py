@@ -144,7 +144,7 @@ def aggregate_data(
 
 
 
-def assign_column_colors(columns, color_palette, null_label):
+def assign_column_colors(columns, color_palette, null_label, first_col_grey=False):
     """
     Assigns colors to columns, with a special gray color for null values.
 
@@ -152,6 +152,7 @@ def assign_column_colors(columns, color_palette, null_label):
         columns (list): List of column values.
         color_palette (str): Name of the color palette.
         null_label (str): Label for null values.
+        first_col_grey (bool): If True, assigns lightgray to the first column in the ordering.
 
     Returns:
         dict: Mapping of column values to colors.
@@ -163,6 +164,9 @@ def assign_column_colors(columns, color_palette, null_label):
 
     colors = {col: palette[i % len(palette)] for i, col in enumerate(sorted(columns))}
     colors[null_label] = "lightgray"
+    if first_col_grey and columns:
+        first_col = sorted(columns)[0]
+        colors[first_col] = "lightgray"
     return colors
 
 def set_caption(caption: str) -> str:

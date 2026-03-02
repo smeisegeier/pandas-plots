@@ -37,6 +37,7 @@ def plot_stacked_bars(
     show_pct_all: bool = False,
     show_pct_bar: bool = False,
     kkr_col: Optional[str] = None,
+    first_col_grey: bool = False,
     
 ) -> None:
     """
@@ -203,7 +204,7 @@ def plot_stacked_bars(
     else:
         index_unique = sorted(df["index"].unique().tolist())
 
-    color_map = assign_column_colors(colors_unique, color_palette, null_label)
+    color_map = assign_column_colors(colors_unique, color_palette, null_label, first_col_grey)
 
     cat_orders = {
         "index": index_unique,
