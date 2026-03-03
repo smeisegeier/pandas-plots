@@ -1,10 +1,10 @@
 import duckdb
 from IPython.display import display, Markdown
 
-def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar_length=30, distinct_metric=None) -> str:
+def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar_length=30, distinct_metric=None, first_n_filter_apply_to_rows=0) -> str:
     """
     Executes a series of cascading queries on a DuckDB connection,
-    calculates row counts (or distinct counts of a specified metric) and percentages, 
+    calculates row counts (or distinct counts of a specified metric) and percentages,
     and optionally visualizes them using a right-aligned ASCII scale.
 
     Args:
@@ -13,10 +13,14 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
         filters (list of tuples): A list of tuples, where each tuple is
                                 (filter_string, caption_string).
         debug (bool): If True, prints the generated SQL queries instead of executing them.
-        max_bar_length (int): The length of the ASCII bar (default is 30). 
+        max_bar_length (int): The length of the ASCII bar (default is 30).
                             If set to 0, the bars are hidden.
-        distinct_metric (str): If set (e.g., 'user_id'), the function calculates 
+        distinct_metric (str): If set (e.g., 'user_id'), the function calculates
                             COUNT(DISTINCT <distinct_metric>) instead of COUNT(*).
+        first_n_filter_apply_to_rows (int): If > 0, takes the first n filters and applies
+                            them to the base query (e.g., "from T where f1 and f2").
+                            These filters are not shown in the bar list but are
+                            included in the returned filter string.
 
     Returns:
         str: A string containing the given filter dict reduced to sql code.
@@ -101,9 +105,19 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
     else:
         base_query_source = query
 
+    # --- Apply first_n_filter_apply_to_rows to base query ---
+    base_where_clause = ""
+    if first_n_filter_apply_to_rows > 0 and filters:
+        n_to_apply = min(first_n_filter_apply_to_rows, len(filters))
+        base_filters = [f[0] for f in filters[:n_to_apply]]
+        base_where_clause = " AND ".join([f"({f})" for f in base_filters])
+
     # --- Initial Row Count (100% Base) ---
-    base_query = f"SELECT {count_clause} FROM ({base_query_source})"
-    
+    if base_where_clause:
+        base_query = f"SELECT {count_clause} FROM ({base_query_source}) WHERE {base_where_clause}"
+    else:
+        base_query = f"SELECT {count_clause} FROM ({base_query_source})"
+
     if debug:
         print(f"**DEBUG** Base Query (100%): {base_query}")
         return
@@ -145,9 +159,13 @@ def get_duckdb_filter_n(con=None, query=None, filters=None, debug=False, max_bar
     )
 
     # --- Cascading Filters Logic ---
-    current_where_clause = ""
-    
-    for filter_idx, (filter_str, caption_str) in enumerate(filters):
+    current_where_clause = base_where_clause
+
+    # Determine which filters to display (skip the first n if first_n_filter_apply_to_rows > 0)
+    start_idx = first_n_filter_apply_to_rows if first_n_filter_apply_to_rows > 0 else 0
+    filters_to_display = filters[start_idx:]
+
+    for filter_idx, (filter_str, caption_str) in enumerate(filters_to_display):
         # SQL Execution
         if current_where_clause:
             current_where_clause += f" AND ({filter_str})"
