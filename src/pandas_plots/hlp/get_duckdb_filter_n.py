@@ -27,9 +27,10 @@ def get_duckdb_filter_n(
         distinct_metric (str): If set (e.g., 'user_id'), the function calculates
                             COUNT(DISTINCT <distinct_metric>) instead of COUNT(*).
         first_n_filter_apply_to_rows (int): If > 0, takes the first n filters and applies
-                            them to the base query (e.g., "from T where f1 and f2").
-                            These filters are not shown in the bar list but are
-                            included in the returned filter string.
+                            them to the base query. These filters ARE displayed, but the
+                            percentage bars are calculated relative to the count AFTER
+                            applying these first n filters (i.e., filter n+1 becomes 100%).
+                            The first n filters are "neutral" in terms of percentage visualization.
         show_filter (bool): If True (default), displays the filter visualization.
                             If False, only extracts and returns the filters without any output.
 
@@ -128,11 +129,8 @@ def get_duckdb_filter_n(
         base_filters = [f[0] for f in filters[:n_to_apply]]
         base_where_clause = " AND ".join([f"({f})" for f in base_filters])
 
-    # --- Initial Row Count (100% Base) ---
-    if base_where_clause:
-        base_query = f"SELECT {count_clause} FROM ({base_query_source}) WHERE {base_where_clause}"
-    else:
-        base_query = f"SELECT {count_clause} FROM ({base_query_source})"
+    # --- Initial Row Count (100% Base - before any filters) ---
+    base_query = f"SELECT {count_clause} FROM ({base_query_source})"
 
     if debug:
         if show_filter:
@@ -140,6 +138,18 @@ def get_duckdb_filter_n(
         return
 
     base_count = con.execute(base_query).fetchone()[0]
+
+    # --- Calculate the "neutral" base count for percentage bars (after first n filters) ---
+    # This is the count that will be used as 100% for the bar visualization
+    # It's the count after applying the first filter AFTER the first n filters
+    neutral_base_count = base_count
+    if first_n_filter_apply_to_rows > 0 and first_n_filter_apply_to_rows < len(filters):
+        # Get the count after applying first n+1 filters (this becomes 100%)
+        neutral_where = base_where_clause
+        next_filter = filters[first_n_filter_apply_to_rows][0]
+        neutral_where += f" AND ({next_filter})" if neutral_where else f"({next_filter})"
+        neutral_query = f"SELECT {count_clause} FROM ({base_query_source}) WHERE {neutral_where}"
+        neutral_base_count = con.execute(neutral_query).fetchone()[0]
 
     # --- Calculate Alignment Widths ---
 
@@ -150,37 +160,80 @@ def get_duckdb_filter_n(
     MAX_LEFT_TEXT_WIDTH = max_caption_len + len(f" {BOX_CORNER} []:")
 
     # 2. Determine the fixed width for the percentage/count display.
-    formatted_base_count_val = f"n = {base_count:,}".replace(",", "_")
+    formatted_base_count_val = f"n = {neutral_base_count:,}".replace(",", "_")
     WIDTH_COUNT_PART = len(formatted_base_count_val)
     WIDTH_PERCENT = len("(100.0%)")
 
     # --- Print Initial Row Count (100% Base) ---
 
     n_part = f"n = {base_count:,}".replace(",", "_")
-    initial_percent = "(100.0%)"
 
-    if show_bars:
-        initial_line_bar = BLOCK_FILLED * max_bar_length
-    else:
-        initial_line_bar = ""
-
-    # Padding needed between n_part and initial_percent
-    padding_needed = MAX_LEFT_TEXT_WIDTH + WIDTH_COUNT_PART - len(n_part)
-
-    if show_filter:
-        print(
+    if first_n_filter_apply_to_rows == 0:
+        # Only show percentage and bar when first_n is 0
+        initial_percent = "(100.0%)"
+        if show_bars:
+            initial_line_bar = BLOCK_FILLED * max_bar_length
+        else:
+            initial_line_bar = ""
+        # Padding needed between n_part and initial_percent
+        padding_needed = MAX_LEFT_TEXT_WIDTH + WIDTH_COUNT_PART - len(n_part)
+        output_line = (
             f"{n_part}"                                     # Start immediately at the beginning of the line
             f"{' ' * padding_needed}"                       # Pad up to the start of the percentage block
             f" {initial_percent}"                           # Space + Percent
             f" "                                            # Space before bar
             f"{initial_line_bar}"
         )
+    else:
+        # When first_n > 0, just show the count, no percentage, no bar
+        output_line = n_part
+
+    if show_filter:
+        print(output_line)
+
+    # --- Display the first n filters (neutral, shown but not used as percentage base) ---
+    if first_n_filter_apply_to_rows > 0:
+        current_where_clause = ""
+        for i in range(first_n_filter_apply_to_rows):
+            filter_str, caption_str = filters[i]
+            if current_where_clause:
+                current_where_clause += f" AND ({filter_str})"
+            else:
+                current_where_clause = f"({filter_str})"
+
+            full_query = f"SELECT {count_clause} FROM ({base_query_source}) WHERE {current_where_clause}"
+
+            if debug:
+                if show_filter:
+                    print(f"**DEBUG** Filter Query #{i+1}: {full_query}")
+                continue
+
+            current_count = con.execute(full_query).fetchone()[0]
+            caption = caption_str if caption_str else filter_str
+
+            # First n filters are "neutral" - show count only, no percentage, no bar
+            bar = ""
+
+            formatted_count_val = f"n = {current_count:,}".replace(",", "_")
+
+            left_text = f"{BOX_CORNER} [{caption}]:"
+            caption_padding_width = MAX_LEFT_TEXT_WIDTH - len(left_text)
+            count_padded = f"{formatted_count_val:>{WIDTH_COUNT_PART}}"
+
+            final_line = (
+                f"{left_text}{' ' * caption_padding_width}"
+                f"{count_padded}"
+            )
+
+            if show_filter:
+                print(final_line)
 
     # --- Cascading Filters Logic ---
     current_where_clause = base_where_clause
 
-    # Determine which filters to display (skip the first n if first_n_filter_apply_to_rows > 0)
-    start_idx = first_n_filter_apply_to_rows if first_n_filter_apply_to_rows > 0 else 0
+    # Display all filters now (first n are already displayed above, but we need to continue from there)
+    # Start from the first filter if first_n_filter_apply_to_rows > 0, otherwise from 0
+    start_idx = 0 if first_n_filter_apply_to_rows == 0 else first_n_filter_apply_to_rows
     filters_to_display = filters[start_idx:]
 
     for filter_idx, (filter_str, caption_str) in enumerate(filters_to_display):
@@ -205,10 +258,10 @@ def get_duckdb_filter_n(
 
         # 5. Calculate bar/padding (only if showing bars)
         if show_bars:
-            if base_count == 0:
+            if neutral_base_count == 0:
                 bar_length_filled = 0
             else:
-                bar_length_filled = int((current_count / base_count) * max_bar_length)
+                bar_length_filled = int((current_count / neutral_base_count) * max_bar_length)
 
             bar_length_empty = max_bar_length - bar_length_filled
             bar = BLOCK_EMPTY * bar_length_empty + BLOCK_FILLED * bar_length_filled
@@ -217,7 +270,7 @@ def get_duckdb_filter_n(
 
         # 6. Format the output strings
         formatted_count_val = f"n = {current_count:,}".replace(",", "_")
-        percentage = f"({(current_count / base_count) * 100:.1f}%)"
+        percentage = f"({(current_count / neutral_base_count) * 100:.1f}%)"
 
         # 7. Construct the final line with alignment
 
