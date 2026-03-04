@@ -302,12 +302,13 @@ def get_duckdb_filter_n(
         
     out = '\nand '.join([i[0] for i in filters])
 
+    if show_filter:
+        display(Markdown("<!-- END_TOKEN -->"))
+
+
     # * final filter string
     if print_filter_str:
         print_filter(out, show_as_details=True)
-
-    if show_filter:
-        display(Markdown("<!-- END_TOKEN -->"))
 
     # Clean up the connection ONLY if it was created inside this function (in example mode)
     if connection_is_ephemeral:

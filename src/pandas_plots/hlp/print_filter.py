@@ -14,11 +14,10 @@ def print_filter(
         show_as_details (bool, optional): If True, formats the filter string as a details HTML tag. Defaults to False.
     """
     
-    # * override details block if rendering aims towards pdf
-    if os.getenv("RENDERER") in ('png', 'svg'):
-        show_as_details = False
+    # # * override details block if rendering aims towards pdf
+    # if os.getenv("RENDERER") in ('png', 'svg'):
+    #     show_as_details = False
     
-    display(Markdown("<!-- START_TOKEN -->"))
     
     cleaned_filter = (filter
         .replace("--sql", "")
@@ -29,8 +28,9 @@ def print_filter(
     if show_as_details:
         display(Markdown(f"<details>\n<summary>filter-sql</summary>\n\n```sql\n{cleaned_filter}\n```\n\n</details>"))
     else:
-        print("# filter")
+        display(Markdown("<!-- START_TOKEN -->"))
+        print("-- filter-sql")
         print(cleaned_filter)
-    
-    display(Markdown("<!-- END_TOKEN -->"))
+        display(Markdown("<!-- END_TOKEN -->"))
+
     return
