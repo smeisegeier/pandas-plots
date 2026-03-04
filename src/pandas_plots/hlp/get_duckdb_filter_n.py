@@ -1,6 +1,8 @@
 import duckdb
 from IPython.display import display, Markdown
 
+from .print_filter import print_filter
+
 def get_duckdb_filter_n(
     con=None,
     query=None,
@@ -10,6 +12,7 @@ def get_duckdb_filter_n(
     distinct_metric=None,
     first_n_filter_apply_to_rows=0,
     show_filter=True,
+    print_filter_str=True,
 ) -> str:
     """
     Executes a series of cascading queries on a DuckDB connection,
@@ -33,6 +36,7 @@ def get_duckdb_filter_n(
                             The first n filters are "neutral" in terms of percentage visualization.
         show_filter (bool): If True (default), displays the filter visualization.
                             If False, only extracts and returns the filters without any output.
+        print_filter_str (bool): If True, prints the filter string to the console.
 
     Returns:
         str: A string containing the given filter dict reduced to sql code.
@@ -104,7 +108,7 @@ def get_duckdb_filter_n(
         count_label = f"counts: distinct {distinct_metric}"
     else:
         count_clause = "count(*)"
-        count_label = "counts: rows"
+        count_label = "counts: all rows (no grouping)"
 
     # --- Print the Metric/Count Label ---
     if show_filter:
@@ -139,17 +143,15 @@ def get_duckdb_filter_n(
 
     base_count = con.execute(base_query).fetchone()[0]
 
-    # --- Calculate the "neutral" base count for percentage bars (after first n filters) ---
+    # --- Calculate the "neutral" base count for percentage bars ---
     # This is the count that will be used as 100% for the bar visualization
-    # It's the count after applying the first filter AFTER the first n filters
-    neutral_base_count = base_count
-    if first_n_filter_apply_to_rows > 0 and first_n_filter_apply_to_rows < len(filters):
-        # Get the count after applying first n+1 filters (this becomes 100%)
-        neutral_where = base_where_clause
-        next_filter = filters[first_n_filter_apply_to_rows][0]
-        neutral_where += f" AND ({next_filter})" if neutral_where else f"({next_filter})"
-        neutral_query = f"SELECT {count_clause} FROM ({base_query_source}) WHERE {neutral_where}"
+    # It's the count after applying the first n filters (the 100% baseline)
+    if first_n_filter_apply_to_rows > 0 and first_n_filter_apply_to_rows <= len(filters):
+        # Use base_where_clause which already contains the first n filters
+        neutral_query = f"SELECT {count_clause} FROM ({base_query_source}) WHERE {base_where_clause}"
         neutral_base_count = con.execute(neutral_query).fetchone()[0]
+    else:
+        neutral_base_count = base_count
 
     # --- Calculate Alignment Widths ---
 
@@ -191,10 +193,11 @@ def get_duckdb_filter_n(
     if show_filter:
         print(output_line)
 
-    # --- Display the first n filters (neutral, shown but not used as percentage base) ---
-    if first_n_filter_apply_to_rows > 0:
+    # --- Display the first n-1 filters as neutral (count only, no percentage, no bar) ---
+    # The nth filter (index n-1) will be the 100% baseline
+    if first_n_filter_apply_to_rows > 1:
         current_where_clause = ""
-        for i in range(first_n_filter_apply_to_rows):
+        for i in range(first_n_filter_apply_to_rows - 1):
             filter_str, caption_str = filters[i]
             if current_where_clause:
                 current_where_clause += f" AND ({filter_str})"
@@ -211,9 +214,6 @@ def get_duckdb_filter_n(
             current_count = con.execute(full_query).fetchone()[0]
             caption = caption_str if caption_str else filter_str
 
-            # First n filters are "neutral" - show count only, no percentage, no bar
-            bar = ""
-
             formatted_count_val = f"n = {current_count:,}".replace(",", "_")
 
             left_text = f"{BOX_CORNER} [{caption}]:"
@@ -229,11 +229,19 @@ def get_duckdb_filter_n(
                 print(final_line)
 
     # --- Cascading Filters Logic ---
-    current_where_clause = base_where_clause
-
-    # Display all filters now (first n are already displayed above, but we need to continue from there)
-    # Start from the first filter if first_n_filter_apply_to_rows > 0, otherwise from 0
-    start_idx = 0 if first_n_filter_apply_to_rows == 0 else first_n_filter_apply_to_rows
+    # Start from filter n-1 (the 100% baseline) when first_n > 0
+    current_where_clause = ""
+    if first_n_filter_apply_to_rows > 0 and first_n_filter_apply_to_rows <= len(filters):
+        # Build the where clause for the first n-1 filters
+        for i in range(first_n_filter_apply_to_rows - 1):
+            filter_str = filters[i][0]
+            if current_where_clause:
+                current_where_clause += f" AND ({filter_str})"
+            else:
+                current_where_clause = f"({filter_str})"
+    
+    # Display filters starting from index n-1 (the 100% baseline)
+    start_idx = first_n_filter_apply_to_rows - 1 if first_n_filter_apply_to_rows > 0 else 0
     filters_to_display = filters[start_idx:]
 
     for filter_idx, (filter_str, caption_str) in enumerate(filters_to_display):
@@ -291,13 +299,18 @@ def get_duckdb_filter_n(
 
         if show_filter:
             print(final_line)
+        
+    out = "\n".join([i[0] for i in filters])
+
+    # * final filter string
+    if print_filter_str:
+        print_filter(out, show_as_details=True)
 
     if show_filter:
         display(Markdown("<!-- END_TOKEN -->"))
 
     # Clean up the connection ONLY if it was created inside this function (in example mode)
-    if connection_is_ephemeral: 
+    if connection_is_ephemeral:
         con.close()
     
-    # * Return the final filter string
-    return '\nand '.join([i[0] for i in filters])
+    return out
