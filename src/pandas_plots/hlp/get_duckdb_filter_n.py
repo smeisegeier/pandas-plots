@@ -300,7 +300,7 @@ def get_duckdb_filter_n(
         if show_filter:
             print(final_line)
         
-    out = "\n".join([i[0] for i in filters])
+    out = '\nand '.join([i[0] for i in filters])
 
     # * final filter string
     if print_filter_str:
