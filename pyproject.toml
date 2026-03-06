@@ -1,6 +1,6 @@
 [project]
 name = "pandas-plots"
-version = "1.2.12"
+version = "1.2.13"
 description = "A collection of helper for table handling and visualization"
 long_description = "file: README.md"
 long_description_content_type = "text/markdown"
@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "pandas>=2.3.2",
+    "pandas<3",
     "plotly>=6.2", # upgrade from 5.24
     "kaleido>=1", # needed for plotly export, must be manually added
     "matplotlib>=3.10.0",

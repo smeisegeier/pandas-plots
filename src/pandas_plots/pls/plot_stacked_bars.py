@@ -25,6 +25,7 @@ def plot_stacked_bars(
     title: str = None,
     renderer: Literal["png", "svg", None] = None,
     caption: str = None,
+    caption_only_n : bool = False,
     sort_values: bool = False,
     sort_values_index: bool = False,
     sort_values_color: bool = False,
@@ -49,7 +50,7 @@ def plot_stacked_bars(
     - top_n_color (int): Limit the number of categories displayed in the color legend.
     - dropna (bool): If True, removes rows with missing values; otherwise, replaces them with `null_label`.
     - swap (bool): If True, swaps the first two columns.
-    - normalize (bool): If True, normalizes numerical values between 0 and 1.
+    - normalize (bool): (DEPR) If True, normalizes numerical values between 0 and 1.
     - relative (bool): If True, normalizes the bars to a percentage scale.
     - orientation (Literal["h", "v"]): Defines the orientation of the bars ("v" for vertical, "h" for horizontal).
     - height (int): Height of the plot.
@@ -57,7 +58,7 @@ def plot_stacked_bars(
     - title (str): Custom title for the plot.
     - renderer (Literal["png", "svg", None]): Defines the output format.
     - caption (str): Optional caption for additional context.
-    - sort_values (bool):
+    - sort_values (bool): (parent option is DEPR)
         - If True, sorts bars by the sum of their values (descending).
         - If False, sorts bars alphabetically.
     - show_total (bool): If True, adds a row with the total sum of all categories.
@@ -141,7 +142,12 @@ def plot_stacked_bars(
     _title_str_top_index = f"TOP{top_n_index} " if top_n_index > 0 else ""
     _title_str_top_color = f"TOP{top_n_color} " if top_n_color > 0 else ""
     _title_str_null = f", NULL excluded" if dropna else ""
-    _title_str_n = f", n={len(df):_} ({n:_})"
+    
+    if caption_only_n:
+        _title_str = f"n={n:_}"
+    else:
+        _title_str_n = f", n={len(df):_} ({n:_})"
+        _title_str = f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}"
 
     _df = df.copy().assign(facet=None)
     _df.columns = ["index", "col", "value", "facet"] if not swap else ["col", "index", "value", "facet"]
@@ -223,8 +229,7 @@ def plot_stacked_bars(
         color="col",
         text=text_to_show,
         orientation=orientation,
-        title=title
-        or f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}",
+        title=title or _title_str,
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         color_discrete_map=color_map,  # Use assigned colors
         category_orders=cat_orders,
