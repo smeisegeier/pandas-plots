@@ -24,7 +24,7 @@ def plot_stacked_bars(
     width: int = 1600,
     title: str = None,
     renderer: Literal["png", "svg", None] = None,
-    caption: str = None,
+    caption: str = "",  # * dont use None, f-string will print this as 'None'
     caption_only_n : bool = False,
     sort_values: bool = False,
     sort_values_index: bool = False,
