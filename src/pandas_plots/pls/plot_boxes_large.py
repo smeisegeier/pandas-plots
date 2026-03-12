@@ -14,6 +14,7 @@ from ..helper import set_caption
 def plot_boxes_large(
     df: pd.DataFrame,
     caption: str = None,
+    caption_only_n : bool = False,
     points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
@@ -33,6 +34,7 @@ def plot_boxes_large(
         df (pd.DataFrame): The input DataFrame with two columns: [0] str or bool (category),
                             and [1] numeric (value).
         caption (str): The caption for the plot.
+        caption_only_n (bool): Whether to show only n in the caption.
         points (Literal["all", "outliers", "suspectedoutliers", None]): Controls the visibility of fliers (outliers).
                         'all' or 'outliers' shows fliers. None hides them.
         precision (int): The precision for rounding the statistics.
@@ -79,9 +81,14 @@ def plot_boxes_large(
     df=df.sort_values(col_cat)
 
     # * Title and Labels
-    caption = set_caption(caption)
     log_str = " (log-scale)" if use_log else ""
-    plot_title = f"{caption}[{col_cat}] by [{col_num}]{log_str}, n={len(df):_.0f}" if not title else title
+    n_str = f"n={len(df):_.0f}"
+    if caption_only_n:
+        plot_title = n_str
+    elif title:
+        plot_title = f"{title}, {n_str}"
+    else:
+        plot_title = f"{set_caption(caption)} [{col_cat}] by [{col_num}]{log_str}, {n_str}"
 
     # * Determine flier/outlier display
     showfliers = True

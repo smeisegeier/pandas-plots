@@ -19,6 +19,7 @@ def plot_box(
     annotations: bool = True,
     summary: bool = True,
     caption: str = None,
+    caption_only_n : bool = False,
     title: str = None,
     violin: bool = False,
     x_min: float = None,
@@ -41,6 +42,7 @@ def plot_box(
         annotations: Whether to add annotations to the plot.
         summary: Whether to add a summary table to the plot.
         caption: The caption for the plot.
+        caption_only_n (bool): Whether to show only n in the caption.
         title: The title of the plot.
         violin: Use violin plot or not.
         x_min: The minimum value for the x-axis scale (max and min must be set).
@@ -75,8 +77,16 @@ def plot_box(
     lvl2 = height * 0.15
     lvl3 = height * 0.25
 
-    caption = set_caption(caption)
     log_str = " (log-scale)" if use_log else ""
+    n_str = f"n={n_:_}"
+    if caption_only_n:
+        plot_title = n_str
+    elif title:
+        plot_title = f"{title}, {n_str}"
+    else:
+        plot_title = f"{set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
+    
+    
     dict = {
         "data_frame": ser,
         "orientation": "h",
@@ -85,7 +95,7 @@ def plot_box(
         # 'box':True,
         "log_x": use_log,  # * logarithmic scale, axis is always x
         # "notched": True,
-        "title": f"{caption}[{ser.name}]{log_str}, n={n_:_}" if not title else title,
+        "title": plot_title,
     }
 
     fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)

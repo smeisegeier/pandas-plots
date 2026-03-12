@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..hlp import *
+# from ..hlp import *
 from ..helper import set_caption, assign_column_colors, aggregate_data
 from ..hlp.group_kkr import group_kkr
 
@@ -141,13 +141,15 @@ def plot_stacked_bars(
     # * title str
     _title_str_top_index = f"TOP{top_n_index} " if top_n_index > 0 else ""
     _title_str_top_color = f"TOP{top_n_color} " if top_n_color > 0 else ""
-    _title_str_null = f", NULL excluded" if dropna else ""
+    _title_str_null = ", NULL excluded" if dropna else ""
     
+
     if caption_only_n:
         _title_str = f"n={n:_}"
+    elif title:
+        _title_str = f"{title}, n={n:_}"
     else:
-        _title_str_n = f", n={len(df):_} ({n:_})"
-        _title_str = f"{caption}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_title_str_n}"
+        _title_str = f"{set_caption(caption)}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}, n={n:_}"
 
     _df = df.copy().assign(facet=None)
     _df.columns = ["index", "col", "value", "facet"] if not swap else ["col", "index", "value", "facet"]
@@ -169,7 +171,6 @@ def plot_stacked_bars(
     # * calculate bar totals
     bar_totals = df.groupby("index")["value"].transform("sum")
 
-    caption = set_caption(caption)
 
     # * after grouping add cols for pct and formatting
     df["cnt_pct_all_only"] = (df["value"] / n * 100).apply(lambda x: f"{(x):.{precision}f}%")
@@ -229,7 +230,7 @@ def plot_stacked_bars(
         color="col",
         text=text_to_show,
         orientation=orientation,
-        title=title or _title_str,
+        title=_title_str,
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         color_discrete_map=color_map,  # Use assigned colors
         category_orders=cat_orders,

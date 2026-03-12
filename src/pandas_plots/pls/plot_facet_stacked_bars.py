@@ -20,6 +20,8 @@ def plot_facet_stacked_bars(
     subplot_size: int = 300,
     color_palette: str = "Plotly",
     caption: str = "",
+    caption_only_n : bool = False,
+    title: str = "",
     renderer: Optional[Literal["png", "svg", None]] = "png",
     annotations: bool = False,
     precision: int = 0,
@@ -45,6 +47,8 @@ def plot_facet_stacked_bars(
     - subplot_size (int): The size of each subplot in pixels. Default is 300.
     - color_palette (str): The name of the color palette to use. Default is "Plotly".
     - caption (str): An optional string indicating the caption for the chart.
+    - caption_only_n (bool): An optional boolean indicating whether to show only the number of observations in the caption.
+    - title (str): The title of the chart.
     - renderer (str): The output format. Default is "png".
     - annotations (bool): Whether to include annotations on the chart. Default is False.
     - precision (int): The number of decimal places to round the values to. Default is 0.
@@ -146,6 +150,14 @@ def plot_facet_stacked_bars(
         formatted_text_series = None
     # - - - -
 
+    title_str_n = f"n={n:_}"
+    if caption_only_n:
+        title_str = title_str_n
+    elif title:
+        title_str = f"{title}, {title_str_n}"
+    else:
+        title_str = f"{caption}, {'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] {'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] {'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}], {title_str_n}"
+
     fig = px.bar(
         aggregated_df,
         x="index",
@@ -159,7 +171,8 @@ def plot_facet_stacked_bars(
         text=formatted_text_series,
         text_auto=False,
         # height=subplot_size * (-(-len(aggregated_df["facet"].unique()) // subplots_per_row)),
-        title=f"{caption} {original_column_names[0]}, {original_column_names[1]}, {original_column_names[2]}",
+        # title=f"{caption} {original_column_names[0]}, {original_column_names[1]}, {original_column_names[2]}",
+        title=title_str,
     )
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -172,11 +185,11 @@ def plot_facet_stacked_bars(
     template = "plotly_dark" if os.getenv("THEME") == "dark" else "plotly"
 
     layout_updates = {
-        "title_text": f"{caption} "
-        f"{'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] "
-        f"{'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] "
-        f"{'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}] "
-        f", n={original_rows:_} ({n:_})",
+        # "title_text": f"{caption} "
+        # f"{'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] "
+        # f"{'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] "
+        # f"{'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}] "
+        # f", n={n:_}",
         "showlegend": True,
         "template": template,
         # "width": subplot_size * subplots_per_row,

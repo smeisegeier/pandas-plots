@@ -12,6 +12,7 @@ from ..helper import set_caption
 def plot_boxes(
     df: pd.DataFrame,
     caption: str = None,
+    caption_only_n : bool = False,
     points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
@@ -35,6 +36,7 @@ def plot_boxes(
     Args:
         df (pd.DataFrame): The input DataFrame with two columns, where the first column is string or bool type and the second column is numeric.
         caption (str): The caption for the plot.
+        caption_only_n (bool): Whether to show only n in the caption.
         points (Literal["all", "outliers", "suspectedoutliers", None]): The points to be plotted.
         precision (int): The precision for rounding the statistics.
         height (int): The height of the plot.
@@ -72,8 +74,15 @@ def plot_boxes(
     # Sort the unique items alphabetically
     items = sorted(df.iloc[:, 0].unique())
 
-    caption = set_caption(caption)
     log_str = " (log-scale)" if use_log else ""
+    n_str = f"n={len(df):_.0f}"
+    if caption_only_n:
+        plot_title = n_str
+    elif title:
+        plot_title = f"{title}, {n_str}"
+    else:
+        plot_title = f"{set_caption(caption)} [{df.columns[0]}] by [{df.columns[1]}]{log_str}, {n_str}"
+
 
     # * main plot
     fig = px.box(
@@ -87,7 +96,7 @@ def plot_boxes(
         points=points,
         log_y=use_log,
         # color_discrete_sequence=px.colors.qualitative.Plotly,
-        title=(f"{caption}[{df.columns[0]}] by [{df.columns[1]}]{log_str}, n={len(df):_.0f}" if not title else title),
+        title=plot_title,
     )
 
     # * Set the order of the x-axis categories

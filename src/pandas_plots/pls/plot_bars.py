@@ -12,6 +12,7 @@ from ..hlp import *
 def plot_bars(
     df_in: pd.Series | pd.DataFrame,
     caption: str = None,
+    caption_only_n : bool = False,
     top_n_index: int = 0,
     top_n_minvalue: int = 0,
     dropna: bool = False,
@@ -36,6 +37,7 @@ def plot_bars(
     Parameters:
     - df_in: df or series.
     - caption: An optional string indicating the caption for the chart.
+    - caption_only_n: An optional boolean indicating whether to show only the number of observations in the caption.
     - top_n_index: An optional integer indicating the number of top indexes to include in the chart. Default is 0, which includes all indexes.
     - top_n_minvalue: An optional integer indicating the minimum value to be included in the chart. Default is 0, which includes all values.
     - dropna: A boolean indicating whether to drop NaN values from the chart. Default is False.
@@ -177,10 +179,18 @@ def plot_bars(
     _title_str_minval = f"ALL >{top_n_minvalue}, " if top_n_minvalue > 0 else ""
 
     # * title str n
-    _title_str_n = f", n={n_len:_} ({n:_})" if not use_ci else f", n={n_len:_})<br><sub>ci(95) on {ci_agg}s<sub>"
+    _title_str_n = f"n={n:_}" if not use_ci else f"n={n_len:_})<br><sub>ci(95) on {ci_agg}s<sub>"
 
     # * title str na
     _title_str_null = ", NULL excluded" if dropna else ""
+    
+
+    if caption_only_n:
+        title_str = _title_str_n
+    elif title:
+        title_str = f"{title}, {_title_str_n}"
+    else:
+        title_str = f"{caption}, {_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}, {_title_str_n}"
 
     # * layot caption if provided
     caption = set_caption(caption)
@@ -195,8 +205,7 @@ def plot_bars(
         text=col_value_str,
         orientation=orientation,
         # * retrieve the original columns from series
-        title=title
-        or f"{caption}{_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}{_title_str_n}",
+        title=title_str,
         # * retrieve theme from env (intro.set_theme) or default
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         error_y=None if not use_ci else df["margin"],

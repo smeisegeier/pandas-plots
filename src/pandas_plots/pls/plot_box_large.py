@@ -1,3 +1,4 @@
+from math import e
 import os
 from pathlib import Path
 from typing import Literal
@@ -20,6 +21,7 @@ def plot_box_large(
     annotations: bool = False,
     summary: bool = True,
     caption: str = None,
+    caption_only_n : bool = False,
     title: str = None,
     violin: bool = False,
     x_min: float = None,
@@ -87,9 +89,14 @@ def plot_box_large(
     # We use 'value' for the numeric data and a constant 'category' for the y-axis
     df_plot = pd.DataFrame({"value": ser.values, "category": ser.name or "Series"})
 
-    caption = set_caption(caption)
     log_str = " (log-scale)" if use_log else ""
-    plot_title = f"{caption}[{ser.name}]{log_str}, n={n_:_}" if not title else title
+    n_str = f"n={n_:_}"
+    if caption_only_n:
+        plot_title = n_str
+    elif title:
+        plot_title = f"{title}, {n_str}"
+    else:
+        plot_title = f"{set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
 
     # ----------------------------------------------------
     # --- Seaborn Plotting ---
