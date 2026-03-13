@@ -5,7 +5,7 @@ import re
 PATH_CHROME = '/Applications/Chromium.app/Contents/MacOS/Chromium'
 # os.environ["BROWSER_PATH"] = PATH_CHROME
 
-def enclose_block_as_code(markdown_filepath: str, start_token: str, stop_token: str, language: str = 'python', remove_token_lines: bool = True) -> bool:
+def enclose_block_as_code(markdown_filepath: str, start_token: str, stop_token: str, language: str = '', remove_token_lines: bool = True) -> bool:
     """
     Processes a Markdown file to find a block defined by single, unique start and stop tokens.
     It encloses the content *between* them in a Markdown code block, modifying the file in-place.
@@ -14,10 +14,10 @@ def enclose_block_as_code(markdown_filepath: str, start_token: str, stop_token: 
         markdown_filepath (str): Path to the Markdown file.
         start_token (str): The token marking the beginning of the content block (must be line prefix).
         stop_token (str): The token marking the end of the content block (must be line prefix).
-        language (str): The language tag for the Markdown code block. Defaults to 'python'.
+        language (str): The language tag for the Markdown code block..
         remove_token_lines (bool): If True (default), the lines containing the start and stop tokens
-                                   are removed from the final output file. If False, they are included
-                                   *inside* the resulting code block.
+                                are removed from the final output file. If False, they are included
+                                *inside* the resulting code block.
 
     Returns:
         bool: True if changes were made, False otherwise.
@@ -389,6 +389,95 @@ def remove_css_style_from_md(markdown_filepath: str):
         print(f"└ Error writing to file: {e}")
 
 
+def scale_images(markdown_filepath: str):
+    """
+    Processes a Markdown file to scale images using HTML width attribute.
+    
+    Looks for SCALE comments like <!-- SCALE-60% --> or <!-- SCALE-800 -->,
+    checks if the next non-empty line contains an image declaration ![png](path) or ![svg](path),
+    and replaces both with an HTML <img> tag with the specified width.
+    
+    Patterns:
+    - SCALE-60% -> width="60%"
+    - SCALE-800 -> width="800"
+    
+    Args:
+        markdown_filepath: Path to the Markdown file.
+    
+    Returns:
+        bool: True if changes were made, False otherwise.
+    """
+    try:
+        with open(markdown_filepath, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        new_lines = []
+        changes_made = False
+        i = 0
+
+        while i < len(lines):
+            line = lines[i]
+            
+            # Check if current line is a SCALE comment <!-- SCALE-60% --> or <!-- SCALE-800 -->
+            scale_match = re.match(r'^\s*<!--\s*SCALE-(\d+)(%)?\s*-->\s*$', line)
+            
+            if scale_match:
+                scale_value = scale_match.group(1)  # e.g., "60", "800"
+                has_percent = scale_match.group(2) is not None  # True if % suffix present
+                
+                # Look for the next non-empty line to check for image declaration
+                img_line_idx = i + 1
+                while img_line_idx < len(lines) and not lines[img_line_idx].strip():
+                    img_line_idx += 1
+                
+                img_path = None
+                
+                if img_line_idx < len(lines):
+                    img_line = lines[img_line_idx]
+                    # Check for image pattern ![png](...) or ![svg](...)
+                    img_pattern = re.match(r'^!\[(png|svg)\]\(([^)]+)\)\s*$', img_line)
+                    
+                    if img_pattern:
+                        img_path = img_pattern.group(2)  # path to image
+                
+                if img_path is not None:
+                    # Build width attribute value
+                    if has_percent:
+                        width_attr = f'{scale_value}%'
+                    else:
+                        width_attr = scale_value
+                    
+                    # Replace with HTML img tag
+                    html_img = f'<img src="{img_path}" width="{width_attr}">\n'
+                    new_lines.append(html_img)
+                    
+                    # Skip both SCALE comment and image line
+                    i = img_line_idx + 1
+                    changes_made = True
+                else:
+                    # No image found after SCALE comment, keep original line
+                    new_lines.append(line)
+                    i += 1
+            else:
+                new_lines.append(line)
+                i += 1
+
+        if changes_made:
+            with open(markdown_filepath, 'w', encoding='utf-8') as f:
+                f.writelines(new_lines)
+            print(f"└ ✅ SUCCESS: Image scaling applied to: {markdown_filepath}")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No scalable images found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
 
 def jupyter_to_md(
     path: str,
@@ -507,21 +596,28 @@ def jupyter_to_md(
 
     enclose_block_as_code(
         markdown_filepath=target_md_path,
+        start_token="<!-- START_TOKEN_PYTHON -->",
+        stop_token="<!-- END_TOKEN_PYTHON -->",
+        language="python",
+        remove_token_lines=True,
+    )
+
+    enclose_block_as_code(
+        markdown_filepath=target_md_path,
         start_token="<!-- START_TOKEN -->",
         stop_token="<!-- END_TOKEN -->",
-        language="python",
+        language="",
         remove_token_lines=True,
     )
     enclose_block_as_code(
         markdown_filepath=target_md_path,
         start_token="┌──────",
         stop_token="└─────────",
-        language="python",
+        language="",
         remove_token_lines=False,
     )
 
-    
-    
+    scale_images(target_md_path)
 
 
 # * Keep the original function name as primary, alias if needed

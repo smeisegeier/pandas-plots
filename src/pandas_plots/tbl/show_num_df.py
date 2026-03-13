@@ -1,13 +1,16 @@
 import warnings
-warnings.filterwarnings("ignore")
+from IPython.display import Markdown, display
 
 import os
 from collections import abc
 from pathlib import Path
 from typing import Literal, Optional, get_args
+from ..hlp.group_kkr import group_kkr
 
 import numpy as np
 import dataframe_image as dfi
+
+warnings.filterwarnings("ignore")
 
 TOTAL_LITERAL = Literal[
     "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
@@ -36,10 +39,14 @@ def show_num_df(
     col1_width: int = 0,
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
+    kkr_col: Optional[str] = None,
+    image_scale: str = None,
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
-
+    
+    `font_size_th` and `font_size_td` are overwritten by ENV variables in `setup_rendering` (⚠️ currently not active).
+    
     Parameters:
     - df: the DataFrame to display
     - total_mode: a Literal indicating the mode for aggregating totals ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
@@ -66,6 +73,8 @@ def show_num_df(
     - col1_width: an integer indicating the width of the first column in px
     - png_path: a string or Path indicating the path to save the PNG file
     - png_conversion: a Literal indicating the conversion method for the PNG file ["chrome", "selenium"]
+    - kkr_col: a string indicating the column name for KKR grouping
+    - image_scale: a string indicating the scale of the image width for markdown. eg "800" or "60%"
 
     The function returns a styled representation of the DataFrame.
     """
@@ -109,6 +118,9 @@ def show_num_df(
     theme = os.getenv("THEME") or "light"
     
     df = df.copy()
+
+    if kkr_col:
+        df = group_kkr(df=df, kkr_col=kkr_col)
 
     # * copy df, do not reference original
     df_ = df if not swap else df.T
@@ -290,6 +302,16 @@ def show_num_df(
     _props_td = [
         ("text-align", "right")
     ]
+
+    # * set font sizes from env
+    # env_th = int(os.getenv("FONT_SIZE_TH",0))
+    # env_td = int(os.getenv("FONT_SIZE_TD",0))
+    # font_size_th = env_th if env_th > 0 else font_size_th
+    # font_size_td = env_td if env_td > 0 else font_size_td
+
+    # font_size_th = int(os.getenv("FONT_SIZE_TH",font_size_th))
+    # font_size_td = int(os.getenv("FONT_SIZE_TD",font_size_td))
+    
     if font_size_th > 0:
         _props_th.append(("font-size", f"{font_size_th}pt"))
     if font_size_td > 0:
@@ -321,5 +343,9 @@ def show_num_df(
     if png_path is not None:
         # * 72dpi default is too low for high res displays
         dfi.export(obj=out, filename=png_path, dpi=150, table_conversion=png_conversion)
-
+    
+    # * set image scale as comment for markdown renderer
+    if image_scale:
+        display(Markdown(f"<!-- SCALE-{image_scale} -->"))
+    
     return out

@@ -90,8 +90,8 @@ tbl.pivot_df(
 )
 ```
 
-![pivot_df()](img/2025-12-26-13-46-10.png)
-
+<!-- ![pivot_df()](img/2025-12-26-13-46-10.png) -->
+![pivot](https://github.com/smeisegeier/pandas-plots/blob/main/img/2025-12-26-13-46-10.png?raw=true)
 <br>
 
 ### table description
@@ -107,7 +107,8 @@ tbl.describe_df(
 )
 ```
 
-![table_describe](img/2025-12-26-20-53-27.png)
+<!-- ![table_describe](img/2025-12-26-20-53-27.png) -->
+![table](https://github.com/smeisegeier/pandas-plots/blob/main/img/2025-12-26-20-53-27.png?raw=true)
 
 <br>
 
@@ -122,7 +123,8 @@ pls.plot_upset(
 )
 ```
 
-![upset](img/2025-12-26-20-17-45.png)
+<!-- ![upset](img/2025-12-26-20-17-45.png) -->
+![upset](https://github.com/smeisegeier/pandas-plots/blob/main/img/2025-12-26-20-17-45.png?raw=true)
 
 <br>
 
@@ -133,7 +135,8 @@ pls.plot_upset(
 metrics = pls.plot_uml_graph()
 ```
 
-![uml_graph](img/2025-12-26-20-46-37.png)
+<!-- ![uml_graph](img/2025-12-26-20-46-37.png) -->
+![uml](https://github.com/smeisegeier/pandas-plots/blob/main/img/2025-12-26-20-46-37.png?raw=true)
 
 <br>
 
@@ -169,7 +172,8 @@ n = 3_241_401                                     (100.0%) ███████
 _ = pls.plot_sankey(width=1000)
 ```
 
-![](img/2025-12-26-20-31-15.png)
+<!-- ![](img/2025-12-26-20-31-15.png) -->
+![sankey](https://github.com/smeisegeier/pandas-plots/blob/main/img/2025-12-26-20-31-15.png?raw=true)
 
 <br>
 
@@ -179,7 +183,8 @@ _ = pls.plot_sankey(width=1000)
 ```python
 _ = pls.plot_box(df['fare'], height=400, violin=true)
 ```
-![plot_box](img/2024-02-13-00-40-27.png)
+<!-- ![plot_box](img/2024-02-13-00-40-27.png) -->
+![box](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-13-00-40-27.png?raw=true)
 
 <br>
 
@@ -190,8 +195,8 @@ _ = pls.plot_box(df['fare'], height=400, violin=true)
 _ = pls.plot_boxes_large(df[["dropoff_borough","distance"]])
 ```
 
-![box_plot](img/2025-12-26-20-35-37.png)
-
+<!-- ![box_plot](img/2025-12-26-20-35-37.png) -->
+![box](https://github.com/smeisegeier/pandas-plots/blob/main/img/2025-12-26-20-35-37.png?raw=true)
 <br>
 
 ### venn diagrams
@@ -285,6 +290,7 @@ _df, _details = ven.show_venn3(
 | `is_ipynb()` | detects if code is running in jupyter notebook |
 | `prepend_uv_header()` | prepends uv header to a .py script to make it executable for `uv run` command |
 | `create_py_script()` | creates a .py script from a .ipynb file |
+| `setup_rendering()` | triggers clean(er) rendering of plots and pandas tables to markdown |
 
 ## ⚙️ configuration
 <a id="markdown-%E2%9A%99%EF%B8%8F-configuration" name="%E2%9A%99%EF%B8%8F-configuration"></a>

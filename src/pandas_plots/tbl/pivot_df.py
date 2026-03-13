@@ -40,6 +40,7 @@ def pivot_df(
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
     kkr_col: Optional[str] = None,
+    image_scale: str = None,
 ) -> pd.DataFrame:
     """
     A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
@@ -49,6 +50,8 @@ def pivot_df(
     First two must be [index] and [columns]
     If 3 columns are given, last one must be the weights column.
     If 2 columns are given, column 3 will be added as flat count.
+
+    `font_size_th` and `font_size_td` are overwritten by ENV variables in `setup_rendering`
 
     Args:
         df (pd.DataFrame): The input DataFrame to be pivoted.
@@ -80,7 +83,7 @@ def pivot_df(
         png_path (str | Path, optional): The path to save the output PNG file. Defaults to None.
         png_conversion (Literal["chrome", "selenium"], optional): The conversion method for the PNG file. Defaults to "selenium".
         kkr_col (str): Edge case: Name of the column that contains kkr name to ensure all kkr are shown
-
+        image_scale: a string indicating the scale of the image width for markdown. eg "800" or "60%"
 
     Returns:
         pd.DataFrame: The pivoted DataFrame.
@@ -175,4 +178,5 @@ def pivot_df(
         png_path=png_path,
         png_conversion=png_conversion,
         total_exclude=total_exclude,
+        image_scale=image_scale,
     )

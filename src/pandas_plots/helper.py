@@ -171,3 +171,4 @@ def assign_column_colors(columns, color_palette, null_label, first_col_grey=Fals
 
 def set_caption(caption: str) -> str:
     return f"{' '.join(caption.split())}, " if caption else ""
+

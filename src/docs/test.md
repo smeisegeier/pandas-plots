@@ -29,7 +29,7 @@
 
 ### <a id='toc1_1_1_'></a>[load](#toc0_)
 
-    🐍 3.12.8 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.2.9 | 📦 connection-helper: 0.13.1
+    🐍 3.12.8 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.2.16 | 📦 connection-helper: 0.13.1
     True
 
 
@@ -52,67 +52,67 @@ graph LR
     classDef Reputation fill:#c8e6c9,stroke:#333,stroke-width:1px,color:#000;
     classDef Vendor fill:#f96,stroke:#333,stroke-width:1px,color:#000;
     classDef Root fill:#eee,stroke:#999,stroke-dasharray: 5 5,color:#666;
-    Karazhan_Key_Chain -- Raid --> Karazhan_Raid
-    Karazhan_Raid -- Boss_Drop --> Cudgel_of_Kardesh_Quest
-    Cudgel_of_Kardesh_Quest -- Raid --> Serpentshrine_Cavern
-    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
-    Battle_for_Mount_Hyjal -- Raid_Step --> Akama_Alliance
-    The_Eye -- Boss_Drop --> The_Vials_of_Eternity
     Akama_Alliance -- Raid --> Black_Temple
+    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
     Black_Temple_Chain -- Quest --> Akama_Alliance
     Serpentshrine_Cavern -- Boss_Drop --> The_Vials_of_Eternity
-    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
-    Key_of_Time -- Access --> Heroic_Black_Morass
     Level_68 -- Quest --> Karazhan_Key_Chain
     Level_70 -- Reputation --> Lower_City_Honored
     Cipher_of_Damnation -- Quest --> Black_Temple_Chain
     Trial_of_the_Naaru -- Raid --> The_Eye
+    The_Eye -- Boss_Drop --> The_Vials_of_Eternity
     Heroic_Slave_Pens -- Quest --> Cudgel_of_Kardesh_Quest
     Flamewrought_Key -- Access --> Heroic_Shattered_Halls
-    Level_70 -- Reputation --> Cenarion_Expedition_Honored
-    Karazhan_Raid -- Quest --> Cipher_of_Damnation
+    Battle_for_Mount_Hyjal -- Raid_Step --> Akama_Alliance
+    Magtheridon_Raid -- Boss_Drop --> Trial_of_the_Naaru
+    Level_70 -- Reputation --> Honor_Hold_Honored
+    Karazhan_Raid -- Boss --> Nightbane
+    Karazhan_Key_Chain -- Raid --> Karazhan_Raid
+    Karazhan_Raid -- Boss_Drop --> Cudgel_of_Kardesh_Quest
+    Cudgel_of_Kardesh_Quest -- Raid --> Serpentshrine_Cavern
+    Level_70 -- Reputation --> Keepers_of_Time_Honored
+    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
     Level_68 -- Leveling --> Level_70
     Level_70 -- Quest_Chain --> Trial_of_the_Naaru
     Cenarion_Expedition_Honored -- Dungeon --> Heroic_Slave_Pens
     Lower_City_Honored -- Vendor --> Auchenai_Key
-    Magtheridon_Raid -- Boss_Drop --> Trial_of_the_Naaru
-    Level_70 -- Reputation --> Honor_Hold_Honored
-    Karazhan_Raid -- Boss --> Nightbane
-    Level_70 -- Reputation --> Keepers_of_Time_Honored
+    Level_70 -- Reputation --> Cenarion_Expedition_Honored
+    Karazhan_Raid -- Quest --> Cipher_of_Damnation
+    Key_of_Time -- Access --> Heroic_Black_Morass
     Honor_Hold_Honored -- Vendor --> Flamewrought_Key
     Keepers_of_Time_Honored -- Vendor --> Key_of_Time
-    class Karazhan_Raid Raid;
-    class Cudgel_of_Kardesh_Quest Boss_Drop;
-    class Serpentshrine_Cavern Raid;
-    class Heroic_Shadow_Labyrinth Access;
-    class Akama_Alliance Raid_Step;
-    class The_Vials_of_Eternity Boss_Drop;
     class Black_Temple Raid;
-    class Level_68 Root;
     class Battle_for_Mount_Hyjal Raid;
-    class Heroic_Black_Morass Access;
-    class Magtheridon_Raid Root;
+    class Level_68 Root;
+    class Akama_Alliance Quest;
+    class The_Vials_of_Eternity Boss_Drop;
     class Karazhan_Key_Chain Quest;
     class Lower_City_Honored Reputation;
     class Black_Temple_Chain Quest;
     class The_Eye Raid;
+    class Cudgel_of_Kardesh_Quest Quest;
     class Heroic_Shattered_Halls Access;
-    class Cenarion_Expedition_Honored Reputation;
-    class Cipher_of_Damnation Quest;
-    class Level_70 Leveling;
-    class Trial_of_the_Naaru Quest_Chain;
-    class Heroic_Slave_Pens Dungeon;
-    class Auchenai_Key Vendor;
+    class Trial_of_the_Naaru Boss_Drop;
     class Honor_Hold_Honored Reputation;
     class Nightbane Boss;
+    class Karazhan_Raid Raid;
+    class Serpentshrine_Cavern Raid;
     class Keepers_of_Time_Honored Reputation;
+    class Heroic_Shadow_Labyrinth Access;
+    class Level_70 Leveling;
+    class Heroic_Slave_Pens Dungeon;
+    class Auchenai_Key Vendor;
+    class Cenarion_Expedition_Honored Reputation;
+    class Cipher_of_Damnation Quest;
+    class Heroic_Black_Morass Access;
     class Flamewrought_Key Vendor;
+    class Magtheridon_Raid Root;
     class Key_of_Time Vendor;
 ```
 
 
 
-```python
+```
     ┌─────────────────────────────┬─────────────┬──────────────┬────────┬─────────────────────┬─────────────┐
     │        current_item         │  category   │ total_weight │ degree │      closeness      │ betweenness │
     │           varchar           │   varchar   │    double    │ int64  │       double        │   double    │
@@ -127,29 +127,29 @@ graph LR
     │ Cudgel_of_Kardesh_Quest     │ Quest       │          4.0 │      3 │                 0.2 │         2.5 │
     │ Heroic_Shattered_Halls      │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
     │ Heroic_Shadow_Labyrinth     │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
-    │ The_Eye                     │ Raid        │          3.0 │      2 │                0.25 │         2.0 │
-    │ Key_of_Time                 │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
-    │ Nightbane                   │ Boss        │          3.0 │      1 │                0.25 │         2.0 │
-    │ Auchenai_Key                │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
-    │ Heroic_Slave_Pens           │ Dungeon     │          3.0 │      2 │                0.25 │         2.0 │
     │ Flamewrought_Key            │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ The_Eye                     │ Raid        │          3.0 │      2 │                0.25 │         2.0 │
+    │ Auchenai_Key                │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ Key_of_Time                 │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
     │ Cipher_of_Damnation         │ Quest       │          3.0 │      2 │                0.25 │         2.0 │
-    │ Trial_of_the_Naaru          │ Quest_Chain │          2.0 │      3 │  0.3333333333333333 │         1.5 │
+    │ Heroic_Slave_Pens           │ Dungeon     │          3.0 │      2 │                0.25 │         2.0 │
+    │ Nightbane                   │ Boss        │          3.0 │      1 │                0.25 │         2.0 │
     │ Cenarion_Expedition_Honored │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
-    │ Honor_Hold_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
-    │ Keepers_of_Time_Honored     │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Trial_of_the_Naaru          │ Quest_Chain │          2.0 │      3 │  0.3333333333333333 │         1.5 │
     │ Lower_City_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Keepers_of_Time_Honored     │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
     │ Karazhan_Raid               │ Raid        │          2.0 │      4 │  0.3333333333333333 │         1.5 │
-    │ Level_70                    │ Leveling    │          1.0 │      6 │                 0.5 │         1.0 │
+    │ Honor_Hold_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
     │ Karazhan_Key_Chain          │ Quest       │          1.0 │      2 │                 0.5 │         1.0 │
-    │ Magtheridon_Raid            │ Root        │          0.0 │      1 │                 1.0 │         0.5 │
+    │ Level_70                    │ Leveling    │          1.0 │      6 │                 0.5 │         1.0 │
     │ Level_68                    │ Root        │          0.0 │      2 │                 1.0 │         0.5 │
+    │ Magtheridon_Raid            │ Root        │          0.0 │      1 │                 1.0 │         0.5 │
     ├─────────────────────────────┴─────────────┴──────────────┴────────┴─────────────────────┴─────────────┤
     │ 27 rows                                                                                     6 columns │
     └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-```python
+```
     counts: all rows (no grouping)
     ---
     n = 3_241_401
@@ -184,23 +184,13 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-```python
-    -- filter-sql
-    Diagnosedatum between '2020-01-01' and '2023-06-30'
-    and not z_is_dco
-    and ifnull(z_m_pc_1,'') <> '1'
-    and ifnull(z_period_diag_death_day,181) >= 180
-    and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 ```
-
-
-```python
     🗄️ db	2_265_000, 4
     	("has_gesamt, has_lokal, has_lymph, has_fm")
 ```
 
 
-```python
+```
     ┌────────────┬───────────┬───────────┬─────────┐
     │ has_gesamt │ has_lokal │ has_lymph │ has_fm  │
     │  boolean   │  boolean  │  boolean  │ boolean │
@@ -216,7 +206,12 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_10_4.png)
+![png](test_files/output_9_4.png)
+    
+
+
+
+<img src="test_files/output_10_1.png" width="500">
     
 
 
@@ -225,20 +220,38 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 ### <a id='toc1_2_1_'></a>[bars](#toc0_)
 
 
-
+    
+![svg](test_files/output_13_0.svg)
+    
 
 
 
     
-![png](test_files/output_14_0.png)
+![svg](test_files/output_14_0.svg)
     
-
-
 
 
 
     
 ![png](test_files/output_15_0.png)
+    
+
+
+
+    
+![svg](test_files/output_15_1.svg)
+    
+
+
+
+    
+![svg](test_files/output_16_0.svg)
+    
+
+
+
+    
+![png](test_files/output_17_0.png)
     
 
 
@@ -251,7 +264,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_15_2.png)
+![png](test_files/output_17_2.png)
     
 
 
@@ -259,7 +272,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_17_0.png)
+![png](test_files/output_19_0.png)
     
 
 
@@ -274,7 +287,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_20_0.png)
+![png](test_files/output_22_0.png)
     
 
 
@@ -285,6 +298,23 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     
 
 
+
+    
+![svg](test_files/output_22_2.svg)
+    
+
+
+    
+    column (n = 45) |  notnull  |  min  | lower |  q25  | median | mean  |  q75   | upper  |  max   |  std   |  cv  
+    ----------------+-----------+-------+-------+-------+--------+-------+--------+--------+--------+--------+------
+    distance        | 45 (100%) | 0.000 | 0.000 | 0.000 |  0.900 | 7.171 | 12.600 | 26.350 | 36.660 | 10.708 | 1.493
+    
+
+
+
+    
+![svg](test_files/output_23_0.svg)
+    
 
 
     
@@ -322,7 +352,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_22_1.png)
+![png](test_files/output_24_1.png)
     
 
 
@@ -347,7 +377,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_25_0.png)
+![png](test_files/output_27_0.png)
     
 
 
@@ -355,7 +385,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_27_0.png)
+![png](test_files/output_29_0.png)
     
 
 
@@ -393,6 +423,10 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     -----------------------------------
 
 
+
+    
+![svg](test_files/output_31_1.svg)
+    
 
 
 ## <a id='toc1_3_'></a>[tbl](#toc0_)
@@ -453,18 +487,28 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     
     🟠 sample 3 rows  
 
-```python
-    ┌─────────────────────┬─────────────────────┬────────────┬──────────┬────────┬────────┬────────┬────────┬─────────┬─────────────┬───────────────────────┬───────────────────────┬────────────────┬─────────────────┐
-    │       pickup        │       dropoff       │ passengers │ distance │  fare  │  tip   │ tolls  │ total  │  color  │   payment   │      pickup_zone      │     dropoff_zone      │ pickup_borough │ dropoff_borough │
-    │    timestamp_ns     │    timestamp_ns     │   int64    │  double  │ double │ double │ double │ double │ varchar │   varchar   │        varchar        │        varchar        │    varchar     │     varchar     │
-    ├─────────────────────┼─────────────────────┼────────────┼──────────┼────────┼────────┼────────┼────────┼─────────┼─────────────┼───────────────────────┼───────────────────────┼────────────────┼─────────────────┤
-    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │      1.6 │    7.0 │   2.15 │    0.0 │  12.95 │ yellow  │ credit card │ Lenox Hill West       │ UN/Turtle Bay South   │ Manhattan      │ Manhattan       │
-    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │     0.79 │    5.0 │    0.0 │    0.0 │    9.3 │ yellow  │ cash        │ Upper West Side South │ Upper West Side South │ Manhattan      │ Manhattan       │
-    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │     1.37 │    7.5 │   2.36 │    0.0 │  14.16 │ yellow  │ credit card │ Alphabet City         │ West Village          │ Manhattan      │ Manhattan       │
-    └─────────────────────┴─────────────────────┴────────────┴──────────┴────────┴────────┴────────┴────────┴─────────┴─────────────┴───────────────────────┴───────────────────────┴────────────────┴─────────────────┘
+
+
+
 ```
 
-![svg](test_files/output_34_1.svg)
+```
+
+
+```
+    ┌─────────────────────┬─────────────────────┬────────────┬───┬──────────────────────┬────────────────┬─────────────────┐
+    │       pickup        │       dropoff       │ passengers │ … │     dropoff_zone     │ pickup_borough │ dropoff_borough │
+    │    timestamp_ns     │    timestamp_ns     │   int64    │   │       varchar        │    varchar     │     varchar     │
+    ├─────────────────────┼─────────────────────┼────────────┼───┼──────────────────────┼────────────────┼─────────────────┤
+    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │ … │ UN/Turtle Bay South  │ Manhattan      │ Manhattan       │
+    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │ … │ Upper West Side So…  │ Manhattan      │ Manhattan       │
+    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │ … │ West Village         │ Manhattan      │ Manhattan       │
+    ├─────────────────────┴─────────────────────┴────────────┴───┴──────────────────────┴────────────────┴─────────────────┤
+    │ 3 rows                                                                                          14 columns (6 shown) │
+    └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+![svg](test_files/output_36_4.svg)
     
 
 
@@ -617,41 +661,68 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     
     🟠 sample 3 rows  
 
-```python
-    ┌──────────────────────┬──────────────────────┬─────────────────────┬──────────────────────┬─────────────┬─────────────────────┬──────────────────────┬──────────────────┬─────────────────────┬───────────────────┬───────────────┬────────────┬────────────┬────────────┬────────────┬───────────────────┬─────────┬───────────────────┬─────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────────────┬───────────────┬────────────┬────────────┬────────────┬────────────┬───────────────────┬─────────┬───────────────────┬─────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────────────┬─────────┬─────────────┬───────────────┬──────────────────┬─────────────────────┬──────────────────────┬──────────────────────┬──────────────────────┬───────────────┬─────────────────────┬──────────────────┬─────────────┬──────────────────────┬─────────────┬───────────────┬───────────────┬────────────────────┬───────┬───────────┬──────────────────────┬────────────┬───────┬────────────┬────────────────────┬─────────┬──────────────────────┬──────────────────────┬───────┬────────────────────────┬─────────────┬───────┬────────┬─────────┬─────────┬────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬──────────┬──────────┬───────────────────┬────────────────┬────────────────┬────────────────┬────────────────┬───────────────────┬──────────────────────────────┬───────────────┬──────────┬─────────────┬─────────────┬─────────┬─────────────────────────┬───────────────────────┐
-    │ oBDS_RKIPatientTum…  │  oBDS_RKIPatientId   │    Diagnosedatum    │ Diagnosedatum_Gena…  │ Inzidenzort │ Diagnose_ICD10_Code │ Diagnose_ICD10_Ver…  │ Topographie_Code │ Topographie_Version │ Diagnosesicherung │ TNM_Auflage_c │ y_Symbol_c │ r_Symbol_c │ a_Symbol_c │ m_Symbol_c │ c_p_u_Praefix_T_c │   T_c   │ c_p_u_Praefix_N_c │   N_c   │ c_p_u_Praefix_M_c │   M_c   │   L_c   │   V_c   │  Pn_c   │   S_c   │ UICC_Stadium_c │ TNM_Auflage_p │ y_Symbol_p │ r_Symbol_p │ a_Symbol_p │ m_Symbol_p │ c_p_u_Praefix_T_p │   T_p   │ c_p_u_Praefix_N_p │   N_p   │ c_p_u_Praefix_M_p │   M_p   │   L_p   │   V_p   │  Pn_p   │   S_p   │ UICC_Stadium_p │ Grading │ LK_befallen │ LK_untersucht │ Morphologie_Code │ Morphologie_Version │ Praetherapeutische…  │ HormonrezeptorStat…  │ HormonrezeptorStat…  │ Her2neuStatus │ TumorgroesseInvasiv │ TumorgroesseDCIS │ RASMutation │ RektumAbstandAnoku…  │ GradPrimaer │ GradSekundaer │ ScoreErgebnis │ AnlassGleasonScore │  PSA  │ DatumPSA  │ DatumPSA_Genauigkeit │ Tumordicke │  LDH  │ Ulzeration │ Seitenlokalisation │   DCN   │ Anzahl_Tage_Diagno…  │       z_tum_id       │ z_kkr │        z_pat_id        │ z_kkr_label │ z_dy  │ z_age  │ z_ag05  │ z_icd10 │ z_icd10_3d │ z_t_c_0 │ z_t_c_1 │ z_t_p_0 │ z_t_p_1 │ z_n_c_0 │ z_n_c_1 │ z_n_p_0 │ z_n_p_1 │ z_m_c_0 │ z_m_c_1 │ z_m_p_0 │ z_m_p_1 │ z_m_pc_1 │ z_is_dco │ z_last_tum_status │ z_tum_op_count │ z_tum_st_count │ z_tum_sy_count │ z_tum_fo_count │ z_first_treatment │ z_first_treatment_after_days │ z_event_order │ z_events │ z_class_hpv │ z_tum_order │  z_sex  │ z_period_diag_death_day │ z_period_diag_psa_day │
-    │       varchar        │       varchar        │      timestamp      │       varchar        │   varchar   │       varchar       │       varchar        │     varchar      │       varchar       │      varchar      │    varchar    │   int32    │   int32    │   int32    │  varchar   │      varchar      │ varchar │      varchar      │ varchar │      varchar      │ varchar │ varchar │ varchar │ varchar │ varchar │    varchar     │    varchar    │  varchar   │   int32    │   int32    │  varchar   │      varchar      │ varchar │      varchar      │ varchar │      varchar      │ varchar │ varchar │ varchar │ varchar │ varchar │    varchar     │ varchar │    int32    │     int32     │     varchar      │       varchar       │        int32         │        int32         │        int32         │     int32     │        int32        │      int32       │    int32    │        int32         │    int32    │     int32     │     int32     │       int32        │ float │ timestamp │        int32         │   float    │ int32 │   int32    │      varchar       │ varchar │        int32         │       varchar        │ int8  │        varchar         │   varchar   │ int16 │ double │ varchar │ varchar │  varchar   │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar │ varchar  │ boolean  │      varchar      │     int16      │     int16      │     int16      │     int16      │      varchar      │            int32             │    varchar    │ varchar  │   varchar   │    int8     │ varchar │          int32          │         int32         │
-    ├──────────────────────┼──────────────────────┼─────────────────────┼──────────────────────┼─────────────┼─────────────────────┼──────────────────────┼──────────────────┼─────────────────────┼───────────────────┼───────────────┼────────────┼────────────┼────────────┼────────────┼───────────────────┼─────────┼───────────────────┼─────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────────────┼───────────────┼────────────┼────────────┼────────────┼────────────┼───────────────────┼─────────┼───────────────────┼─────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────────────┼─────────┼─────────────┼───────────────┼──────────────────┼─────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼───────────────┼─────────────────────┼──────────────────┼─────────────┼──────────────────────┼─────────────┼───────────────┼───────────────┼────────────────────┼───────┼───────────┼──────────────────────┼────────────┼───────┼────────────┼────────────────────┼─────────┼──────────────────────┼──────────────────────┼───────┼────────────────────────┼─────────────┼───────┼────────┼─────────┼─────────┼────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────────┼──────────┼───────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼───────────────────┼──────────────────────────────┼───────────────┼──────────┼─────────────┼─────────────┼─────────┼─────────────────────────┼───────────────────────┤
-    │ 6f105957-7bbb-41f3…  │ 6fe288a8-24d6-451d…  │ 2022-12-15 00:00:00 │ T                    │ 05382       │ C44.3               │ 102022GM             │ C44.3            │ 33                  │ 7                 │ 8             │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 8             │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ U       │        NULL │          NULL │ 8097/3           │ 33                  │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ L                  │ N       │                 NULL │ 6f105957-7bbb-41f3…  │     5 │ 6fe288a8-24d6-451d-b…  │ 05-NW       │  2022 │   62.0 │ a60b64  │ C44.3   │ C44        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ false    │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                    NULL │                  NULL │
-    │ 2334f59e-74ee-477c…  │ c2490ae9-4489-4b9a…  │ 2022-05-15 00:00:00 │ T                    │ 05162       │ C16.0               │ 102022GM             │ C16.0            │ 33                  │ 7                 │ 8             │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 8             │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 3       │        NULL │          NULL │ 8490/3           │ 33                  │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ T                  │ N       │                  143 │ 2334f59e-74ee-477c…  │     5 │ c2490ae9-4489-4b9a-8…  │ 05-NW       │  2022 │  44.08 │ a40b44  │ C16.0   │ C16        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ false    │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                     143 │                  NULL │
-    │ eb2ae3f0-31a2-4d2f…  │ 32d7f226-18c2-41b8…  │ 2023-10-15 00:00:00 │ T                    │ 04011       │ C80.0               │ 102023GM             │ C80.9            │ 33                  │ 0                 │ NULL          │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ NULL          │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ U       │        NULL │          NULL │ 8000/3           │ NULL                │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ U                  │ J       │                    0 │ eb2ae3f0-31a2-4d2f…  │     4 │ 32d7f226-18c2-41b8-a…  │ 04-HB       │  2023 │  92.25 │ a85plus │ C80.0   │ C80        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ true     │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                       0 │                  NULL │
-    └──────────────────────┴──────────────────────┴─────────────────────┴──────────────────────┴─────────────┴─────────────────────┴──────────────────────┴──────────────────┴─────────────────────┴───────────────────┴───────────────┴────────────┴────────────┴────────────┴────────────┴───────────────────┴─────────┴───────────────────┴─────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴────────────────┴───────────────┴────────────┴────────────┴────────────┴────────────┴───────────────────┴─────────┴───────────────────┴─────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴────────────────┴─────────┴─────────────┴───────────────┴──────────────────┴─────────────────────┴──────────────────────┴──────────────────────┴──────────────────────┴───────────────┴─────────────────────┴──────────────────┴─────────────┴──────────────────────┴─────────────┴───────────────┴───────────────┴────────────────────┴───────┴───────────┴──────────────────────┴────────────┴───────┴────────────┴────────────────────┴─────────┴──────────────────────┴──────────────────────┴───────┴────────────────────────┴─────────────┴───────┴────────┴─────────┴─────────┴────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────┴──────────┴───────────────────┴────────────────┴────────────────┴────────────────┴────────────────┴───────────────────┴──────────────────────────────┴───────────────┴──────────┴─────────────┴─────────────┴─────────┴─────────────────────────┴───────────────────────┘
+
+
+
+```
+
+```
+
+
+```
+    ┌──────────────────────┬──────────────────────┬───┬─────────┬──────────────────────┬──────────────────────┐
+    │ oBDS_RKIPatientTum…  │  oBDS_RKIPatientId   │ … │  z_sex  │ z_period_diag_deat…  │ z_period_diag_psa_…  │
+    │       varchar        │       varchar        │   │ varchar │        int32         │        int32         │
+    ├──────────────────────┼──────────────────────┼───┼─────────┼──────────────────────┼──────────────────────┤
+    │ 6f105957-7bbb-41f3…  │ 6fe288a8-24d6-451d…  │ … │ W       │                 NULL │                 NULL │
+    │ 2334f59e-74ee-477c…  │ c2490ae9-4489-4b9a…  │ … │ W       │                  143 │                 NULL │
+    │ eb2ae3f0-31a2-4d2f…  │ 32d7f226-18c2-41b8…  │ … │ W       │                    0 │                 NULL │
+    ├──────────────────────┴──────────────────────┴───┴─────────┴──────────────────────┴──────────────────────┤
+    │ 3 rows                                                                            105 columns (5 shown) │
+    └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### <a id='toc1_3_3_'></a>[descr_db()](#toc0_)
 
+
+
+```
     🗄️ delay	1_724, 3
     	("z_kkr_label, z_first_treatment_after_days, z_first_treatment")
+```
 
-```python
+
+```
     ┌─────────────┬──────────────────────────────┬───────────────────┐
     │ z_kkr_label │ z_first_treatment_after_days │ z_first_treatment │
     │   varchar   │            int32             │      varchar      │
     ├─────────────┼──────────────────────────────┼───────────────────┤
-    │ 05-NW       │                           13 │ op                │
-    │ 01-SH       │                           48 │ st                │
-    │ 01-SH       │                           14 │ sy                │
+    │ 05-NW       │                           67 │ sy                │
+    │ 08-BW       │                           40 │ sy                │
+    │ 09-BY       │                            0 │ sy                │
     └─────────────┴──────────────────────────────┴───────────────────┘
 ```
 
-![png](test_files/output_38_0.png)
+![png](test_files/output_40_0.png)
     
 
 
 
+    
+![svg](test_files/output_41_0.svg)
+    
 
 
 
+    
+![svg](test_files/output_42_0.svg)
+    
+
+
+
+    
+![svg](test_files/output_43_0.svg)
+    
 
 
     🔵 *** df: taxis ***  
@@ -673,7 +744,15 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     
     🟠 sample 3 rows  
 
-```python
+
+
+
+```
+
+```
+
+
+```
     ┌─────────┬─────────────┬────────────────┬────────┐
     │  color  │   payment   │ pickup_borough │ total  │
     │ varchar │   varchar   │    varchar     │ double │
@@ -684,27 +763,32 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     └─────────┴─────────────┴────────────────┴────────┘
 ```
 
+![svg](test_files/output_44_4.svg)
+    
+
+
+
+
+```
     🗄️ taxis	6_433, 14
     	("pickup, dropoff, passengers, distance, fare, tip, tolls, total, color, payment, pickup_zone, dropoff_zone, pickup_borough, dropoff_borough")
-
-```python
-    ┌─────────────────────┬─────────────────────┬────────────┬──────────┬────────┬────────┬────────┬────────┬─────────┬─────────────┬───────────────────────┬───────────────────────┬────────────────┬─────────────────┐
-    │       pickup        │       dropoff       │ passengers │ distance │  fare  │  tip   │ tolls  │ total  │  color  │   payment   │      pickup_zone      │     dropoff_zone      │ pickup_borough │ dropoff_borough │
-    │    timestamp_ns     │    timestamp_ns     │   int64    │  double  │ double │ double │ double │ double │ varchar │   varchar   │        varchar        │        varchar        │    varchar     │     varchar     │
-    ├─────────────────────┼─────────────────────┼────────────┼──────────┼────────┼────────┼────────┼────────┼─────────┼─────────────┼───────────────────────┼───────────────────────┼────────────────┼─────────────────┤
-    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │      1.6 │    7.0 │   2.15 │    0.0 │  12.95 │ yellow  │ credit card │ Lenox Hill West       │ UN/Turtle Bay South   │ Manhattan      │ Manhattan       │
-    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │     0.79 │    5.0 │    0.0 │    0.0 │    9.3 │ yellow  │ cash        │ Upper West Side South │ Upper West Side South │ Manhattan      │ Manhattan       │
-    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │     1.37 │    7.5 │   2.36 │    0.0 │  14.16 │ yellow  │ credit card │ Alphabet City         │ West Village          │ Manhattan      │ Manhattan       │
-    └─────────────────────┴─────────────────────┴────────────┴──────────┴────────┴────────┴────────┴────────┴─────────┴─────────────┴───────────────────────┴───────────────────────┴────────────────┴─────────────────┘
 ```
 
-## <a id='toc1_4_'></a>[show num](#toc0_)
 
+```
+    ┌─────────────────────┬─────────────────────┬────────────┬───┬──────────────────────┬────────────────┬─────────────────┐
+    │       pickup        │       dropoff       │ passengers │ … │     dropoff_zone     │ pickup_borough │ dropoff_borough │
+    │    timestamp_ns     │    timestamp_ns     │   int64    │   │       varchar        │    varchar     │     varchar     │
+    ├─────────────────────┼─────────────────────┼────────────┼───┼──────────────────────┼────────────────┼─────────────────┤
+    │ 2019-03-23 20:21:09 │ 2019-03-23 20:27:24 │          1 │ … │ UN/Turtle Bay South  │ Manhattan      │ Manhattan       │
+    │ 2019-03-04 16:11:55 │ 2019-03-04 16:19:00 │          1 │ … │ Upper West Side So…  │ Manhattan      │ Manhattan       │
+    │ 2019-03-27 17:53:01 │ 2019-03-27 18:00:25 │          1 │ … │ West Village         │ Manhattan      │ Manhattan       │
+    ├─────────────────────┴─────────────────────┴────────────┴───┴──────────────────────┴────────────────┴─────────────────┤
+    │ 3 rows                                                                                          14 columns (6 shown) │
+    └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-    
-![png](test_files/output_46_0.png)
-    
-
+### <a id='toc1_4_'></a>[show num](#toc0_)
 
 
     
@@ -757,8 +841,8 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-```python
-    # filter
+```
+    -- filter-sql
         z_dy between 2020 and 2024
         and z_kkr_label is not null
         and z_icd10_3d in ('C18','C19','C20')
@@ -816,7 +900,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-```python
+```
     ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────┐
     │                                                    ops                                                     │ cnt_ops │
     │                                                  varchar                                                   │  int32  │
@@ -837,7 +921,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 ```
 
 
-```python
+```
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────┐
     │                                                 ops                                                  │ cnt_ops │
     │                                               varchar                                                │  int32  │
@@ -872,22 +956,26 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
+
+
+```
     tum_id: d90eb5e3-2791-420e-9682-69a8e9dfff9a
-    
     pat
 
-```python
-    ┌──────────────────────────────────────┬─────────┬────────┬─────────┬────────────┬──────────────┬──────────────────────────┬───────────────────┬───────────────────────────────┐
-    │               z_pat_id               │  z_sex  │ z_age  │ z_ag05  │ Verstorben │ Geburtsdatum │ Geburtsdatum_Genauigkeit │ Datum_Vitalstatus │ Datum_Vitalstatus_Genauigkeit │
-    │               varchar                │ varchar │ double │ varchar │  varchar   │     date     │         varchar          │       date        │            varchar            │
-    ├──────────────────────────────────────┼─────────┼────────┼─────────┼────────────┼──────────────┼──────────────────────────┼───────────────────┼───────────────────────────────┤
-    │ cb00a5de-22fd-495b-9375-bca43b0cab8a │ M       │  69.92 │ a65b69  │ N          │ 1950-06-15   │ T                        │ 2024-10-15        │ T                             │
-    └──────────────────────────────────────┴─────────┴────────┴─────────┴────────────┴──────────────┴──────────────────────────┴───────────────────┴───────────────────────────────┘
+```
+    ┌──────────────────────┬─────────┬────────┬───┬──────────────────────┬───────────────────┬──────────────────────┐
+    │       z_pat_id       │  z_sex  │ z_age  │ … │ Geburtsdatum_Genau…  │ Datum_Vitalstatus │ Datum_Vitalstatus_…  │
+    │       varchar        │ varchar │ double │   │       varchar        │       date        │       varchar        │
+    ├──────────────────────┼─────────┼────────┼───┼──────────────────────┼───────────────────┼──────────────────────┤
+    │ cb00a5de-22fd-495b…  │ M       │  69.92 │ … │ T                    │ 2024-10-15        │ T                    │
+    ├──────────────────────┴─────────┴────────┴───┴──────────────────────┴───────────────────┴──────────────────────┤
+    │ 1 rows                                                                                    9 columns (6 shown) │
+    └───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     tod
 
-```python
+```
     ┌────────────────┬─────────┬─────────┬───────────────┐
     │ TodesursacheId │  Code   │ Version │ IsGrundleiden │
     │    varchar     │ varchar │ varchar │    boolean    │
@@ -898,29 +986,33 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     tum1
 
-```python
-    ┌─────────────┬─────────┬───────────────┬───────────────────────────┬────────────────┬────────────────┬────────────────┬────────────────┬───────────────────┬──────────────────────────────┐
-    │ z_kkr_label │ z_icd10 │ Diagnosedatum │ Diagnosedatum_Genauigkeit │ z_tum_op_count │ z_tum_st_count │ z_tum_sy_count │ z_tum_fo_count │ z_first_treatment │ z_first_treatment_after_days │
-    │   varchar   │ varchar │     date      │          varchar          │     int16      │     int16      │     int16      │     int16      │      varchar      │            int32             │
-    ├─────────────┼─────────┼───────────────┼───────────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼───────────────────┼──────────────────────────────┤
-    │ 13-MV       │ C61     │ 2020-05-15    │ T                         │              1 │             11 │              8 │              7 │ sy                │                           29 │
-    └─────────────┴─────────┴───────────────┴───────────────────────────┴────────────────┴────────────────┴────────────────┴────────────────┴───────────────────┴──────────────────────────────┘
+```
+    ┌─────────────┬─────────┬───────────────┬───┬────────────────┬───────────────────┬──────────────────────┐
+    │ z_kkr_label │ z_icd10 │ Diagnosedatum │ … │ z_tum_fo_count │ z_first_treatment │ z_first_treatment_…  │
+    │   varchar   │ varchar │     date      │   │     int16      │      varchar      │        int32         │
+    ├─────────────┼─────────┼───────────────┼───┼────────────────┼───────────────────┼──────────────────────┤
+    │ 13-MV       │ C61     │ 2020-05-15    │ … │              7 │ sy                │                   29 │
+    ├─────────────┴─────────┴───────────────┴───┴────────────────┴───────────────────┴──────────────────────┤
+    │ 1 rows                                                                           10 columns (6 shown) │
+    └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     tum2
 
-```python
-    ┌─────────────────────────────────────────────────┬─────────────┬──────────────────────────┬─────────────────────────┬────────────┬───────────────────────┬───────────────────┬─────────────┬─────────────┐
-    │                  z_event_order                  │  z_events   │ Anzahl_Tage_Diagnose_Tod │ z_period_diag_death_day │  DatumPSA  │ z_period_diag_psa_day │ z_last_tum_status │ z_class_hpv │ z_tum_order │
-    │                     varchar                     │   varchar   │          int32           │          int32          │    date    │         int32         │      varchar      │   varchar   │    int8     │
-    ├─────────────────────────────────────────────────┼─────────────┼──────────────────────────┼─────────────────────────┼────────────┼───────────────────────┼───────────────────┼─────────────┼─────────────┤
-    │ sy-st-sy-fo-sy-fo-sy-st-sy-fo-op-fo-st-sy-fo-st │ op|st|sy|fo │                     NULL │                    NULL │ 2020-05-15 │                     0 │ P - Progression   │ NULL        │           1 │
-    └─────────────────────────────────────────────────┴─────────────┴──────────────────────────┴─────────────────────────┴────────────┴───────────────────────┴───────────────────┴─────────────┴─────────────┘
+```
+    ┌──────────────────────┬─────────────┬──────────────────────┬───┬───────────────────┬─────────────┬─────────────┐
+    │    z_event_order     │  z_events   │ Anzahl_Tage_Diagno…  │ … │ z_last_tum_status │ z_class_hpv │ z_tum_order │
+    │       varchar        │   varchar   │        int32         │   │      varchar      │   varchar   │    int8     │
+    ├──────────────────────┼─────────────┼──────────────────────┼───┼───────────────────┼─────────────┼─────────────┤
+    │ sy-st-sy-fo-sy-fo-…  │ op|st|sy|fo │                 NULL │ … │ P - Progression   │ NULL        │           1 │
+    ├──────────────────────┴─────────────┴──────────────────────┴───┴───────────────────┴─────────────┴─────────────┤
+    │ 1 rows                                                                                    9 columns (6 shown) │
+    └───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     tum3
 
-```python
+```
     ┌─────────┬──────────────────┬──────────────────┬─────────────┬───────────────────┬────────────────────┬─────────┐
     │ Grading │ Morphologie_Code │ Topographie_Code │ Inzidenzort │ Diagnosesicherung │ Seitenlokalisation │   DCN   │
     │ varchar │     varchar      │     varchar      │   varchar   │      varchar      │      varchar       │ varchar │
@@ -931,18 +1023,20 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     tum4
 
-```python
-    ┌─────────┬─────────┬─────────┬────────────────┬───────────────┬──────────────────────────────────────┬────────────────────────────────┬──────────────────────────────────┐
-    │ z_t_p_0 │ z_n_p_0 │ z_m_p_0 │ UICC_Stadium_p │ Her2neuStatus │ Praetherapeutischer_Menopausenstatus │ HormonrezeptorStatus_Oestrogen │ HormonrezeptorStatus_Progesteron │
-    │ varchar │ varchar │ varchar │    varchar     │    varchar    │               varchar                │            varchar             │             varchar              │
-    ├─────────┼─────────┼─────────┼────────────────┼───────────────┼──────────────────────────────────────┼────────────────────────────────┼──────────────────────────────────┤
-    │ NULL    │ NULL    │ NULL    │ NULL           │ NULL          │ NULL                                 │ NULL                           │ NULL                             │
-    └─────────┴─────────┴─────────┴────────────────┴───────────────┴──────────────────────────────────────┴────────────────────────────────┴──────────────────────────────────┘
+```
+    ┌─────────┬─────────┬─────────┬───┬──────────────────────┬──────────────────────┬──────────────────────┐
+    │ z_t_p_0 │ z_n_p_0 │ z_m_p_0 │ … │ Praetherapeutische…  │ HormonrezeptorStat…  │ HormonrezeptorStat…  │
+    │ varchar │ varchar │ varchar │   │       varchar        │       varchar        │       varchar        │
+    ├─────────┼─────────┼─────────┼───┼──────────────────────┼──────────────────────┼──────────────────────┤
+    │ NULL    │ NULL    │ NULL    │ … │ NULL                 │ NULL                 │ NULL                 │
+    ├─────────┴─────────┴─────────┴───┴──────────────────────┴──────────────────────┴──────────────────────┤
+    │ 1 rows                                                                           8 columns (6 shown) │
+    └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     tum5
 
-```python
+```
     ┌─────────────────────┬──────────────────┬─────────────┬───────────────┬───────┬────────────┬───────┬────────────┐
     │ TumorgroesseInvasiv │ TumorgroesseDCIS │ RASMutation │ ScoreErgebnis │  PSA  │ Tumordicke │  LDH  │ Ulzeration │
     │        int32        │      int32       │   varchar   │    varchar    │ float │   float    │ int32 │  varchar   │
@@ -953,18 +1047,20 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     op
 
-```python
-    ┌──────────────────────────────────────┬───────────┬───────────────────────────────────┬─────────────────────────┬────────────┬──────────────────────┬──────────────────────┬────────────┐
-    │                 OPId                 │ Intention │ Lokale_Beurteilung_Residualstatus │ Anzahl_Tage_Diagnose_OP │  Datum_OP  │ Datum_OP_Genauigkeit │ z_period_diag_op_day │ z_op_order │
-    │               varchar                │  varchar  │              varchar              │          int32          │    date    │       varchar        │        int32         │   int64    │
-    ├──────────────────────────────────────┼───────────┼───────────────────────────────────┼─────────────────────────┼────────────┼──────────────────────┼──────────────────────┼────────────┤
-    │ ec494ef0-e73d-4762-b022-7227aaf2ff57 │ K         │ RX                                │                     897 │ 2022-10-15 │ T                    │                  897 │          1 │
-    └──────────────────────────────────────┴───────────┴───────────────────────────────────┴─────────────────────────┴────────────┴──────────────────────┴──────────────────────┴────────────┘
+```
+    ┌──────────────────────┬───────────┬──────────────────────┬───┬──────────────────────┬────────────┐
+    │         OPId         │ Intention │ Lokale_Beurteilung…  │ … │ z_period_diag_op_day │ z_op_order │
+    │       varchar        │  varchar  │       varchar        │   │        int32         │   int64    │
+    ├──────────────────────┼───────────┼──────────────────────┼───┼──────────────────────┼────────────┤
+    │ ec494ef0-e73d-4762…  │ K         │ RX                   │ … │                  897 │          1 │
+    ├──────────────────────┴───────────┴──────────────────────┴───┴──────────────────────┴────────────┤
+    │ 1 rows                                                                      8 columns (5 shown) │
+    └─────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     ops
 
-```python
+```
     ┌──────────────────────────────────────┬──────────┬─────────┬──────────────────────────────────────┐
     │                OPSId                 │   Code   │ Version │               OP_TypId               │
     │               varchar                │ varchar  │ varchar │               varchar                │
@@ -975,7 +1071,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     st
 
-```python
+```
     ┌──────────────────────────────────────┬───────────┬─────────────┐
     │                 STId                 │ Intention │ Stellung_OP │
     │               varchar                │  varchar  │   varchar   │
@@ -998,146 +1094,154 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     be
 
-```python
-    ┌──────────────────────────────────────┬─────────────────────────┬──────────────────────┬──────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────┬─────────────────────────┬───────────────┐
-    │            BestrahlungId             │ Anzahl_Tage_Diagnose_ST │ Anzahl_Tage_ST_Dauer │ Datum_Beginn_Bestrahlung │ Datum_Beginn_Bestrahlung_Genauigkeit │                 STId                 │ z_period_diag_bestr_day │ z_bestr_order │
-    │               varchar                │          int32          │        int32         │           date           │               varchar                │               varchar                │          int32          │     int64     │
-    ├──────────────────────────────────────┼─────────────────────────┼──────────────────────┼──────────────────────────┼──────────────────────────────────────┼──────────────────────────────────────┼─────────────────────────┼───────────────┤
-    │ b121f45a-221e-481d-addb-eaed52e116f9 │                      43 │                    3 │ 2020-06-15               │ T                                    │ eff1fce1-16a1-4806-b7d0-f41ffec9ed98 │                      43 │             1 │
-    │ 4cd066be-9355-4067-80a4-b55ab03e6677 │                      49 │                   25 │ 2020-06-15               │ T                                    │ 72a7f8c1-4436-440a-a646-e9bbaea91663 │                      49 │             2 │
-    │ 9e2ea731-0140-4f35-915c-1bbde7664f0b │                     854 │                    4 │ 2022-09-15               │ T                                    │ ea82aeb8-6ade-421c-8185-e20cae5d927e │                     854 │             3 │
-    │ 041d9288-6c70-4f53-aa48-8bec77316bbf │                     996 │                   13 │ 2023-02-15               │ T                                    │ 337d17d0-25fd-4f70-aeeb-3e2a8543d0c4 │                     996 │             4 │
-    │ 8ab778d9-7244-42a0-b0db-1cc275b19222 │                    1172 │                    0 │ 2023-07-15               │ T                                    │ ef7b0226-d577-401a-ae01-808f5613730a │                    1172 │             5 │
-    │ b185569c-7972-4635-b49a-e1f96b01e1a9 │                    1226 │                    0 │ 2023-09-15               │ T                                    │ 825ace54-695f-42a6-8b9d-0bd05165268f │                    1226 │             6 │
-    │ 3d0960de-30b5-4188-bd0b-b28806e6d2d4 │                    1281 │                    0 │ 2023-11-15               │ T                                    │ 17f45990-667f-49cb-a178-b95a98e5e8ff │                    1281 │             7 │
-    │ d9404472-f9e3-47c4-90b9-5395a53929fc │                    1333 │                    0 │ 2024-01-15               │ T                                    │ 3334fc97-99ef-4657-9780-277b07c7785f │                    1333 │             8 │
-    │ 8a6aa060-d578-487c-9979-76aaaf1a868a │                    1333 │                    0 │ 2024-01-15               │ T                                    │ 3334fc97-99ef-4657-9780-277b07c7785f │                    1333 │             9 │
-    │ 43a1aff7-5898-4da1-a20c-ae1e2ea44f97 │                    1386 │                    0 │ 2024-02-15               │ T                                    │ e6629ef7-13d3-48fc-a4c3-4fd9f7bb773e │                    1386 │            10 │
-    │ b33226f3-b6cd-4d96-86da-f8028c0e14b5 │                    1386 │                    0 │ 2024-02-15               │ T                                    │ e6629ef7-13d3-48fc-a4c3-4fd9f7bb773e │                    1386 │            11 │
-    │ 570b5f4d-0ec2-4cc9-aaf4-e2097dda9456 │                    1442 │                    0 │ 2024-04-15               │ T                                    │ 8fd82c06-6a60-4419-983a-c18c9441a544 │                    1442 │            12 │
-    │ e024423c-d480-49b9-aea3-b1327299a6c1 │                    1442 │                    0 │ 2024-04-15               │ T                                    │ 8fd82c06-6a60-4419-983a-c18c9441a544 │                    1442 │            13 │
-    │ db6c9dbf-06d1-4276-b9eb-24b74b0b2378 │                    1556 │                    0 │ 2024-08-15               │ T                                    │ 56b19ab4-3c34-4c31-85e3-2945199a8b2b │                    1556 │            14 │
-    │ 995fc348-feee-482a-8891-ef71651fb6fe │                    1556 │                    0 │ 2024-08-15               │ T                                    │ 56b19ab4-3c34-4c31-85e3-2945199a8b2b │                    1556 │            15 │
-    ├──────────────────────────────────────┴─────────────────────────┴──────────────────────┴──────────────────────────┴──────────────────────────────────────┴──────────────────────────────────────┴─────────────────────────┴───────────────┤
-    │ 15 rows                                                                                                                                                                                                                        8 columns │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+    ┌──────────────────────┬──────────────────────┬──────────────────────┬───┬──────────────────────┬───────────────┐
+    │    BestrahlungId     │ Anzahl_Tage_Diagno…  │ Anzahl_Tage_ST_Dauer │ … │ z_period_diag_best…  │ z_bestr_order │
+    │       varchar        │        int32         │        int32         │   │        int32         │     int64     │
+    ├──────────────────────┼──────────────────────┼──────────────────────┼───┼──────────────────────┼───────────────┤
+    │ b121f45a-221e-481d…  │                   43 │                    3 │ … │                   43 │             1 │
+    │ 4cd066be-9355-4067…  │                   49 │                   25 │ … │                   49 │             2 │
+    │ 9e2ea731-0140-4f35…  │                  854 │                    4 │ … │                  854 │             3 │
+    │ 041d9288-6c70-4f53…  │                  996 │                   13 │ … │                  996 │             4 │
+    │ 8ab778d9-7244-42a0…  │                 1172 │                    0 │ … │                 1172 │             5 │
+    │ b185569c-7972-4635…  │                 1226 │                    0 │ … │                 1226 │             6 │
+    │ 3d0960de-30b5-4188…  │                 1281 │                    0 │ … │                 1281 │             7 │
+    │ d9404472-f9e3-47c4…  │                 1333 │                    0 │ … │                 1333 │             8 │
+    │ 8a6aa060-d578-487c…  │                 1333 │                    0 │ … │                 1333 │             9 │
+    │ 43a1aff7-5898-4da1…  │                 1386 │                    0 │ … │                 1386 │            10 │
+    │ b33226f3-b6cd-4d96…  │                 1386 │                    0 │ … │                 1386 │            11 │
+    │ 570b5f4d-0ec2-4cc9…  │                 1442 │                    0 │ … │                 1442 │            12 │
+    │ e024423c-d480-49b9…  │                 1442 │                    0 │ … │                 1442 │            13 │
+    │ db6c9dbf-06d1-4276…  │                 1556 │                    0 │ … │                 1556 │            14 │
+    │ 995fc348-feee-482a…  │                 1556 │                    0 │ … │                 1556 │            15 │
+    ├──────────────────────┴──────────────────────┴──────────────────────┴───┴──────────────────────┴───────────────┤
+    │ 15 rows                                                                                   8 columns (5 shown) │
+    └───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     app
 
-```python
-    ┌──────────────────────────────────────┬─────────────────────────────────────────────┬──────────────────┬────────────────────────────┬───────────┬─────────────────┬────────────┬────────────────┬────────────────┬─────────────────┬─────────────────┐
-    │            BestrahlungId             │   TypeOfST_TypBestrahlungApplikationsart    │ Seite_Zielgebiet │ Interstitiell_endokavitaer │ Rate_Type │ Metabolisch_Typ │ Radiochemo │ Stereotaktisch │ Atemgetriggert │ CodeVersion2014 │ CodeVersion2021 │
-    │               varchar                │                   varchar                   │     varchar      │          varchar           │  varchar  │     varchar     │  varchar   │    varchar     │    varchar     │     varchar     │     varchar     │
-    ├──────────────────────────────────────┼─────────────────────────────────────────────┼──────────────────┼────────────────────────────┼───────────┼─────────────────┼────────────┼────────────────┼────────────────┼─────────────────┼─────────────────┤
-    │ b121f45a-221e-481d-addb-eaed52e116f9 │ ST_TypBestrahlungApplikationsartPerkutan    │ B                │ NULL                       │ NULL      │ NULL            │ NULL       │ NULL           │ NULL           │ 313             │ NULL            │
-    │ 4cd066be-9355-4067-80a4-b55ab03e6677 │ ST_TypBestrahlungApplikationsartPerkutan    │ U                │ NULL                       │ NULL      │ NULL            │ NULL       │ NULL           │ NULL           │ 541             │ NULL            │
-    │ 9e2ea731-0140-4f35-915c-1bbde7664f0b │ ST_TypBestrahlungApplikationsartPerkutan    │ U                │ NULL                       │ NULL      │ NULL            │ RCN        │ NULL           │ NULL           │ 67              │ NULL            │
-    │ 041d9288-6c70-4f53-aa48-8bec77316bbf │ ST_TypBestrahlungApplikationsartPerkutan    │ U                │ NULL                       │ NULL      │ NULL            │ RCN        │ NULL           │ NULL           │ 65              │ NULL            │
-    │ 8ab778d9-7244-42a0-b0db-1cc275b19222 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 81              │ NULL            │
-    │ b185569c-7972-4635-b49a-e1f96b01e1a9 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 81              │ NULL            │
-    │ 3d0960de-30b5-4188-bd0b-b28806e6d2d4 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 81              │ NULL            │
-    │ d9404472-f9e3-47c4-90b9-5395a53929fc │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
-    │ 8a6aa060-d578-487c-9979-76aaaf1a868a │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
-    │ 43a1aff7-5898-4da1-a20c-ae1e2ea44f97 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
-    │ b33226f3-b6cd-4d96-86da-f8028c0e14b5 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
-    │ 570b5f4d-0ec2-4cc9-aaf4-e2097dda9456 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
-    │ e024423c-d480-49b9-aea3-b1327299a6c1 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
-    │ db6c9dbf-06d1-4276-b9eb-24b74b0b2378 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
-    │ 995fc348-feee-482a-8891-ef71651fb6fe │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
-    ├──────────────────────────────────────┴─────────────────────────────────────────────┴──────────────────┴────────────────────────────┴───────────┴─────────────────┴────────────┴────────────────┴────────────────┴─────────────────┴─────────────────┤
-    │ 15 rows                                                                                                                                                                                                                                  11 columns │
-    └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+    ┌──────────────────────┬──────────────────────┬───┬────────────────┬─────────────────┬─────────────────┐
+    │    BestrahlungId     │ TypeOfST_TypBestra…  │ … │ Atemgetriggert │ CodeVersion2014 │ CodeVersion2021 │
+    │       varchar        │       varchar        │   │    varchar     │     varchar     │     varchar     │
+    ├──────────────────────┼──────────────────────┼───┼────────────────┼─────────────────┼─────────────────┤
+    │ b121f45a-221e-481d…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 313             │ NULL            │
+    │ 4cd066be-9355-4067…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 541             │ NULL            │
+    │ 9e2ea731-0140-4f35…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 67              │ NULL            │
+    │ 041d9288-6c70-4f53…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 65              │ NULL            │
+    │ 8ab778d9-7244-42a0…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 81              │ NULL            │
+    │ b185569c-7972-4635…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 81              │ NULL            │
+    │ 3d0960de-30b5-4188…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 81              │ NULL            │
+    │ d9404472-f9e3-47c4…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 6               │ NULL            │
+    │ 8a6aa060-d578-487c…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 542             │ NULL            │
+    │ 43a1aff7-5898-4da1…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 542             │ NULL            │
+    │ b33226f3-b6cd-4d96…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 6               │ NULL            │
+    │ 570b5f4d-0ec2-4cc9…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 542             │ NULL            │
+    │ e024423c-d480-49b9…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 6               │ NULL            │
+    │ db6c9dbf-06d1-4276…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 542             │ NULL            │
+    │ 995fc348-feee-482a…  │ ST_TypBestrahlungA…  │ … │ NULL           │ 6               │ NULL            │
+    ├──────────────────────┴──────────────────────┴───┴────────────────┴─────────────────┴─────────────────┤
+    │ 15 rows                                                                         11 columns (5 shown) │
+    └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     syst
 
-```python
-    ┌──────────────────────────────────────┬───────────┬─────────────┬─────────────┬───────────────────────────┬────────────────────────┬───────────────────┬───────────────────────────────┬────────────────────────┬──────────────┐
-    │                SYSTId                │ Intention │ Stellung_OP │ Therapieart │ Anzahl_Tage_Diagnose_SYST │ Anzahl_Tage_SYST_Dauer │ Datum_Beginn_SYST │ Datum_Beginn_SYST_Genauigkeit │ z_period_diag_syst_day │ z_syst_order │
-    │               varchar                │  varchar  │   varchar   │   varchar   │           int32           │         int32          │       date        │            varchar            │         int32          │    int64     │
-    ├──────────────────────────────────────┼───────────┼─────────────┼─────────────┼───────────────────────────┼────────────────────────┼───────────────────┼───────────────────────────────┼────────────────────────┼──────────────┤
-    │ 73aa6922-bc09-4af1-8004-d9c20d3be370 │ S         │ O           │ HO          │                        29 │                      9 │ 2020-06-15        │ T                             │                     29 │            1 │
-    │ e38d4eed-ad2d-4f6f-b032-86af238e02ca │ S         │ O           │ HO          │                        57 │                   NULL │ 2020-07-15        │ T                             │                     57 │            2 │
-    │ 2624813f-392d-4600-9236-a0c09027645e │ S         │ O           │ HO          │                       141 │                    539 │ 2020-09-15        │ T                             │                    141 │            3 │
-    │ df3ac679-6da8-4678-b347-81bef6eac5bc │ P         │ O           │ CH          │                       688 │                    120 │ 2022-03-15        │ T                             │                    688 │            4 │
-    │ 077140e2-e752-4bb9-9143-552229636965 │ P         │ O           │ CH          │                       862 │                   NULL │ 2022-09-15        │ T                             │                    862 │            5 │
-    │ 102bf12e-be20-47de-9833-9c3840540609 │ P         │ O           │ HO          │                       869 │                    291 │ 2022-09-15        │ T                             │                    869 │            6 │
-    │ d2717912-2fa2-4eb8-84e2-34f87a1f38d3 │ P         │ O           │ SO          │                      1045 │                   NULL │ 2023-03-15        │ T                             │                   1045 │            7 │
-    │ 102c8567-ec63-4ac7-9cf0-1f9e2bb63996 │ P         │ O           │ IM          │                      1073 │                   NULL │ 2023-04-15        │ T                             │                   1073 │            8 │
-    └──────────────────────────────────────┴───────────┴─────────────┴─────────────┴───────────────────────────┴────────────────────────┴───────────────────┴───────────────────────────────┴────────────────────────┴──────────────┘
+```
+    ┌──────────────────────┬───────────┬─────────────┬───┬──────────────────────┬──────────────────────┬──────────────┐
+    │        SYSTId        │ Intention │ Stellung_OP │ … │ Datum_Beginn_SYST_…  │ z_period_diag_syst…  │ z_syst_order │
+    │       varchar        │  varchar  │   varchar   │   │       varchar        │        int32         │    int64     │
+    ├──────────────────────┼───────────┼─────────────┼───┼──────────────────────┼──────────────────────┼──────────────┤
+    │ 73aa6922-bc09-4af1…  │ S         │ O           │ … │ T                    │                   29 │            1 │
+    │ e38d4eed-ad2d-4f6f…  │ S         │ O           │ … │ T                    │                   57 │            2 │
+    │ 2624813f-392d-4600…  │ S         │ O           │ … │ T                    │                  141 │            3 │
+    │ df3ac679-6da8-4678…  │ P         │ O           │ … │ T                    │                  688 │            4 │
+    │ 077140e2-e752-4bb9…  │ P         │ O           │ … │ T                    │                  862 │            5 │
+    │ 102bf12e-be20-47de…  │ P         │ O           │ … │ T                    │                  869 │            6 │
+    │ d2717912-2fa2-4eb8…  │ P         │ O           │ … │ T                    │                 1045 │            7 │
+    │ 102c8567-ec63-4ac7…  │ P         │ O           │ … │ T                    │                 1073 │            8 │
+    ├──────────────────────┴───────────┴─────────────┴───┴──────────────────────┴──────────────────────┴──────────────┤
+    │ 8 rows                                                                                     10 columns (6 shown) │
+    └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     subst
 
-```python
-    ┌──────────────────────────────────────┬────────────────────────┬──────────────────────────┬─────────────────────────────┬───────────────┬──────────────────────────────────────┬─────────────────────────────┬──────────────────────────────┐
-    │              SubstanzId              │ TypeOfSYST_TypSubstanz │ SYST_TypSubstanzATC_Code │ SYST_TypSubstanzATC_Version │  Bezeichnung  │                SYSTId                │ z_substance_prediction_name │ z_substance_prediction_score │
-    │               varchar                │        varchar         │         varchar          │           varchar           │    varchar    │               varchar                │           varchar           │            double            │
-    ├──────────────────────────────────────┼────────────────────────┼──────────────────────────┼─────────────────────────────┼───────────────┼──────────────────────────────────────┼─────────────────────────────┼──────────────────────────────┤
-    │ 2f5803c7-df95-4f64-8c58-4e33914db7db │ Bezeichnung            │ NULL                     │ NULL                        │ Docetaxel     │ df3ac679-6da8-4678-b347-81bef6eac5bc │ Docetaxel                   │                          1.0 │
-    │ 7c3b7991-ada9-4f92-8ced-2ca789307cc2 │ Bezeichnung            │ NULL                     │ NULL                        │ Cabazitaxel   │ 077140e2-e752-4bb9-9143-552229636965 │ Cabazitaxel                 │                          1.0 │
-    │ f802f4ba-562e-4053-8f6a-f7105e41566e │ Bezeichnung            │ NULL                     │ NULL                        │ Enzalutamid   │ 102bf12e-be20-47de-9833-9c3840540609 │ Enzalutamid                 │                          1.0 │
-    │ 478a99ec-4942-47da-b609-785ca6557171 │ Bezeichnung            │ NULL                     │ NULL                        │ Zoledronsäure │ d2717912-2fa2-4eb8-84e2-34f87a1f38d3 │ Zoledronsäure               │                          1.0 │
-    │ 6e49d638-8b4d-4c7c-82e4-ce4a9e648f75 │ Bezeichnung            │ NULL                     │ NULL                        │ Denosumab     │ 102c8567-ec63-4ac7-9cf0-1f9e2bb63996 │ Denosumab                   │                          1.0 │
-    └──────────────────────────────────────┴────────────────────────┴──────────────────────────┴─────────────────────────────┴───────────────┴──────────────────────────────────────┴─────────────────────────────┴──────────────────────────────┘
+```
+    ┌──────────────────────┬──────────────────────┬──────────────────────┬───┬──────────────────────┬──────────────────────┐
+    │      SubstanzId      │ TypeOfSYST_TypSubs…  │ SYST_TypSubstanzAT…  │ … │ z_substance_predic…  │ z_substance_predic…  │
+    │       varchar        │       varchar        │       varchar        │   │       varchar        │        double        │
+    ├──────────────────────┼──────────────────────┼──────────────────────┼───┼──────────────────────┼──────────────────────┤
+    │ 2f5803c7-df95-4f64…  │ Bezeichnung          │ NULL                 │ … │ Docetaxel            │                  1.0 │
+    │ 7c3b7991-ada9-4f92…  │ Bezeichnung          │ NULL                 │ … │ Cabazitaxel          │                  1.0 │
+    │ f802f4ba-562e-4053…  │ Bezeichnung          │ NULL                 │ … │ Enzalutamid          │                  1.0 │
+    │ 478a99ec-4942-47da…  │ Bezeichnung          │ NULL                 │ … │ Zoledronsäure        │                  1.0 │
+    │ 6e49d638-8b4d-4c7c…  │ Bezeichnung          │ NULL                 │ … │ Denosumab            │                  1.0 │
+    ├──────────────────────┴──────────────────────┴──────────────────────┴───┴──────────────────────┴──────────────────────┤
+    │ 5 rows                                                                                           8 columns (5 shown) │
+    └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     prot
 
-```python
-    ┌──────────────────────────────────────┬─────────────────────┬──────────────────────────┬───────────────────────────────────────┬──────────────────────────────────────────┐
-    │                SYSTId                │ TypeOfProtokoll_Typ │       Bezeichnung        │ Protokoll_TypProtokollschluessel_Code │ Protokoll_TypProtokollschluessel_Version │
-    │               varchar                │       varchar       │         varchar          │                varchar                │                 varchar                  │
-    ├──────────────────────────────────────┼─────────────────────┼──────────────────────────┼───────────────────────────────────────┼──────────────────────────────────────────┤
-    │ 73aa6922-bc09-4af1-8004-d9c20d3be370 │ Bezeichnung         │ Bicalutamidflareup       │ NULL                                  │ NULL                                     │
-    │ e38d4eed-ad2d-4f6f-b032-86af238e02ca │ Bezeichnung         │ Leuprorelin->fortlaufend │ NULL                                  │ NULL                                     │
-    │ 2624813f-392d-4600-9236-a0c09027645e │ Bezeichnung         │ Abirateron+Prednisolon   │ NULL                                  │ NULL                                     │
-    │ df3ac679-6da8-4678-b347-81bef6eac5bc │ Bezeichnung         │ Docetaxel                │ NULL                                  │ NULL                                     │
-    │ 077140e2-e752-4bb9-9143-552229636965 │ Bezeichnung         │ Cabazitaxelfortl.        │ NULL                                  │ NULL                                     │
-    │ 102bf12e-be20-47de-9833-9c3840540609 │ Bezeichnung         │ Enzalutamidfortl.        │ NULL                                  │ NULL                                     │
-    │ d2717912-2fa2-4eb8-84e2-34f87a1f38d3 │ Bezeichnung         │ Zoledronsäurefortl.      │ NULL                                  │ NULL                                     │
-    │ 102c8567-ec63-4ac7-9cf0-1f9e2bb63996 │ Bezeichnung         │ Denosumabfortl.          │ NULL                                  │ NULL                                     │
-    └──────────────────────────────────────┴─────────────────────┴──────────────────────────┴───────────────────────────────────────┴──────────────────────────────────────────┘
+```
+    ┌──────────────────────┬─────────────────────┬──────────────────────┬──────────────────────┬───────────────────────────┐
+    │        SYSTId        │ TypeOfProtokoll_Typ │     Bezeichnung      │ Protokoll_TypProto…  │ Protokoll_TypProtokolls…  │
+    │       varchar        │       varchar       │       varchar        │       varchar        │          varchar          │
+    ├──────────────────────┼─────────────────────┼──────────────────────┼──────────────────────┼───────────────────────────┤
+    │ 73aa6922-bc09-4af1…  │ Bezeichnung         │ Bicalutamidflareup   │ NULL                 │ NULL                      │
+    │ e38d4eed-ad2d-4f6f…  │ Bezeichnung         │ Leuprorelin->fortl…  │ NULL                 │ NULL                      │
+    │ 2624813f-392d-4600…  │ Bezeichnung         │ Abirateron+Prednis…  │ NULL                 │ NULL                      │
+    │ df3ac679-6da8-4678…  │ Bezeichnung         │ Docetaxel            │ NULL                 │ NULL                      │
+    │ 077140e2-e752-4bb9…  │ Bezeichnung         │ Cabazitaxelfortl.    │ NULL                 │ NULL                      │
+    │ 102bf12e-be20-47de…  │ Bezeichnung         │ Enzalutamidfortl.    │ NULL                 │ NULL                      │
+    │ d2717912-2fa2-4eb8…  │ Bezeichnung         │ Zoledronsäurefortl.  │ NULL                 │ NULL                      │
+    │ 102c8567-ec63-4ac7…  │ Bezeichnung         │ Denosumabfortl.      │ NULL                 │ NULL                      │
+    └──────────────────────┴─────────────────────┴──────────────────────┴──────────────────────┴───────────────────────────┘
 ```
 
     fo
 
-```python
-    ┌──────────────────────────────────────┬───────────────────────────────┬─────────────────────────────┬─────────────────────────────────┬────────────────────────────────────┬─────────────────────┬─────────────────────────────────┬────────────┬──────────────────────┐
-    │           FolgeereignisId            │ Gesamtbeurteilung_Tumorstatus │ Verlauf_Lokaler_Tumorstatus │ Verlauf_Tumorstatus_Lymphknoten │ Verlauf_Tumorstatus_Fernmetastasen │ Datum_Folgeereignis │ Datum_Folgeereignis_Genauigkeit │ z_fo_order │ z_period_diag_fo_day │
-    │               varchar                │            varchar            │           varchar           │             varchar             │              varchar               │        date         │             varchar             │   int64    │        int32         │
-    ├──────────────────────────────────────┼───────────────────────────────┼─────────────────────────────┼─────────────────────────────────┼────────────────────────────────────┼─────────────────────┼─────────────────────────────────┼────────────┼──────────────────────┤
-    │ 00f3ce83-391f-4c4a-891d-de01c969d5ef │ K                             │ N                           │ K                               │ N                                  │ 2020-09-15          │ T                               │          1 │                  123 │
-    │ 98f85314-5e08-4447-aab1-0000f4d5313b │ K                             │ N                           │ K                               │ T                                  │ 2020-12-15          │ T                               │          2 │                  214 │
-    │ 28b5a28c-32b9-4b2d-913e-89c4185c0406 │ K                             │ N                           │ K                               │ T                                  │ 2021-11-15          │ T                               │          3 │                  549 │
-    │ 38ce200a-9dbe-4d52-a747-f7b8441e98cb │ P                             │ P                           │ F                               │ P                                  │ 2022-02-15          │ T                               │          4 │                  641 │
-    │ f9784935-338a-4099-b5d5-efc66265f621 │ P                             │ T                           │ F                               │ P                                  │ 2022-10-15          │ T                               │          5 │                  883 │
-    │ d0b9b58a-485e-4053-a168-95eab8c78552 │ P                             │ T                           │ K                               │ P                                  │ 2023-01-15          │ T                               │          6 │                  975 │
-    │ f2a1bcd8-691f-4ec6-8466-40d144db1d8b │ P                             │ P                           │ K                               │ N                                  │ 2023-07-15          │ T                               │          7 │                 1156 │
-    └──────────────────────────────────────┴───────────────────────────────┴─────────────────────────────┴─────────────────────────────────┴────────────────────────────────────┴─────────────────────┴─────────────────────────────────┴────────────┴──────────────────────┘
+```
+    ┌──────────────────────┬──────────────────────┬───┬──────────────────────┬────────────┬──────────────────────┐
+    │   FolgeereignisId    │ Gesamtbeurteilung_…  │ … │ Datum_Folgeereigni…  │ z_fo_order │ z_period_diag_fo_day │
+    │       varchar        │       varchar        │   │       varchar        │   int64    │        int32         │
+    ├──────────────────────┼──────────────────────┼───┼──────────────────────┼────────────┼──────────────────────┤
+    │ 00f3ce83-391f-4c4a…  │ K                    │ … │ T                    │          1 │                  123 │
+    │ 98f85314-5e08-4447…  │ K                    │ … │ T                    │          2 │                  214 │
+    │ 28b5a28c-32b9-4b2d…  │ K                    │ … │ T                    │          3 │                  549 │
+    │ 38ce200a-9dbe-4d52…  │ P                    │ … │ T                    │          4 │                  641 │
+    │ f9784935-338a-4099…  │ P                    │ … │ T                    │          5 │                  883 │
+    │ d0b9b58a-485e-4053…  │ P                    │ … │ T                    │          6 │                  975 │
+    │ f2a1bcd8-691f-4ec6…  │ P                    │ … │ T                    │          7 │                 1156 │
+    ├──────────────────────┴──────────────────────┴───┴──────────────────────┴────────────┴──────────────────────┤
+    │ 7 rows                                                                                 9 columns (5 shown) │
+    └────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     fo_tnm
 
-```python
-    ┌──────────────────────────────────────┬──────────────────────────────────────┬─────────┬──────────┬──────────┬──────────┬─────────────────┬─────────┬──────────────┬─────────────────┬─────────┬─────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬──────────────┐
-    │                TNMId                 │           FolgeereignisId            │ Version │ y_Symbol │ r_Symbol │ a_Symbol │ c_p_u_Praefix_T │    T    │ TNM_m_Symbol │ c_p_u_Praefix_N │    N    │ c_p_u_Praefix_M │    M    │    L    │    V    │   Pn    │    S    │ UICC_Stadium │
-    │               varchar                │               varchar                │ varchar │ varchar  │ varchar  │ varchar  │     varchar     │ varchar │   varchar    │     varchar     │ varchar │     varchar     │ varchar │ varchar │ varchar │ varchar │ varchar │   varchar    │
-    ├──────────────────────────────────────┼──────────────────────────────────────┼─────────┼──────────┼──────────┼──────────┼─────────────────┼─────────┼──────────────┼─────────────────┼─────────┼─────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────────────┤
-    │ 00f3ce83-391f-4c4a-891d-de01c969d5ef │ 00f3ce83-391f-4c4a-891d-de01c969d5ef │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    │ 98f85314-5e08-4447-aab1-0000f4d5313b │ 98f85314-5e08-4447-aab1-0000f4d5313b │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    │ 28b5a28c-32b9-4b2d-913e-89c4185c0406 │ 28b5a28c-32b9-4b2d-913e-89c4185c0406 │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    │ 38ce200a-9dbe-4d52-a747-f7b8441e98cb │ 38ce200a-9dbe-4d52-a747-f7b8441e98cb │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    │ f9784935-338a-4099-b5d5-efc66265f621 │ f9784935-338a-4099-b5d5-efc66265f621 │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    │ d0b9b58a-485e-4053-a168-95eab8c78552 │ d0b9b58a-485e-4053-a168-95eab8c78552 │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    │ f2a1bcd8-691f-4ec6-8466-40d144db1d8b │ f2a1bcd8-691f-4ec6-8466-40d144db1d8b │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
-    └──────────────────────────────────────┴──────────────────────────────────────┴─────────┴──────────┴──────────┴──────────┴─────────────────┴─────────┴──────────────┴─────────────────┴─────────┴─────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────────┘
+```
+    ┌──────────────────────┬──────────────────────┬─────────┬──────────┬───┬─────────┬─────────┬─────────┬──────────────┐
+    │        TNMId         │   FolgeereignisId    │ Version │ y_Symbol │ … │    V    │   Pn    │    S    │ UICC_Stadium │
+    │       varchar        │       varchar        │ varchar │ varchar  │   │ varchar │ varchar │ varchar │   varchar    │
+    ├──────────────────────┼──────────────────────┼─────────┼──────────┼───┼─────────┼─────────┼─────────┼──────────────┤
+    │ 00f3ce83-391f-4c4a…  │ 00f3ce83-391f-4c4a…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ 98f85314-5e08-4447…  │ 98f85314-5e08-4447…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ 28b5a28c-32b9-4b2d…  │ 28b5a28c-32b9-4b2d…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ 38ce200a-9dbe-4d52…  │ 38ce200a-9dbe-4d52…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ f9784935-338a-4099…  │ f9784935-338a-4099…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ d0b9b58a-485e-4053…  │ d0b9b58a-485e-4053…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ f2a1bcd8-691f-4ec6…  │ f2a1bcd8-691f-4ec6…  │ NULL    │ NULL     │ … │ NULL    │ NULL    │ NULL    │ NULL         │
+    ├──────────────────────┴──────────────────────┴─────────┴──────────┴───┴─────────┴─────────┴─────────┴──────────────┤
+    │ 7 rows                                                                                       18 columns (8 shown) │
+    └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
     fo_fm
 
-```python
+```
     ┌─────────────────┬─────────────────┬──────────────┐
     │ FolgeereignisId │ FernmetastaseId │ Lokalisation │
     │     varchar     │     varchar     │   varchar    │
@@ -1148,7 +1252,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     fo_weitere
 
-```python
+```
     ┌─────────────────────────┬─────────┬─────────┬─────────────────┐
     │ WeitereKlassifikationId │  Name   │ Stadium │ FolgeereignisId │
     │         varchar         │ varchar │ varchar │     varchar     │
@@ -1159,7 +1263,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     diag_fm
 
-```python
+```
     ┌──────────────────────────────────────┬──────────────┐
     │           FernmetastaseId            │ Lokalisation │
     │               varchar                │   varchar    │
@@ -1170,13 +1274,15 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
     diag_weitere
 
-```python
+```
     ┌─────────────────────────┬─────────┬─────────┐
     │ WeitereKlassifikationId │  Name   │ Stadium │
     │         varchar         │ varchar │ varchar │
     ├─────────────────────────┴─────────┴─────────┤
     │                   0 rows                    │
     └─────────────────────────────────────────────┘
+```
+
 ```
 
     ['total', 'distance']
