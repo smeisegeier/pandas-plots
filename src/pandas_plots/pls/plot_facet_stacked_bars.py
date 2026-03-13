@@ -156,7 +156,7 @@ def plot_facet_stacked_bars(
     elif title:
         title_str = f"{title}, {title_str_n}"
     else:
-        title_str = f"{caption}, {'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] {'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] {'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}], {title_str_n}"
+        title_str = f"{set_caption(caption)} {'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] {'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] {'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}], {title_str_n}"
 
     fig = px.bar(
         aggregated_df,

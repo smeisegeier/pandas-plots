@@ -21,7 +21,7 @@ def plot_bars(
     normalize: bool = True,
     height: int = 600,
     width: int = 1600,
-    title: str = None,
+    title: str = "",
     use_ci: bool = False,
     ci_agg: Literal["mean", "median"] = "mean",
     precision: int = 0,
