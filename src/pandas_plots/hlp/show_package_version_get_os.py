@@ -15,7 +15,7 @@ def show_package_version(
     Display the versions of the specified packages.
 
     Parameters:
-        packages (list[str], optional): A list of package names. Defaults to ["pandas","numpy","duckdb","pandas-plots", "connection_helper"].
+        packages (list[str], optional): A list of package names.
         sep (str, optional): The separator to use when joining the package names and versions. Defaults to " | ".
         include_demo_packages: If True, inlude all demo packages
 
@@ -34,7 +34,7 @@ def show_package_version(
         "numpy",
         "duckdb",
         "pandas-plots",
-        "connection-helper",
+        # "connection-helper",
     ]
     items = []
     items.append(f"🐍 {python_version()}")

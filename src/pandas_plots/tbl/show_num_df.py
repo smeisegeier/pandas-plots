@@ -5,6 +5,7 @@ import os
 from collections import abc
 from pathlib import Path
 from typing import Literal, Optional, get_args
+
 from ..hlp.group_kkr import group_kkr
 
 import numpy as np
@@ -44,10 +45,15 @@ def show_num_df(
 ):
     """
     A function to display a DataFrame with various options for styling and formatting, including the ability to show totals, apply data bar coloring, and control the display precision.
+
+    if unset, `font_size_th`, `font_size_td` are filled up by ENV variables in `setup_rendering`.  
+    **⚠️ this is currently not active.**
+
+    increasing `font_size_th` and `font_size_td` will also increase tables image size and visual sharpness.  
+    too large tables will be cut off by the chromium engine, so stick to values around 12/11  
+    `image_scale` is best declared as a percentage of the viewports width, e.g. "60%" (100% seems not to work)  
     
-    `font_size_th` and `font_size_td` are overwritten by ENV variables in `setup_rendering` (⚠️ currently not active).
-    
-    Parameters:
+    Args:
     - df: the DataFrame to display
     - total_mode: a Literal indicating the mode for aggregating totals ["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
     - total_axis (Literal["x", "y", "xy", None], optional): The axis for displaying totals. Defaults to "xy".
@@ -74,8 +80,9 @@ def show_num_df(
     - png_path: a string or Path indicating the path to save the PNG file
     - png_conversion: a Literal indicating the conversion method for the PNG file ["chrome", "selenium"]
     - kkr_col: a string indicating the column name for KKR grouping
-    - image_scale: a string indicating the scale of the image width for markdown. eg "800" or "60%"
+    - image_scale: a string indicating the scale of the image width for markdown. eg "800" or "60%" (->60% of viewport)
 
+    Returns:
     The function returns a styled representation of the DataFrame.
     """
     # * ensure arguments match parameter definition
@@ -288,7 +295,7 @@ def show_num_df(
     # * apply formatter
     # debug(formatter)
     out.format(formatter=formatter)
-
+    
     # * apply fonts for cells
     if alter_font:
         out.set_properties(**{"font-family": "Courier"})
@@ -303,19 +310,19 @@ def show_num_df(
         ("text-align", "right")
     ]
 
-    # * set font sizes from env
-    # env_th = int(os.getenv("FONT_SIZE_TH",0))
-    # env_td = int(os.getenv("FONT_SIZE_TD",0))
-    # font_size_th = env_th if env_th > 0 else font_size_th
-    # font_size_td = env_td if env_td > 0 else font_size_td
-
-    # font_size_th = int(os.getenv("FONT_SIZE_TH",font_size_th))
-    # font_size_td = int(os.getenv("FONT_SIZE_TD",font_size_td))
+    # * set font sizes: 1) from args, 2) from env vars
+    env_th = int(os.getenv("FONT_SIZE_TH",0))
+    env_td = int(os.getenv("FONT_SIZE_TD",0))
+    
+    _th = font_size_th if font_size_th > 0 else env_th
+    _td = font_size_td if font_size_td > 0 else env_td
+    
+    # print(_th, _td)
     
     if font_size_th > 0:
-        _props_th.append(("font-size", f"{font_size_th}pt"))
+        _props_th.append(("font-size", f"{_th}pt"))
     if font_size_td > 0:
-        _props_td.append(("font-size", f"{font_size_td}pt"))
+        _props_td.append(("font-size", f"{_td}pt"))
     
     out.set_table_styles(
         [
@@ -344,7 +351,6 @@ def show_num_df(
         # * 72dpi default is too low for high res displays
         dfi.export(obj=out, filename=png_path, dpi=150, table_conversion=png_conversion)
     
-    # * set image scale as comment for markdown renderer
     if image_scale:
         display(Markdown(f"<!-- SCALE-{image_scale} -->"))
     
