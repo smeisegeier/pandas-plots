@@ -4,7 +4,6 @@ Public constants for pandas-plots.
 This module contains all public constants including color palettes.
 """
 
-# Color palettes
 PALETTE_RKI1 = [
     "#005db9",
     "#8cabe2",
@@ -43,8 +42,9 @@ PALETTE_VIBRANT = [
 ]
 
 # PALETTE_SANKEY_START = ["#808080"]  # Gray
-
-PALETTE_NA = ["#D0D0D0"]
+COLOR_NA = ["#D0D0D0"]
+COLOR_BLUE_LIGHT = ["#8cabe2"]
+COLOR_BLUE_DARK = ["#005db9"]
 
 # Other constants
 OTHER_LABEL = "(other)"

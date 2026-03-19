@@ -21,7 +21,7 @@ def plot_bars(
     orientation: Literal["h", "v"] = "v",
     sort_values: bool = False,
     normalize: bool = True,
-    color_palette: str | list[str] = const.PALETTE_RKI1,
+    color_palette: str | list[str] = None,
     null_label: str = "(NA)",
     height: int = 600,
     width: int = 1600,
@@ -99,6 +99,8 @@ def plot_bars(
 
     col_index = df_in.columns[0]
     col_name = df_in.columns[1]
+
+    color_palette = const.COLOR_BLUE_LIGHT if os.getenv("THEME") == "dark" else const.COLOR_BLUE_DARK
 
     # * ensure df is grouped to prevent false aggregations, reset index to return df
     if use_ci:

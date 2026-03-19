@@ -23,7 +23,7 @@ def plot_sankey(
     palette_link="Pastel",
     # palette_link=const.PALETTE_SANKEY_LINK,
     palette_start=["#808080"],
-    palette_na=const.PALETTE_NA,
+    palette_na=const.COLOR_NA,
 ):
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
@@ -343,7 +343,7 @@ def plot_sankey(
     if palette_start is None:
         palette_start = const.PALETTE_SANKEY_START
     if palette_na is None:
-        palette_na = const.PALETTE_NA
+        palette_na = const.COLOR_NA
 
     # Get unique link types for color assignment
     link_types = []

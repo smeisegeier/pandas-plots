@@ -6,6 +6,7 @@ from collections import abc
 from pathlib import Path
 from typing import Literal, Optional, get_args
 
+from pandas_plots import const
 from ..helper import group_kkr
 
 import numpy as np
@@ -165,12 +166,13 @@ def show_num_df(
     # * derive style
     out = df_.style
 
-    color_highlight = "lightblue" if theme == "light" else "#666666"
+    color_highlight = "#d9e3f6" if theme == "light" else "#666666"
+    # color_highlight = "#b3c8ec" if theme == "light" else "#666666"
     color_zeros = "#A9A9A9" if theme == "light" else "#888888"
     color_pct = "grey" if theme == "light" else "yellow"
-    color_values = "black" if theme == "light" else "white"
     color_minus = "red" if theme == "light" else "red"
     cmap_heat = "Blues" if theme == "light" else "copper"
+    # color_values = "black" if theme == "light" else "white"
 
     # * apply data bar coloring
     if data_bar_axis:
