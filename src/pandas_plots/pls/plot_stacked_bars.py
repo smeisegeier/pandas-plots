@@ -4,11 +4,15 @@ from typing import Literal, Optional
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
-# from ..hlp import *
-from ..helper import set_caption, assign_column_colors, aggregate_data
-from ..hlp.group_kkr import group_kkr
+from pandas_plots import const
+
+from ..helper import (
+    aggregate_data,
+    assign_column_colors,
+    group_kkr,
+    set_caption,
+)
 
 
 def plot_stacked_bars(
@@ -25,21 +29,20 @@ def plot_stacked_bars(
     title: str = None,
     renderer: Literal["png", "svg", None] = None,
     caption: str = "",  # * dont use None, f-string will print this as 'None'
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     sort_values: bool = False,
     sort_values_index: bool = False,
     sort_values_color: bool = False,
     show_total: bool = False,
     precision: int = 0,
     png_path: Path | str = None,
-    color_palette: str = "Plotly",
+    color_palette: str | list[str] = const.PALETTE_RKI1,
     null_label: str = "(NA)",
     show_other: bool = False,
     show_pct_all: bool = False,
     show_pct_bar: bool = False,
     kkr_col: Optional[str] = None,
     first_col_grey: bool = False,
-    
 ) -> None:
     """
     Generates a stacked bar plot using the provided DataFrame.
@@ -50,7 +53,7 @@ def plot_stacked_bars(
     - top_n_color (int): Limit the number of categories displayed in the color legend.
     - dropna (bool): If True, removes rows with missing values; otherwise, replaces them with `null_label`.
     - swap (bool): If True, swaps the first two columns.
-    - normalize (bool): (DEPR) If True, normalizes numerical values between 0 and 1.
+    - normalize (bool): ⚠️ DEPRECATED
     - relative (bool): If True, normalizes the bars to a percentage scale.
     - orientation (Literal["h", "v"]): Defines the orientation of the bars ("v" for vertical, "h" for horizontal).
     - height (int): Height of the plot.
@@ -58,13 +61,12 @@ def plot_stacked_bars(
     - title (str): Custom title for the plot.
     - renderer (Literal["png", "svg", None]): Defines the output format.
     - caption (str): Optional caption for additional context.
-    - sort_values (bool): (parent option is DEPR)
-        - If True, sorts bars by the sum of their values (descending).
-        - If False, sorts bars alphabetically.
+    - caption_only_n (bool): If True, shows only the count (n) in the title, ignoring the caption.
+    - sort_values (bool): ⚠️ DEPRECATED
     - show_total (bool): If True, adds a row with the total sum of all categories.
     - precision (int): Number of decimal places for numerical values.
     - png_path (Path | str): If specified, saves the plot as a PNG file.
-    - color_palette (str): Name of the color palette to use.
+    - color_palette (str | list[str]): Name of the color palette to use, or a list of color codes. Example 🎨 names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
     - null_label (str): Label for null values.
     - show_other (bool): If True, shows the "Other" category in the legend.
     - sort_values_index (bool): If True, sorts the index categories by group sum
@@ -142,7 +144,6 @@ def plot_stacked_bars(
     _title_str_top_index = f"TOP{top_n_index} " if top_n_index > 0 else ""
     _title_str_top_color = f"TOP{top_n_color} " if top_n_color > 0 else ""
     _title_str_null = ", NULL excluded" if dropna else ""
-    
 
     if caption_only_n:
         _title_str = f"n={n:_}"
@@ -171,7 +172,6 @@ def plot_stacked_bars(
     # * calculate bar totals
     bar_totals = df.groupby("index")["value"].transform("sum")
 
-
     # * after grouping add cols for pct and formatting
     df["cnt_pct_all_only"] = (df["value"] / n * 100).apply(lambda x: f"{(x):.{precision}f}%")
     df["cnt_pct_bar_only"] = (df["value"] / bar_totals * 100).apply(lambda x: f"{(x):.{precision}f}%")
@@ -183,15 +183,19 @@ def plot_stacked_bars(
 
     # Modify this section
     df["cnt_pct_all_str"] = df.apply(
-        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_all_only']})"
-        if (row["value"] / n * 100) >= 5
-        else row["cnt_str"],
+        lambda row: (
+            f"{row['cnt_str']}{divider2}({row['cnt_pct_all_only']})"
+            if (row["value"] / n * 100) >= 5
+            else row["cnt_str"]
+        ),
         axis=1,
     )
     df["cnt_pct_bar_str"] = df.apply(
-        lambda row: f"{row['cnt_str']}{divider2}({row['cnt_pct_bar_only']})"
-        if (row["value"] / bar_totals.loc[row.name] * 100) >= 5
-        else row["cnt_str"],
+        lambda row: (
+            f"{row['cnt_str']}{divider2}({row['cnt_pct_bar_only']})"
+            if (row["value"] / bar_totals.loc[row.name] * 100) >= 5
+            else row["cnt_str"]
+        ),
         axis=1,
     )
 
@@ -241,7 +245,9 @@ def plot_stacked_bars(
     # display(df)
 
     # * get longest bar
-    bar_max = df.groupby("index", observed=True)["value"].sum().sort_values(ascending=False).iloc[0] * BAR_LENGTH_MULTIPLIER
+    bar_max = (
+        df.groupby("index", observed=True)["value"].sum().sort_values(ascending=False).iloc[0] * BAR_LENGTH_MULTIPLIER
+    )
     # * ignore if bar mode is on
     if not relative:
         if orientation == "v":

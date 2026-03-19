@@ -6,8 +6,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..hlp import *
-from ..helper import set_caption, aggregate_data, assign_column_colors
+from pandas_plots import const
+
+# from ..hlp import *
+from ..helper import aggregate_data, assign_column_colors, set_caption
 
 
 def plot_facet_stacked_bars(
@@ -17,10 +19,11 @@ def plot_facet_stacked_bars(
     top_n_color: int = 0,
     top_n_facet: int = 0,
     null_label: str = "(NA)",
+    first_col_grey=False,
     subplot_size: int = 300,
-    color_palette: str = "Plotly",
+    color_palette: str | list[str] = const.PALETTE_RKI1,
     caption: str = "",
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     title: str = "",
     renderer: Optional[Literal["png", "svg", None]] = "png",
     annotations: bool = False,
@@ -44,8 +47,12 @@ def plot_facet_stacked_bars(
     - top_n_color (int): The number of top colors to include in the chart. Default is 0, which includes all colors.
     - top_n_facet (int): The number of top facets to include in the chart. Default is 0, which includes all facets.
     - null_label (str): The label to use for null values. Default is "<NA>".
+    - first_col_grey (bool): Whether to use a grey color for the first column. Default is False.
     - subplot_size (int): The size of each subplot in pixels. Default is 300.
-    - color_palette (str): The name of the color palette to use. Default is "Plotly".
+    - color_palette (str | list[str]): Name of the color palette to use, or a list of colors.
+        - Default: `const.PALETTE_RKI1`
+        - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+        - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
     - caption (str): An optional string indicating the caption for the chart.
     - caption_only_n (bool): An optional boolean indicating whether to show only the number of observations in the caption.
     - title (str): The title of the chart.
@@ -54,7 +61,7 @@ def plot_facet_stacked_bars(
     - precision (int): The number of decimal places to round the values to. Default is 0.
     - png_path (str): The path to save the chart to, if provided.
     - show_other (bool): Whether to include "<other>" for columns not in top_n_color. Default is False.
-    - sort_values (bool): Whether to sort the values in the chart. Default is True.
+    - sort_values (bool): ⚠️ DEPRECATED - has no effect
     - sort_values_index (bool): Whether to sort the index column. Default is False.
     - sort_values_color (bool): Whether to sort the color column. Default is False.
     - sort_values_facet (bool): Whether to sort the facet column. Default is False.
@@ -133,7 +140,7 @@ def plot_facet_stacked_bars(
 
     columns_for_color = sorted(aggregated_df["col"].unique().tolist())
     column_colors_map = assign_column_colors(
-        columns_for_color, color_palette, null_label
+        columns_for_color, color_palette, null_label, first_col_grey=first_col_grey
     )  # Assumes assign_column_colors is accessible
 
     #  Prepare the text series for annotations with 'show_pct' control

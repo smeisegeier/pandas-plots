@@ -5,9 +5,10 @@ from typing import Literal
 import pandas as pd
 import plotly.express as px
 
+from ..helper import set_caption
 from ..hlp import *
 from ..tbl import print_summary
-from ..helper import set_caption
+
 
 def plot_histogram(
     df_ser: pd.DataFrame | pd.Series,
@@ -47,7 +48,7 @@ def plot_histogram(
         caption (str): The caption for the plot. Default is None.
         title (str): The title of the plot. Default is None.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
-        print_summary (bool): Whether to print a summary table of the data. Default is False.
+        summary (bool): Whether to print a summary table of the data. Default is False.
 
 
     Returns: None

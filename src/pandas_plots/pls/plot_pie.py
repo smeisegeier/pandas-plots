@@ -29,6 +29,7 @@ def plot_pie(
         width (int, optional): The width of the plot in pixels.
         donut_size (float, optional): A value between 0 and 1 to create a donut chart.
             A value of 0 results in a regular pie chart. Defaults to 0.
+        precision (int, optional): The number of decimal places for percentage labels. Default is 1.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
     """
 

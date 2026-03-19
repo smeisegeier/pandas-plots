@@ -1,5 +1,5 @@
-from math import e
 import os
+from math import e
 from pathlib import Path
 from typing import Literal
 
@@ -7,9 +7,9 @@ import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 
+from ..helper import set_caption
 from ..hlp import *
 from ..tbl import print_summary
-from ..helper import set_caption
 
 
 def plot_box_large(
@@ -21,7 +21,7 @@ def plot_box_large(
     annotations: bool = False,
     summary: bool = True,
     caption: str = None,
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     title: str = None,
     violin: bool = False,
     x_min: float = None,
@@ -47,6 +47,7 @@ def plot_box_large(
                     mean, fences) as text and arrows onto the plot.
         summary: If True, prints a statistical summary table below the plot.
         caption: A custom prefix added to the default plot title.
+        caption_only_n: If True, shows only the count (n) in the title, ignoring the caption.
         title: The specific title to use for the plot (overrides the default generated title).
         violin: If True, generates a violin plot with an inner boxplot; otherwise,
                 generates a standard boxplot.

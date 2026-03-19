@@ -6,15 +6,17 @@ import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 
+from pandas_plots import const
+
+from ..helper import assign_column_colors, set_caption
 from ..hlp import *
 from ..tbl import print_summary
-from ..helper import set_caption
 
 
 def plot_boxes_large(
     df: pd.DataFrame,
     caption: str = None,
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
@@ -25,6 +27,9 @@ def plot_boxes_large(
     use_log: bool = False,
     box_width: float = 0.5,
     png_path: Path | str = None,
+    color_palette: str | list[str] = const.PALETTE_RKI1,
+    null_label: str = "(NA)",
+    first_col_grey: bool = False,
 ) -> None:
     """
     Plots vertical box plots for each unique item in the DataFrame using Seaborn/Matplotlib.
@@ -46,6 +51,12 @@ def plot_boxes_large(
         violin (bool): If True, generates a violin plot instead of a box plot.
         box_width (float): The relative width of the boxes (0 to 1).
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        color_palette (str | list[str]): Name of the color palette to use, or a list of colors.
+            - Default: `const.PALETTE_RKI1`
+            - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+            - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
+        null_label (str): Label for null values.
+        first_col_grey (bool): If True, sets the first category to grey.
 
     Returns: None
     """
@@ -70,6 +81,11 @@ def plot_boxes_large(
     # * Prepare DataFrame for Seaborn
     col_cat, col_num = df.columns[0], df.columns[1]
 
+    # * handle null values FIRST before any type conversion
+    df[col_cat] = df[col_cat].fillna(null_label)
+    # Also replace pd.NA and string "nan" / "<NA>" that may result from conversion
+    df[col_cat] = df[col_cat].replace([pd.NA, "nan", "<NA>"], null_label)
+
     # * type of col0 must be str, not object
     if pd.api.types.is_object_dtype(df.iloc[:, 0]):
         df.loc[:, col_cat] = df[col_cat].astype(str)
@@ -78,7 +94,13 @@ def plot_boxes_large(
     # items = sorted(df[col_cat].unique())
 
     # * Sort by category
-    df=df.sort_values(col_cat)
+    df = df.sort_values(col_cat)
+
+    # * assign colors
+    colors_unique = df[col_cat].unique().tolist()
+    color_map = assign_column_colors(colors_unique, color_palette, null_label, first_col_grey)
+    # convert dict to list in the order of colors_unique
+    color_list = [color_map[cat] for cat in colors_unique]
 
     # * Title and Labels
     log_str = " (log-scale)" if use_log else ""
@@ -107,7 +129,7 @@ def plot_boxes_large(
             x=col_cat,
             y=col_num,
             hue=col_cat,
-            palette="tab10",
+            palette=color_list,
             width=box_width,
             inner="box" if not use_log else None,  # inner="box" is standard for violin
             ax=plt.gca(),
@@ -118,7 +140,7 @@ def plot_boxes_large(
             x=col_cat,
             y=col_num,
             hue=col_cat,
-            palette="tab10",
+            palette=color_list,
             width=box_width,
             showfliers=showfliers,
             flierprops={"markerfacecolor": "white", "markersize": flier_size} if showfliers else {},
@@ -139,10 +161,18 @@ def plot_boxes_large(
     if summary:
         # * sort df by first column before printing summary
         # * print all data
-        print_summary(df=df.sort_values(col_cat), precision=precision,sparse=False,)
+        print_summary(
+            df=df.sort_values(col_cat),
+            precision=precision,
+            sparse=False,
+        )
 
         # * print values
-        print_summary(df=df.sort_values(col_cat), precision=precision,sparse=True,)
+        print_summary(
+            df=df.sort_values(col_cat),
+            precision=precision,
+            sparse=True,
+        )
 
     # * save to png if path is provided
     if png_path is not None:

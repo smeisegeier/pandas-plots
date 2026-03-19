@@ -5,20 +5,24 @@ from typing import Literal
 import pandas as pd
 import plotly.express as px
 
-from ..helper import set_caption
+from pandas_plots import const
+
+from ..helper import assign_column_colors, set_caption
 from ..hlp import *
 
 
 def plot_bars(
     df_in: pd.Series | pd.DataFrame,
     caption: str = None,
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     top_n_index: int = 0,
     top_n_minvalue: int = 0,
     dropna: bool = False,
     orientation: Literal["h", "v"] = "v",
     sort_values: bool = False,
     normalize: bool = True,
+    color_palette: str | list[str] = const.PALETTE_RKI1,
+    null_label: str = "(NA)",
     height: int = 600,
     width: int = 1600,
     title: str = "",
@@ -44,6 +48,11 @@ def plot_bars(
     - orientation: A string indicating the orientation of the chart. It can be either "h" for horizontal or "v" for vertical. Default is "v".
     - sort_values: A boolean indicating whether to sort the values in the chart. Default is False.
     - normalize: A boolean indicating whether to show pct values in the chart. Default is False.
+    - color_palette: Name of the color palette to use, or a list of colors.
+        - Default: `const.PALETTE_RKI1`
+        - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+        - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
+    - null_label: Label for null values. Default is "(NA)".
     - height: An optional integer indicating the height of the chart. Default is 500.
     - width: An optional integer indicating the width of the chart. Default is 2000.
     - title: An optional string indicating the title of the chart. If not provided, the title will be the name of the index column.
@@ -52,6 +61,7 @@ def plot_bars(
         - enforces vertical orientation.
         - enforces nomalize=False
         - enforces dropna=True
+    - ci_agg: Aggregation method for confidence intervals. Can be "mean" or "median". Default is "mean".
     - precision: An integer indicating the number of decimal places to round the values to. Default is 0.
     - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is None.
     - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
@@ -143,7 +153,9 @@ def plot_bars(
         None
         if not use_ci
         else df.apply(
-            lambda row: f"{row['cnt_str']}{divider}[{row['mean'] - row['margin']:_.{precision}f};{row['mean'] + row['margin']:_.{precision}f}]",
+            lambda row: (
+                f"{row['cnt_str']}{divider}[{row['mean'] - row['margin']:_.{precision}f};{row['mean'] + row['margin']:_.{precision}f}]"
+            ),
             axis=1,
         )
     )
@@ -183,7 +195,6 @@ def plot_bars(
 
     # * title str na
     _title_str_null = ", NULL excluded" if dropna else ""
-    
 
     if caption_only_n:
         title_str = _title_str_n
@@ -194,12 +205,20 @@ def plot_bars(
 
     # * layot caption if provided
     caption = set_caption(caption)
+
+    # * sort df
+    df = df.sort_values(
+        col_value if sort_values else col_index,
+        ascending=False if sort_values else True,
+    )
+
+    # * assign colors AFTER sorting, so palette order matches bar order
+    colors_unique = df[col_index].unique().tolist()
+    color_map = assign_column_colors(colors_unique, color_palette, null_label, first_col_grey=False, sort_columns=False)
+
     # ! plot
     _fig = px.bar(
-        df.sort_values(
-            col_value if sort_values else col_index,
-            ascending=False if sort_values else True,
-        ),
+        df,
         x=col_index if orientation == "v" else col_value,
         y=col_value if orientation == "v" else col_index,
         text=col_value_str,
@@ -209,7 +228,8 @@ def plot_bars(
         # * retrieve theme from env (intro.set_theme) or default
         template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
         error_y=None if not use_ci else df["margin"],
-        color_discrete_sequence=px.colors.qualitative.D3,
+        # color_discrete_sequence=px.colors.qualitative.D3,
+        color_discrete_map=color_map,  # Use assigned colors
         color=col_index,
     )
 
@@ -247,17 +267,7 @@ def plot_bars(
         showlegend=False,
         # uniformtext_minsize=14, uniformtext_mode='hide'
     )
-    # * sorting
-    if orientation == "v":
-        if sort_values:
-            _fig.update_layout(xaxis={"categoryorder": "total descending"})
-        else:
-            _fig.update_layout(xaxis={"categoryorder": "category ascending"})
-    else:
-        if sort_values:
-            _fig.update_layout(yaxis={"categoryorder": "total ascending"})
-        else:
-            _fig.update_layout(yaxis={"categoryorder": "category descending"})
+    # * sorting is already applied to df, no need to update layout
 
     # * looks better on single bars
     _fig.update_traces(error_y=dict(thickness=5))

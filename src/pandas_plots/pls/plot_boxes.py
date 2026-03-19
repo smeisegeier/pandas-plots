@@ -5,14 +5,17 @@ from typing import Literal
 import pandas as pd
 import plotly.express as px
 
+from pandas_plots import const
+
+from ..helper import assign_column_colors, set_caption
 from ..hlp import *
 from ..tbl import print_summary
-from ..helper import set_caption
+
 
 def plot_boxes(
     df: pd.DataFrame,
     caption: str = None,
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     points: Literal["all", "outliers", "suspectedoutliers", None] = None,
     precision: int = 2,
     height: int = 600,
@@ -25,6 +28,9 @@ def plot_boxes(
     box_width: float = 0.5,
     png_path: Path | str = None,
     renderer: Literal["png", "svg", None] = None,
+    color_palette: str | list[str] = const.PALETTE_RKI1,
+    null_label: str = "(NA)",
+    first_col_grey: bool = False,
 ) -> None:
     """
     Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
@@ -45,26 +51,38 @@ def plot_boxes(
         facet_col (str): The column to facet the plot by.
         summary (bool): Whether to add a summary to the plot.
         use_log (bool): Whether to use logarithmic scale for the plot (cannot show negative values).
+        box_width (float): The relative width of the boxes (0 to 1). Default is 0.5.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
         renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to None.
+        color_palette (str | list[str]): Name of the color palette to use, or a list of colors.
+            - Default: `const.PALETTE_RKI1`
+            - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+            - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
+        null_label (str): Label for null values.
+        first_col_grey (bool): If True, sets the first category to grey.
 
     Returns: None
     """
 
     if (
         len(df.columns) not in (2, 3)
-        or not (
-            (pd.api.types.is_object_dtype(df.iloc[:, 0]))
-            or (pd.api.types.is_bool_dtype(df.iloc[:, 0]))
-            )
+        or not ((pd.api.types.is_object_dtype(df.iloc[:, 0])) or (pd.api.types.is_bool_dtype(df.iloc[:, 0])))
         or not pd.api.types.is_numeric_dtype(df.iloc[:, 1])
     ):
-        print(f"❌ df must have 2 or 3 columns: [0] str or bool, [1] num, [2] (optional) str")
+        print("❌ df must have 2 or 3 columns: [0] str or bool, [1] num, [2] (optional) str")
         return
     # * layout gaps
     xlvl1 = -50
     xlvl2 = 0
     xlvl3 = 50
+
+    col_cat = df.columns[0]
+    col_num = df.columns[1]
+
+    # * handle null values FIRST before any type conversion
+    df[col_cat] = df[col_cat].fillna(null_label)
+    # Also replace pd.NA and string "nan" / "<NA>" that may result from conversion
+    df[col_cat] = df[col_cat].replace([pd.NA, "nan", "<NA>"], null_label)
 
     # * type of col0 must be str, not object. otherwise px.box will fail since sorting will fail
     if pd.api.types.is_object_dtype(df.iloc[:, 0]):
@@ -72,7 +90,10 @@ def plot_boxes(
 
     # * unique items
     # Sort the unique items alphabetically
-    items = sorted(df.iloc[:, 0].unique())
+    items = sorted(df[col_cat].unique())
+
+    # * assign colors
+    color_map = assign_column_colors(items, color_palette, null_label, first_col_grey)
 
     log_str = " (log-scale)" if use_log else ""
     n_str = f"n={len(df):_.0f}"
@@ -82,7 +103,6 @@ def plot_boxes(
         plot_title = f"{title}, {n_str}"
     else:
         plot_title = f"{set_caption(caption)} [{df.columns[0]}] by [{df.columns[1]}]{log_str}, {n_str}"
-
 
     # * main plot
     fig = px.box(
@@ -95,7 +115,7 @@ def plot_boxes(
         orientation="v",
         points=points,
         log_y=use_log,
-        # color_discrete_sequence=px.colors.qualitative.Plotly,
+        color_discrete_map=color_map,
         title=plot_title,
     )
 
@@ -165,10 +185,18 @@ def plot_boxes(
     if summary:
         # * sort df by first column before printing summary
         # * print all data
-        print_summary(df=df.sort_values(df.columns[0]), precision=precision,sparse=False,)
+        print_summary(
+            df=df.sort_values(df.columns[0]),
+            precision=precision,
+            sparse=False,
+        )
 
         # * print values
-        print_summary(df=df.sort_values(df.columns[0]), precision=precision,sparse=True,)
+        print_summary(
+            df=df.sort_values(df.columns[0]),
+            precision=precision,
+            sparse=True,
+        )
 
     # * save to png if path is provided
     if png_path is not None:

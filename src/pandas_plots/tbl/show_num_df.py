@@ -6,7 +6,7 @@ from collections import abc
 from pathlib import Path
 from typing import Literal, Optional, get_args
 
-from ..hlp.group_kkr import group_kkr
+from ..helper import group_kkr
 
 import numpy as np
 import dataframe_image as dfi

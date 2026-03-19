@@ -42,6 +42,7 @@ a comprehensive python package for enhanced **data visualization** and **analysi
 - **plotting functions** (`pls`): comprehensive visualization tools with plotly
 - **venn diagrams** (`ven`): easy-to-create venn diagrams for set analysis
 - **helper functions** (`hlp`): utility functions for common data operations
+- **constants** (`const`): useful constants like color palettes
 
 ## 📦 installation
 <a id="markdown-%F0%9F%93%A6-installation" name="%F0%9F%93%A6-installation"></a>
@@ -57,7 +58,7 @@ uv add -U pandas-plots
 <a id="markdown-%F0%9F%9B%A0%EF%B8%8F-usage" name="%F0%9F%9B%A0%EF%B8%8F-usage"></a>
 
 ```python
-from pandas_plots import tbl, pls, ven, hlp
+from pandas_plots import tbl, pls, ven, hlp, const
 
 # for public examples: load sample dataset from seaborn
 import seaborn as sb

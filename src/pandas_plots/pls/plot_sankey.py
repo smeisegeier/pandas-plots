@@ -1,9 +1,14 @@
 import os
-import pandas as pd
-import plotly.graph_objects as go
 import re
 
-NA_EVENT = '(NA)'
+import pandas as pd
+import plotly.graph_objects as go
+
+from pandas_plots import const
+from pandas_plots.helper import assign_column_colors
+
+NA_EVENT = "(NA)"
+
 
 def plot_sankey(
     df=None,
@@ -15,6 +20,10 @@ def plot_sankey(
     renderer=None,
     show_start_node=True,
     font_size=10,
+    palette_link="Pastel",
+    # palette_link=const.PALETTE_SANKEY_LINK,
+    palette_start=["#808080"],
+    palette_na=const.PALETTE_NA,
 ):
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
@@ -45,6 +54,12 @@ def plot_sankey(
                                 first events to it. This is useful for visualizing
                                 IDs with only one event, including those with missing/invalid events.
         font_size (int): The font size of the labels in the plot.
+        palette_link (list[str], optional): Color palette for regular links.
+                                Defaults to PALETTE_SANKEY_LINK from helper.
+        palette_start (list[str], optional): Color palette for start node links.
+                                Defaults to PALETTE_SANKEY_START from helper.
+        palette_na (list[str], optional): Color palette for (NA) links.
+                                Defaults to PALETTE_SANKEY_NA from helper.
     """
     # --- Example Usage with Enlarged Pandas DataFrame if no DataFrame is provided ---
     if df is None:
@@ -151,25 +166,24 @@ def plot_sankey(
     df_processed = df.copy()
 
     # --- Aggregate the data to remove duplicate rows before processing ---
-    df_processed = df_processed.drop_duplicates(
-        subset=[id_col_name, date_col_name, event_col_name]
-    )
-    
+    df_processed = df_processed.drop_duplicates(subset=[id_col_name, date_col_name, event_col_name])
+
     # Track the total number of IDs before any filtering
     total_unique_ids = df_processed[id_col_name].nunique()
 
     # --- Handle Missing Date/Event and Coerce to <NA> Event ---
-    
+
     # 1. Flag rows with null/empty event names
-    is_event_missing = (df_processed[event_col_name].isna()) | \
-                    (df_processed[event_col_name].astype(str).str.strip() == '')
+    is_event_missing = (df_processed[event_col_name].isna()) | (
+        df_processed[event_col_name].astype(str).str.strip() == ""
+    )
 
     # 2. Convert date column to datetime, coercing errors to NaT
-    df_processed[date_col_name] = pd.to_datetime(df_processed[date_col_name], errors='coerce')
-    
+    df_processed[date_col_name] = pd.to_datetime(df_processed[date_col_name], errors="coerce")
+
     # 3. Flag rows where date could not be parsed (NaT)
     is_date_missing = df_processed[date_col_name].isna()
-    
+
     # 4. Create a unified flag for invalid records
     is_invalid_record = is_event_missing | is_date_missing
 
@@ -183,7 +197,7 @@ def plot_sankey(
 
     # --- Now we only work with records that have valid IDs and event names ((NA) is now a valid name) ---
     df_processed = df_processed.dropna(subset=[id_col_name]).copy()
-    
+
     # If no data remains after filtering, exit early
     if df_processed.empty:
         print("No valid data to plot after filtering.")
@@ -194,7 +208,7 @@ def plot_sankey(
 
     # Temporarily filter out (NA) events for overlap checks, as they don't have a valid date
     df_overlap_check = df_processed[df_processed[event_col_name] != NA_EVENT].copy()
-    
+
     if exclude_overlap_id and not df_overlap_check.empty:
         overlapping_ids = (
             df_overlap_check.groupby([id_col_name, date_col_name])
@@ -204,23 +218,18 @@ def plot_sankey(
             .unique()
         )
         # Exclude IDs from the main dataframe
-        df_processed = df_processed[
-            ~df_processed[id_col_name].isin(overlapping_ids)
-        ].copy()
+        df_processed = df_processed[~df_processed[id_col_name].isin(overlapping_ids)].copy()
         overlap_title_part = ", overlap ids excluded"
     elif exclude_overlap_event and not df_overlap_check.empty:
         overlapping_event_set = set(
-            df_overlap_check.groupby([id_col_name, date_col_name])
-            .size()
-            .loc[lambda x: x > 1]
-            .index
+            df_overlap_check.groupby([id_col_name, date_col_name]).size().loc[lambda x: x > 1].index
         )
         # Exclude only the overlapping date-events from the main dataframe
         # (excluding (NA) records since they don't have a valid date)
         df_processed = df_processed[
-            ~df_processed[df_processed[event_col_name] != NA_EVENT].set_index([id_col_name, date_col_name]).index.isin(
-                overlapping_event_set
-            )
+            ~df_processed[df_processed[event_col_name] != NA_EVENT]
+            .set_index([id_col_name, date_col_name])
+            .index.isin(overlapping_event_set)
         ].copy()
         overlap_title_part = ", overlap events excluded"
 
@@ -236,21 +245,17 @@ def plot_sankey(
     if max_events_per_id is not None:
         df_sorted = df_sorted[df_sorted["event_order"] <= max_events_per_id]
 
-    df_sorted["ordered_event_label"] = (
-        "[" + df_sorted["event_order"].astype(str) + "] " + df_sorted[event_col_name]
-    )
+    df_sorted["ordered_event_label"] = "[" + df_sorted["event_order"].astype(str) + "] " + df_sorted[event_col_name]
 
     # Filter out IDs that were left with no events after sequencing (e.g., if max_events=0)
-    df_sorted = df_sorted.dropna(subset=['ordered_event_label'])
-    
+    df_sorted = df_sorted.dropna(subset=["ordered_event_label"])
+
     if df_sorted.empty:
         print("No valid data to plot after filtering.")
         return None
 
     # Use a vectorized shift operation to create source and target columns
-    df_sorted["source_label"] = df_sorted.groupby(id_col_name)[
-        "ordered_event_label"
-    ].shift(1)
+    df_sorted["source_label"] = df_sorted.groupby(id_col_name)["ordered_event_label"].shift(1)
     df_with_links = df_sorted.dropna(subset=["source_label"]).copy()
 
     # Create the start node and links if enabled
@@ -265,67 +270,53 @@ def plot_sankey(
             ignore_index=True,
         )
 
-    link_counts = (
-        df_with_links.groupby(["source_label", "ordered_event_label"])
-        .size()
-        .reset_index(name="value")
-    )
+    link_counts = df_with_links.groupby(["source_label", "ordered_event_label"]).size().reset_index(name="value")
 
     # Get all unique nodes for the labels and sorting
-    all_labels = pd.concat(
-        [link_counts["source_label"], link_counts["ordered_event_label"]]
-    ).unique()
+    all_labels = pd.concat([link_counts["source_label"], link_counts["ordered_event_label"]]).unique()
     unique_labels_df = pd.DataFrame(all_labels, columns=["label"])
-    unique_labels_df["event_order_num"] = (
-        unique_labels_df["label"].str.extract(r"\[(\d+)\]").astype(float).fillna(0)
-    )
-    unique_labels_df["event_name"] = (
-        unique_labels_df["label"].str.extract(r"\] (.*)").fillna("start")
-    )
-    
+    unique_labels_df["event_order_num"] = unique_labels_df["label"].str.extract(r"\[(\d+)\]").astype(float).fillna(0)
+    unique_labels_df["event_name"] = unique_labels_df["label"].str.extract(r"\] (.*)").fillna("start")
+
     # Add sort key to force (NA) to the end
     unique_labels_df["event_name_sort_key"] = unique_labels_df["event_name"].apply(
         lambda x: "~Z_NA_LAST" if x == NA_EVENT else x
     )
 
     # Sort primarily by order number, and secondarily by the custom sort key
-    unique_labels_df_sorted = unique_labels_df.sort_values(
-        by=["event_order_num", "event_name_sort_key"]
-    )
-    
+    unique_labels_df_sorted = unique_labels_df.sort_values(by=["event_order_num", "event_name_sort_key"])
+
     unique_unformatted_labels_sorted = unique_labels_df_sorted["label"].tolist()
 
-    label_to_index = {
-        label: i for i, label in enumerate(unique_unformatted_labels_sorted)
-    }
+    label_to_index = {label: i for i, label in enumerate(unique_unformatted_labels_sorted)}
 
     # Calculate node counts and step totals for percentage calculation
     node_counts = df_sorted["ordered_event_label"].value_counts()
-    
+
     # Add count information to the DataFrame for easier calculation
-    unique_labels_df_sorted['node_count'] = unique_labels_df_sorted['label'].apply(
-        lambda x: total_unique_ids if x == '[0] start' else node_counts.get(x, 0)
+    unique_labels_df_sorted["node_count"] = unique_labels_df_sorted["label"].apply(
+        lambda x: total_unique_ids if x == "[0] start" else node_counts.get(x, 0)
     )
 
     # Calculate the total count for each step (event_order_num)
-    step_totals = unique_labels_df_sorted.groupby('event_order_num')['node_count'].sum()
+    step_totals = unique_labels_df_sorted.groupby("event_order_num")["node_count"].sum()
 
     # Map the step total back to the DataFrame
-    unique_labels_df_sorted['step_total'] = unique_labels_df_sorted['event_order_num'].map(step_totals)
+    unique_labels_df_sorted["step_total"] = unique_labels_df_sorted["event_order_num"].map(step_totals)
 
     # --- Recalculate and format display_labels with (Total % | Step %) ---
     display_labels = []
     for index, row in unique_labels_df_sorted.iterrows():
-        label = row['label']
-        count = row['node_count']
-        step_total = row['step_total']
-        
+        label = row["label"]
+        count = row["node_count"]
+        step_total = row["step_total"]
+
         formatted_count = f"{count:,}".replace(",", "_")
-        
+
         # 1. Total Percentage (relative to total_unique_ids)
         total_percentage = (count / total_unique_ids) * 100
         formatted_total_percentage = f"{int(round(total_percentage, 0))}%"
-        
+
         # 2. Step Percentage (relative to step_total)
         if label == "[0] start":
             # Step 0 is the total start, so step percentage is 100%
@@ -346,44 +337,50 @@ def plot_sankey(
     targets = link_counts["ordered_event_label"].map(label_to_index).tolist()
     values = link_counts["value"].tolist()
 
-    # Define a color palette for links
-    color_palette = [
-        "rgba(255, 99, 71, 0.6)",
-        "rgba(60, 179, 113, 0.6)",
-        "rgba(65, 105, 225, 0.6)",
-        "rgba(255, 215, 0, 0.6)",
-        "rgba(147, 112, 219, 0.6)",
-        "rgba(0, 206, 209, 0.6)",
-        "rgba(255, 160, 122, 0.6)",
-        "rgba(124, 252, 0, 0.6)",
-        "rgba(30, 144, 255, 0.6)",
-        "rgba(218, 165, 32, 0.6)",
-    ]
-    start_link_color = "rgba(128, 128, 128, 0.6)"
+    # Set default palettes if not provided
+    if palette_link is None:
+        palette_link = const.PALETTE_VIBRANT
+    if palette_start is None:
+        palette_start = const.PALETTE_SANKEY_START
+    if palette_na is None:
+        palette_na = const.PALETTE_NA
 
-    link_colors = []
-    link_type_to_color = {}
-    color_index = 0
+    # Get unique link types for color assignment
+    link_types = []
     for i, row in link_counts.iterrows():
         source_l = row["source_label"]
         target_l = row["ordered_event_label"]
-        
+        if NA_EVENT not in source_l and NA_EVENT not in target_l and source_l != "[0] start":
+            source_event_name = re.search(r"\] (.*)", source_l).group(1)
+            target_event_name = re.search(r"\] (.*)", target_l).group(1)
+            link_types.append((source_event_name, target_event_name))
+
+    # Assign colors to link types using assign_column_colors helper
+    unique_link_types = list(set(link_types))
+    link_type_colors = assign_column_colors(
+        columns=unique_link_types,
+        color_palette=palette_link,
+        null_label="",
+        first_col_grey=False,
+        sort_columns=False,
+    )
+
+    # Build link colors list
+    link_colors = []
+    for i, row in link_counts.iterrows():
+        source_l = row["source_label"]
+        target_l = row["ordered_event_label"]
+
         # Use a distinct color for links to/from (NA)
         if NA_EVENT in source_l or NA_EVENT in target_l:
-            link_colors.append("rgba(255, 165, 0, 0.6)") # Orange for (NA) links
+            link_colors.append(palette_na[0])
         elif source_l == "[0] start":
-            link_colors.append(start_link_color)
+            link_colors.append(palette_start[0])
         else:
             source_event_name = re.search(r"\] (.*)", source_l).group(1)
             target_event_name = re.search(r"\] (.*)", target_l).group(1)
             link_type = (source_event_name, target_event_name)
-
-            if link_type not in link_type_to_color:
-                link_type_to_color[link_type] = color_palette[
-                    color_index % len(color_palette)
-                ]
-                color_index += 1
-            link_colors.append(link_type_to_color[link_type])
+            link_colors.append(link_type_colors[link_type])
 
     formatted_total_ids = f"{total_unique_ids:,}".replace(",", "_")
     total_rows = len(df_processed)
@@ -406,13 +403,10 @@ def plot_sankey(
                     color="blue",
                     align="left",
                 ),
-                link=dict(
-                    source=sources, target=targets, value=values, color=link_colors
-                ),
+                link=dict(source=sources, target=targets, value=values, color=link_colors),
             )
         ]
     )
-
 
     fig.update_layout(title_text=chart_title, font_size=font_size, width=width, height=height)
     fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
