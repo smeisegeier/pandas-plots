@@ -37,6 +37,7 @@ def pivot_df(
     font_size_th: int = 0,
     font_size_td: int = 0,
     col1_width: int = 0,
+    color_highlight_style:  Literal['bright','medium'] = 'medium',
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
     kkr_col: Optional[str] = None,
@@ -80,6 +81,7 @@ def pivot_df(
         font_size_th (int, optional): The font size for the header. Defaults to 0.
         font_size_td (int, optional): The font size for the table data. Defaults to 0.
         col1_width (int, optional): The width of the first column in px. Defaults to 0.
+        color_highlight_style: a string indicating the color highlight style ["bright","medium"]. default is "medium"
         png_path (str | Path, optional): The path to save the output PNG file. Defaults to None.
         png_conversion (Literal["chrome", "selenium"], optional): The conversion method for the PNG file. Defaults to "selenium".
         kkr_col (str): Edge case: Name of the column that contains kkr name to ensure all kkr are shown
@@ -175,6 +177,7 @@ def pivot_df(
         font_size_th=font_size_th,
         font_size_td=font_size_td,
         col1_width=col1_width,
+        color_highlight_style = color_highlight_style,
         png_path=png_path,
         png_conversion=png_conversion,
         total_exclude=total_exclude,

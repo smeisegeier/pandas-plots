@@ -39,6 +39,7 @@ def show_num_df(
     font_size_th: int = 0,
     font_size_td: int = 0,
     col1_width: int = 0,
+    color_highlight_style:  Literal['bright','medium'] = 'medium',
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
     kkr_col: Optional[str] = None,
@@ -78,6 +79,7 @@ def show_num_df(
     - font_size_th: an integer indicating the font size for the header
     - font_size_td: an integer indicating the font size for the table data
     - col1_width: an integer indicating the width of the first column in px
+    - color_highlight_style: a string indicating the color highlight style ["bright","medium"]. default is "medium"
     - png_path: a string or Path indicating the path to save the PNG file
     - png_conversion: a Literal indicating the conversion method for the PNG file ["chrome", "selenium"]
     - kkr_col: a string indicating the column name for KKR grouping
@@ -165,8 +167,16 @@ def show_num_df(
 
     # * derive style
     out = df_.style
+    
+    # * set highlight color from blue styles
+    color_highlight = (
+        "#d9e3f6" if theme == "light" and color_highlight_style == "bright"
+        else "#b3c8ec" if theme == "light"
+        else "#666666" if color_highlight_style == "bright"
+        else "#444444"
+    )
 
-    color_highlight = "#d9e3f6" if theme == "light" else "#666666"
+    # color_highlight = color_highlight or "#d9e3f6" if theme == "light" else "#666666"
     # color_highlight = "#b3c8ec" if theme == "light" else "#666666"
     color_zeros = "#A9A9A9" if theme == "light" else "#888888"
     color_pct = "grey" if theme == "light" else "yellow"
