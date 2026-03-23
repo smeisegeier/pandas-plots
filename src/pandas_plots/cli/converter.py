@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+from typing import Literal
 
 import dataframe_image as dfi
 
@@ -11,9 +12,13 @@ PATH_CHROME = "/Applications/Chromium.app/Contents/MacOS/Chromium"
 def remove_duckdb_table_header(markdown_filepath: str, start_token: str, stop_token: str) -> bool:
     """
     Processes a Markdown file to find a block defined by start and stop tokens.
-    Within that block, looks for lines matching DuckDB table header pattern:
-    | type1 | type2 | type3 |
-    and replaces the type names with blanks, leaving the pipes intact.
+    Removes line 3 (the type header line) within each block.
+
+    Structure assumed:
+    - Line 1: start_token
+    - Line 2: column headers
+    - Line 3: type headers (to be removed)
+    - Line 4+: data rows and separators
 
     Args:
         markdown_filepath (str): Path to the Markdown file.
@@ -23,84 +28,13 @@ def remove_duckdb_table_header(markdown_filepath: str, start_token: str, stop_to
     Returns:
         bool: True if changes were made, False otherwise.
     """
-    # Comprehensive list of DuckDB data types (case-insensitive matching)
-    DUCKDB_TYPES = {
-        # Integer types
-        "tinyint",
-        "int1",
-        "smallint",
-        "int2",
-        "short",
-        "integer",
-        "int4",
-        "int",
-        "signed",
-        "bigint",
-        "int8",
-        "long",
-        "hugeint",
-        "utinyint",
-        "usmallint",
-        "uinteger",
-        "ubigint",
-        "uhugeint",
-        # Numeric types
-        "decimal",
-        "numeric",
-        "float",
-        "float4",
-        "real",
-        "float8",
-        "double",
-        "bignum",
-        # Text types
-        "varchar",
-        "char",
-        "bpchar",
-        "text",
-        "string",
-        # Binary types
-        "blob",
-        "bytea",
-        "binary",
-        "varbinary",
-        "bit",
-        "bitstring",
-        # Boolean type
-        "boolean",
-        "bool",
-        "logical",
-        # Temporal types
-        "date",
-        "time",
-        "timestamp",
-        "datetime",
-        "timestamptz",
-        "interval",
-        # Special types
-        "uuid",
-        "json",
-        "null",
-        # Nested types
-        "array",
-        "list",
-        "map",
-        "struct",
-        "union",
-    }
-
-    # Pattern to match lines like: | varchar | int16 | binary |
-    # Also supports box-drawing characters: │ varchar │ int16 │ binary │
-    # Captures pipe-separated values with optional whitespace
-    duckdb_type_pattern = re.compile(r"^(\s*[\|│])(.+?)([\|│]\s*)$")
-
     try:
         with open(markdown_filepath, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         new_lines = []
         changes_made = False
-        state = 0  # 0: Searching, 1: Inside block
+        state = 0  # 0: Searching, 1: Found start_token, 2: Found header line
 
         for line in lines:
             lstripped = line.lstrip()
@@ -110,30 +44,19 @@ def remove_duckdb_table_header(markdown_filepath: str, start_token: str, stop_to
                     state = 1
                 new_lines.append(line)
             elif state == 1:
+                # This is line 2 (header line) - keep it and move to state 2
+                state = 2
+                new_lines.append(line)
+            elif state == 2:
+                # This is line 3 (type line) - skip it
+                changes_made = True
                 if lstripped.startswith(stop_token):
                     state = 0
                     new_lines.append(line)
                 else:
-                    # Check if line matches DuckDB table header pattern
-                    match = duckdb_type_pattern.match(line.rstrip())
-                    if match:
-                        # Extract the content between pipes
-                        content = match.group(2)
-
-                        # Check if any part between pipes is a DuckDB type (exact match)
-                        # Split by both regular pipe and box-drawing pipe
-                        parts = re.split(r"[\|│]", content)
-                        has_duckdb_type = any(
-                            stripped and stripped.lower() in DUCKDB_TYPES for stripped in (p.strip() for p in parts)
-                        )
-
-                        # Delete the whole line if at least one DuckDB type is found
-                        if has_duckdb_type:
-                            changes_made = True
-                        else:
-                            new_lines.append(line)
-                    else:
-                        new_lines.append(line)
+                    state = 0
+            else:
+                new_lines.append(line)
 
         if changes_made:
             with open(markdown_filepath, "w", encoding="utf-8") as f:
@@ -561,6 +484,7 @@ def scale_images(markdown_filepath: str):
 
 def jupyter_to_md(
     path: str,
+    to: Literal["markdown", "html", "pdf"] = "markdown",
     output_dir: str = "./docs",
     no_input=True,
     execute=False,
@@ -641,7 +565,8 @@ def jupyter_to_md(
     print(f"Converting {path} to Markdown using dataframe-image python API ..")
     dfi.convert(
         path,
-        to="markdown",
+        # to="markdown",
+        to=to,
         # use='latex',
         center_df=center_df,
         max_rows=None,
