@@ -37,80 +37,66 @@
 
 
 
-<div style="margin-bottom: 20px;"><strong>Legend:</strong> <span style="background-color:#f96; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Access</span> <span style="background-color:#9cf; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Boss</span> <span style="background-color:#dfd; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Boss_Drop</span> <span style="background-color:#fdb; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Dungeon</span> <span style="background-color:#dff; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Leveling</span> <span style="background-color:#ccf; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Quest</span> <span style="background-color:#ffd1dc; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Quest_Chain</span> <span style="background-color:#e0bbff; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Raid</span> <span style="background-color:#b3e5fc; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Raid_Step</span> <span style="background-color:#c8e6c9; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Reputation</span> <span style="background-color:#f96; padding: 2px 8px; margin-right: 10px; border: 1px solid #333; border-radius: 4px; color: #000; font-size: 0.8em;">Vendor</span></div>
-
-
-
 ```mermaid
 graph LR
-    classDef Access fill:#f96,stroke:#333,stroke-width:1px,color:#000;
-    classDef Boss fill:#9cf,stroke:#333,stroke-width:1px,color:#000;
-    classDef Boss_Drop fill:#dfd,stroke:#333,stroke-width:1px,color:#000;
-    classDef Dungeon fill:#fdb,stroke:#333,stroke-width:1px,color:#000;
-    classDef Leveling fill:#dff,stroke:#333,stroke-width:1px,color:#000;
-    classDef Quest fill:#ccf,stroke:#333,stroke-width:1px,color:#000;
-    classDef Quest_Chain fill:#ffd1dc,stroke:#333,stroke-width:1px,color:#000;
-    classDef Raid fill:#e0bbff,stroke:#333,stroke-width:1px,color:#000;
-    classDef Raid_Step fill:#b3e5fc,stroke:#333,stroke-width:1px,color:#000;
-    classDef Reputation fill:#c8e6c9,stroke:#333,stroke-width:1px,color:#000;
-    classDef Vendor fill:#f96,stroke:#333,stroke-width:1px,color:#000;
-    classDef Root fill:#eee,stroke:#999,stroke-dasharray: 5 5,color:#666;
-    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
+    classDef default fill:#222,stroke:#444,color:#aaa;
+    classDef Root fill:#222,stroke:#444,stroke-dasharray: 5 5,color:#aaa;
+    Black_Temple_Chain -- Quest --> Akama_Alliance
+    Serpentshrine_Cavern -- Boss_Drop --> The_Vials_of_Eternity
+    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
+    Level_70 -- Reputation --> Cenarion_Expedition_Honored
+    Karazhan_Raid -- Quest --> Cipher_of_Damnation
     Battle_for_Mount_Hyjal -- Raid_Step --> Akama_Alliance
-    Level_68 -- Leveling --> Level_70
-    Level_70 -- Quest_Chain --> Trial_of_the_Naaru
-    Cenarion_Expedition_Honored -- Dungeon --> Heroic_Slave_Pens
-    Lower_City_Honored -- Vendor --> Auchenai_Key
-    Level_68 -- Quest --> Karazhan_Key_Chain
-    Level_70 -- Reputation --> Lower_City_Honored
-    Cipher_of_Damnation -- Quest --> Black_Temple_Chain
-    Akama_Alliance -- Raid --> Black_Temple
-    Magtheridon_Raid -- Boss_Drop --> Trial_of_the_Naaru
-    Level_70 -- Reputation --> Honor_Hold_Honored
-    Karazhan_Raid -- Boss --> Nightbane
     Trial_of_the_Naaru -- Raid --> The_Eye
     The_Eye -- Boss_Drop --> The_Vials_of_Eternity
     Heroic_Slave_Pens -- Quest --> Cudgel_of_Kardesh_Quest
     Flamewrought_Key -- Access --> Heroic_Shattered_Halls
-    The_Vials_of_Eternity -- Raid --> Battle_for_Mount_Hyjal
+    Key_of_Time -- Access --> Heroic_Black_Morass
+    Akama_Alliance -- Raid --> Black_Temple
     Karazhan_Key_Chain -- Raid --> Karazhan_Raid
     Karazhan_Raid -- Boss_Drop --> Cudgel_of_Kardesh_Quest
     Cudgel_of_Kardesh_Quest -- Raid --> Serpentshrine_Cavern
-    Key_of_Time -- Access --> Heroic_Black_Morass
-    Level_70 -- Reputation --> Keepers_of_Time_Honored
-    Black_Temple_Chain -- Quest --> Akama_Alliance
-    Serpentshrine_Cavern -- Boss_Drop --> The_Vials_of_Eternity
-    Level_70 -- Reputation --> Cenarion_Expedition_Honored
-    Karazhan_Raid -- Quest --> Cipher_of_Damnation
+    Level_68 -- Quest --> Karazhan_Key_Chain
+    Level_70 -- Reputation --> Lower_City_Honored
+    Cipher_of_Damnation -- Quest --> Black_Temple_Chain
     Keepers_of_Time_Honored -- Vendor --> Key_of_Time
+    Magtheridon_Raid -- Boss_Drop --> Trial_of_the_Naaru
+    Level_70 -- Reputation --> Honor_Hold_Honored
+    Karazhan_Raid -- Boss --> Nightbane
+    Level_68 -- Leveling --> Level_70
+    Level_70 -- Quest_Chain --> Trial_of_the_Naaru
+    Cenarion_Expedition_Honored -- Dungeon --> Heroic_Slave_Pens
+    Lower_City_Honored -- Vendor --> Auchenai_Key
+    Level_70 -- Reputation --> Keepers_of_Time_Honored
+    Auchenai_Key -- Access --> Heroic_Shadow_Labyrinth
     Honor_Hold_Honored -- Vendor --> Flamewrought_Key
-    class Heroic_Shadow_Labyrinth Access;
-    class Akama_Alliance Raid_Step;
-    class Level_70 Leveling;
-    class Trial_of_the_Naaru Quest_Chain;
-    class Heroic_Slave_Pens Dungeon;
-    class Auchenai_Key Vendor;
+    class Magtheridon_Raid Root;
+    class Level_68 Root;
+    class Akama_Alliance Quest;
+    class The_Vials_of_Eternity Boss_Drop;
+    class Battle_for_Mount_Hyjal Raid;
+    class Cenarion_Expedition_Honored Reputation;
+    class Cipher_of_Damnation Quest;
+    class The_Eye Raid;
+    class Cudgel_of_Kardesh_Quest Quest;
+    class Heroic_Shattered_Halls Access;
+    class Heroic_Black_Morass Access;
+    class Black_Temple Raid;
+    class Karazhan_Raid Raid;
+    class Serpentshrine_Cavern Raid;
     class Karazhan_Key_Chain Quest;
     class Lower_City_Honored Reputation;
     class Black_Temple_Chain Quest;
-    class Black_Temple Raid;
+    class Key_of_Time Vendor;
+    class Trial_of_the_Naaru Boss_Drop;
     class Honor_Hold_Honored Reputation;
     class Nightbane Boss;
-    class The_Eye Raid;
-    class The_Vials_of_Eternity Boss_Drop;
-    class Cudgel_of_Kardesh_Quest Quest;
-    class Heroic_Shattered_Halls Access;
-    class Battle_for_Mount_Hyjal Raid;
-    class Karazhan_Raid Raid;
-    class Serpentshrine_Cavern Raid;
-    class Heroic_Black_Morass Access;
+    class Level_70 Leveling;
+    class Heroic_Slave_Pens Dungeon;
+    class Auchenai_Key Vendor;
     class Keepers_of_Time_Honored Reputation;
-    class Level_68 Root;
-    class Cenarion_Expedition_Honored Reputation;
-    class Cipher_of_Damnation Quest;
-    class Key_of_Time Vendor;
+    class Heroic_Shadow_Labyrinth Access;
     class Flamewrought_Key Vendor;
-    class Magtheridon_Raid Root;
 ```
 
 
@@ -124,24 +110,24 @@ graph LR
     │ Battle_for_Mount_Hyjal      │ Raid        │          7.0 │      2 │               0.125 │         4.0 │
     │ The_Vials_of_Eternity       │ Boss_Drop   │          6.0 │      3 │ 0.14285714285714285 │         3.5 │
     │ Serpentshrine_Cavern        │ Raid        │          5.0 │      2 │ 0.16666666666666666 │         3.0 │
-    │ Heroic_Black_Morass         │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
     │ Black_Temple_Chain          │ Quest       │          4.0 │      2 │                 0.2 │         2.5 │
-    │ Heroic_Shattered_Halls      │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
-    │ Cudgel_of_Kardesh_Quest     │ Quest       │          4.0 │      3 │                 0.2 │         2.5 │
     │ Heroic_Shadow_Labyrinth     │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
-    │ The_Eye                     │ Raid        │          3.0 │      2 │                0.25 │         2.0 │
-    │ Flamewrought_Key            │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
-    │ Key_of_Time                 │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
-    │ Cipher_of_Damnation         │ Quest       │          3.0 │      2 │                0.25 │         2.0 │
+    │ Heroic_Black_Morass         │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
+    │ Cudgel_of_Kardesh_Quest     │ Quest       │          4.0 │      3 │                 0.2 │         2.5 │
+    │ Heroic_Shattered_Halls      │ Access      │          4.0 │      1 │                 0.2 │         2.5 │
     │ Nightbane                   │ Boss        │          3.0 │      1 │                0.25 │         2.0 │
     │ Auchenai_Key                │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ Flamewrought_Key            │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ Key_of_Time                 │ Vendor      │          3.0 │      2 │                0.25 │         2.0 │
+    │ The_Eye                     │ Raid        │          3.0 │      2 │                0.25 │         2.0 │
+    │ Cipher_of_Damnation         │ Quest       │          3.0 │      2 │                0.25 │         2.0 │
     │ Heroic_Slave_Pens           │ Dungeon     │          3.0 │      2 │                0.25 │         2.0 │
-    │ Keepers_of_Time_Honored     │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
-    │ Karazhan_Raid               │ Raid        │          2.0 │      4 │  0.3333333333333333 │         1.5 │
-    │ Honor_Hold_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
-    │ Cenarion_Expedition_Honored │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
-    │ Lower_City_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
     │ Trial_of_the_Naaru          │ Quest_Chain │          2.0 │      3 │  0.3333333333333333 │         1.5 │
+    │ Lower_City_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Cenarion_Expedition_Honored │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Honor_Hold_Honored          │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
+    │ Karazhan_Raid               │ Raid        │          2.0 │      4 │  0.3333333333333333 │         1.5 │
+    │ Keepers_of_Time_Honored     │ Reputation  │          2.0 │      2 │  0.3333333333333333 │         1.5 │
     │ Karazhan_Key_Chain          │ Quest       │          1.0 │      2 │                 0.5 │         1.0 │
     │ Level_70                    │ Leveling    │          1.0 │      6 │                 0.5 │         1.0 │
     │ Level_68                    │ Root        │          0.0 │      2 │                 1.0 │         0.5 │
@@ -192,6 +178,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     │ has_gesamt │ has_lokal │ has_lymph │ has_fm  │
     ├────────────┼───────────┼───────────┼─────────┤
     │ false      │ false     │ false     │ false   │
+    │ false      │ NULL      │ NULL      │ NULL    │
     │ false      │ false     │ false     │ false   │
     └────────────┴───────────┴───────────┴─────────┘
 ```
@@ -639,6 +626,9 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌──────────────────────┬──────────────────────┬─────────────────────┬──────────────────────┬─────────────┬─────────────────────┬──────────────────────┬──────────────────┬─────────────────────┬───────────────────┬───────────────┬────────────┬────────────┬────────────┬────────────┬───────────────────┬─────────┬───────────────────┬─────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────────────┬───────────────┬────────────┬────────────┬────────────┬────────────┬───────────────────┬─────────┬───────────────────┬─────────┬───────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬────────────────┬─────────┬─────────────┬───────────────┬──────────────────┬─────────────────────┬──────────────────────┬──────────────────────┬──────────────────────┬───────────────┬─────────────────────┬──────────────────┬─────────────┬──────────────────────┬─────────────┬───────────────┬───────────────┬────────────────────┬───────┬───────────┬──────────────────────┬────────────┬───────┬────────────┬────────────────────┬─────────┬──────────────────────┬──────────────────────┬───────┬────────────────────────┬─────────────┬───────┬────────┬─────────┬─────────┬────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬──────────┬──────────┬───────────────────┬────────────────┬────────────────┬────────────────┬────────────────┬───────────────────┬──────────────────────────────┬───────────────┬──────────┬─────────────┬─────────────┬─────────┬─────────────────────────┬───────────────────────┐
     │ oBDS_RKIPatientTum…  │  oBDS_RKIPatientId   │    Diagnosedatum    │ Diagnosedatum_Gena…  │ Inzidenzort │ Diagnose_ICD10_Code │ Diagnose_ICD10_Ver…  │ Topographie_Code │ Topographie_Version │ Diagnosesicherung │ TNM_Auflage_c │ y_Symbol_c │ r_Symbol_c │ a_Symbol_c │ m_Symbol_c │ c_p_u_Praefix_T_c │   T_c   │ c_p_u_Praefix_N_c │   N_c   │ c_p_u_Praefix_M_c │   M_c   │   L_c   │   V_c   │  Pn_c   │   S_c   │ UICC_Stadium_c │ TNM_Auflage_p │ y_Symbol_p │ r_Symbol_p │ a_Symbol_p │ m_Symbol_p │ c_p_u_Praefix_T_p │   T_p   │ c_p_u_Praefix_N_p │   N_p   │ c_p_u_Praefix_M_p │   M_p   │   L_p   │   V_p   │  Pn_p   │   S_p   │ UICC_Stadium_p │ Grading │ LK_befallen │ LK_untersucht │ Morphologie_Code │ Morphologie_Version │ Praetherapeutische…  │ HormonrezeptorStat…  │ HormonrezeptorStat…  │ Her2neuStatus │ TumorgroesseInvasiv │ TumorgroesseDCIS │ RASMutation │ RektumAbstandAnoku…  │ GradPrimaer │ GradSekundaer │ ScoreErgebnis │ AnlassGleasonScore │  PSA  │ DatumPSA  │ DatumPSA_Genauigkeit │ Tumordicke │  LDH  │ Ulzeration │ Seitenlokalisation │   DCN   │ Anzahl_Tage_Diagno…  │       z_tum_id       │ z_kkr │        z_pat_id        │ z_kkr_label │ z_dy  │ z_age  │ z_ag05  │ z_icd10 │ z_icd10_3d │ z_t_c_0 │ z_t_c_1 │ z_t_p_0 │ z_t_p_1 │ z_n_c_0 │ z_n_c_1 │ z_n_p_0 │ z_n_p_1 │ z_m_c_0 │ z_m_c_1 │ z_m_p_0 │ z_m_p_1 │ z_m_pc_1 │ z_is_dco │ z_last_tum_status │ z_tum_op_count │ z_tum_st_count │ z_tum_sy_count │ z_tum_fo_count │ z_first_treatment │ z_first_treatment_after_days │ z_event_order │ z_events │ z_class_hpv │ z_tum_order │  z_sex  │ z_period_diag_death_day │ z_period_diag_psa_day │
     ├──────────────────────┼──────────────────────┼─────────────────────┼──────────────────────┼─────────────┼─────────────────────┼──────────────────────┼──────────────────┼─────────────────────┼───────────────────┼───────────────┼────────────┼────────────┼────────────┼────────────┼───────────────────┼─────────┼───────────────────┼─────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────────────┼───────────────┼────────────┼────────────┼────────────┼────────────┼───────────────────┼─────────┼───────────────────┼─────────┼───────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────────────┼─────────┼─────────────┼───────────────┼──────────────────┼─────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼───────────────┼─────────────────────┼──────────────────┼─────────────┼──────────────────────┼─────────────┼───────────────┼───────────────┼────────────────────┼───────┼───────────┼──────────────────────┼────────────┼───────┼────────────┼────────────────────┼─────────┼──────────────────────┼──────────────────────┼───────┼────────────────────────┼─────────────┼───────┼────────┼─────────┼─────────┼────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────────┼──────────┼───────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼───────────────────┼──────────────────────────────┼───────────────┼──────────┼─────────────┼─────────────┼─────────┼─────────────────────────┼───────────────────────┤
+    │ 6f105957-7bbb-41f3…  │ 6fe288a8-24d6-451d…  │ 2022-12-15 00:00:00 │ T                    │ 05382       │ C44.3               │ 102022GM             │ C44.3            │ 33                  │ 7                 │ 8             │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 8             │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ U       │        NULL │          NULL │ 8097/3           │ 33                  │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ L                  │ N       │                 NULL │ 6f105957-7bbb-41f3…  │     5 │ 6fe288a8-24d6-451d-b…  │ 05-NW       │  2022 │   62.0 │ a60b64  │ C44.3   │ C44        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ false    │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                    NULL │                  NULL │
+    │ 2334f59e-74ee-477c…  │ c2490ae9-4489-4b9a…  │ 2022-05-15 00:00:00 │ T                    │ 05162       │ C16.0               │ 102022GM             │ C16.0            │ 33                  │ 7                 │ 8             │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 8             │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ 3       │        NULL │          NULL │ 8490/3           │ 33                  │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ T                  │ N       │                  143 │ 2334f59e-74ee-477c…  │     5 │ c2490ae9-4489-4b9a-8…  │ 05-NW       │  2022 │  44.08 │ a40b44  │ C16.0   │ C16        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ false    │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                     143 │                  NULL │
+    │ eb2ae3f0-31a2-4d2f…  │ 32d7f226-18c2-41b8…  │ 2023-10-15 00:00:00 │ T                    │ 04011       │ C80.0               │ 102023GM             │ C80.9            │ 33                  │ 0                 │ NULL          │       NULL │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ NULL          │ NULL       │       NULL │       NULL │ NULL       │ NULL              │ NULL    │ NULL              │ NULL    │ NULL              │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL           │ U       │        NULL │          NULL │ 8000/3           │ NULL                │                 NULL │                 NULL │                 NULL │          NULL │                NULL │             NULL │        NULL │                 NULL │        NULL │          NULL │          NULL │               NULL │  NULL │ NULL      │                 NULL │       NULL │  NULL │       NULL │ U                  │ J       │                    0 │ eb2ae3f0-31a2-4d2f…  │     4 │ 32d7f226-18c2-41b8-a…  │ 04-HB       │  2023 │  92.25 │ a85plus │ C80.0   │ C80        │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL     │ true     │ NULL              │              0 │              0 │              0 │              0 │ NULL              │                         NULL │ NULL          │ -        │ NULL        │           1 │ W       │                       0 │                  NULL │
     └──────────────────────┴──────────────────────┴─────────────────────┴──────────────────────┴─────────────┴─────────────────────┴──────────────────────┴──────────────────┴─────────────────────┴───────────────────┴───────────────┴────────────┴────────────┴────────────┴────────────┴───────────────────┴─────────┴───────────────────┴─────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴────────────────┴───────────────┴────────────┴────────────┴────────────┴────────────┴───────────────────┴─────────┴───────────────────┴─────────┴───────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴────────────────┴─────────┴─────────────┴───────────────┴──────────────────┴─────────────────────┴──────────────────────┴──────────────────────┴──────────────────────┴───────────────┴─────────────────────┴──────────────────┴─────────────┴──────────────────────┴─────────────┴───────────────┴───────────────┴────────────────────┴───────┴───────────┴──────────────────────┴────────────┴───────┴────────────┴────────────────────┴─────────┴──────────────────────┴──────────────────────┴───────┴────────────────────────┴─────────────┴───────┴────────┴─────────┴─────────┴────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────┴──────────┴───────────────────┴────────────────┴────────────────┴────────────────┴────────────────┴───────────────────┴──────────────────────────────┴───────────────┴──────────┴─────────────┴─────────────┴─────────┴─────────────────────────┴───────────────────────┘
 ```
 
@@ -844,6 +834,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────┐
     │                                                    ops                                                     │ cnt_ops │
     ├────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────┤
+    │ NULL                                                                                                       │  165429 │
     │ 5-401.11 - Exzision einzelner Lymphknoten und Lymphgefäße: Axillär: Mit Radionuklidmarkierung (Sentinel-…  │  135826 │
     │ 5-573.40 - Transurethrale Inzision, Exzision, Destruktion und Resektion von (erkranktem) Gewebe der Harn…  │   94266 │
     │ 5-987.0 - Anwendung eines OP-Roboters: Komplexer OP-Roboter                                                │   82761 │
@@ -863,6 +854,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────┐
     │                                                 ops                                                  │ cnt_ops │
     ├──────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────┤
+    │ NULL                                                                                                 │  165429 │
     │ 5-401.11 - Exzision einzelner Lymphknoten und Lymphgefäße: Axillär: Mit Radionuklidmarkierung (Senti │  135826 │
     │ 5-573.40 - Transurethrale Inzision, Exzision, Destruktion und Resektion von (erkranktem) Gewebe der  │   94266 │
     │ 5-987.0 - Anwendung eines OP-Roboters: Komplexer OP-Roboter                                          │   82761 │
@@ -930,6 +922,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌─────────────────────────────────────────────────┬─────────────┬──────────────────────────┬─────────────────────────┬────────────┬───────────────────────┬───────────────────┬─────────────┬─────────────┐
     │                  z_event_order                  │  z_events   │ Anzahl_Tage_Diagnose_Tod │ z_period_diag_death_day │  DatumPSA  │ z_period_diag_psa_day │ z_last_tum_status │ z_class_hpv │ z_tum_order │
     ├─────────────────────────────────────────────────┼─────────────┼──────────────────────────┼─────────────────────────┼────────────┼───────────────────────┼───────────────────┼─────────────┼─────────────┤
+    │ sy-st-sy-fo-sy-fo-sy-st-sy-fo-op-fo-st-sy-fo-st │ op|st|sy|fo │                     NULL │                    NULL │ 2020-05-15 │                     0 │ P - Progression   │ NULL        │           1 │
     └─────────────────────────────────────────────────┴─────────────┴──────────────────────────┴─────────────────────────┴────────────┴───────────────────────┴───────────────────┴─────────────┴─────────────┘
 ```
 
@@ -949,6 +942,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌─────────┬─────────┬─────────┬────────────────┬───────────────┬──────────────────────────────────────┬────────────────────────────────┬──────────────────────────────────┐
     │ z_t_p_0 │ z_n_p_0 │ z_m_p_0 │ UICC_Stadium_p │ Her2neuStatus │ Praetherapeutischer_Menopausenstatus │ HormonrezeptorStatus_Oestrogen │ HormonrezeptorStatus_Progesteron │
     ├─────────┼─────────┼─────────┼────────────────┼───────────────┼──────────────────────────────────────┼────────────────────────────────┼──────────────────────────────────┤
+    │ NULL    │ NULL    │ NULL    │ NULL           │ NULL          │ NULL                                 │ NULL                           │ NULL                             │
     └─────────┴─────────┴─────────┴────────────────┴───────────────┴──────────────────────────────────────┴────────────────────────────────┴──────────────────────────────────┘
 ```
 
@@ -958,6 +952,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌─────────────────────┬──────────────────┬─────────────┬───────────────┬───────┬────────────┬───────┬────────────┐
     │ TumorgroesseInvasiv │ TumorgroesseDCIS │ RASMutation │ ScoreErgebnis │  PSA  │ Tumordicke │  LDH  │ Ulzeration │
     ├─────────────────────┼──────────────────┼─────────────┼───────────────┼───────┼────────────┼───────┼────────────┤
+    │                NULL │             NULL │ NULL        │ 8             │ 130.0 │       NULL │  NULL │ NULL       │
     └─────────────────────┴──────────────────┴─────────────┴───────────────┴───────┴────────────┴───────┴────────────┘
 ```
 
@@ -1035,6 +1030,21 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌──────────────────────────────────────┬─────────────────────────────────────────────┬──────────────────┬────────────────────────────┬───────────┬─────────────────┬────────────┬────────────────┬────────────────┬─────────────────┬─────────────────┐
     │            BestrahlungId             │   TypeOfST_TypBestrahlungApplikationsart    │ Seite_Zielgebiet │ Interstitiell_endokavitaer │ Rate_Type │ Metabolisch_Typ │ Radiochemo │ Stereotaktisch │ Atemgetriggert │ CodeVersion2014 │ CodeVersion2021 │
     ├──────────────────────────────────────┼─────────────────────────────────────────────┼──────────────────┼────────────────────────────┼───────────┼─────────────────┼────────────┼────────────────┼────────────────┼─────────────────┼─────────────────┤
+    │ b121f45a-221e-481d-addb-eaed52e116f9 │ ST_TypBestrahlungApplikationsartPerkutan    │ B                │ NULL                       │ NULL      │ NULL            │ NULL       │ NULL           │ NULL           │ 313             │ NULL            │
+    │ 4cd066be-9355-4067-80a4-b55ab03e6677 │ ST_TypBestrahlungApplikationsartPerkutan    │ U                │ NULL                       │ NULL      │ NULL            │ NULL       │ NULL           │ NULL           │ 541             │ NULL            │
+    │ 9e2ea731-0140-4f35-915c-1bbde7664f0b │ ST_TypBestrahlungApplikationsartPerkutan    │ U                │ NULL                       │ NULL      │ NULL            │ RCN        │ NULL           │ NULL           │ 67              │ NULL            │
+    │ 041d9288-6c70-4f53-aa48-8bec77316bbf │ ST_TypBestrahlungApplikationsartPerkutan    │ U                │ NULL                       │ NULL      │ NULL            │ RCN        │ NULL           │ NULL           │ 65              │ NULL            │
+    │ 8ab778d9-7244-42a0-b0db-1cc275b19222 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 81              │ NULL            │
+    │ b185569c-7972-4635-b49a-e1f96b01e1a9 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 81              │ NULL            │
+    │ 3d0960de-30b5-4188-bd0b-b28806e6d2d4 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 81              │ NULL            │
+    │ d9404472-f9e3-47c4-90b9-5395a53929fc │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
+    │ 8a6aa060-d578-487c-9979-76aaaf1a868a │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
+    │ 43a1aff7-5898-4da1-a20c-ae1e2ea44f97 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
+    │ b33226f3-b6cd-4d96-86da-f8028c0e14b5 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
+    │ 570b5f4d-0ec2-4cc9-aaf4-e2097dda9456 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
+    │ e024423c-d480-49b9-aea3-b1327299a6c1 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
+    │ db6c9dbf-06d1-4276-b9eb-24b74b0b2378 │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 542             │ NULL            │
+    │ 995fc348-feee-482a-8891-ef71651fb6fe │ ST_TypBestrahlungApplikationsartMetabolisch │ T                │ NULL                       │ NULL      │ PSMA            │ NULL       │ NULL           │ NULL           │ 6               │ NULL            │
     ├──────────────────────────────────────┴─────────────────────────────────────────────┴──────────────────┴────────────────────────────┴───────────┴─────────────────┴────────────┴────────────────┴────────────────┴─────────────────┴─────────────────┤
     │ 15 rows                                                                                                                                                                                                                                  11 columns │
     └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1047,9 +1057,13 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     │                SYSTId                │ Intention │ Stellung_OP │ Therapieart │ Anzahl_Tage_Diagnose_SYST │ Anzahl_Tage_SYST_Dauer │ Datum_Beginn_SYST │ Datum_Beginn_SYST_Genauigkeit │ z_period_diag_syst_day │ z_syst_order │
     ├──────────────────────────────────────┼───────────┼─────────────┼─────────────┼───────────────────────────┼────────────────────────┼───────────────────┼───────────────────────────────┼────────────────────────┼──────────────┤
     │ 73aa6922-bc09-4af1-8004-d9c20d3be370 │ S         │ O           │ HO          │                        29 │                      9 │ 2020-06-15        │ T                             │                     29 │            1 │
+    │ e38d4eed-ad2d-4f6f-b032-86af238e02ca │ S         │ O           │ HO          │                        57 │                   NULL │ 2020-07-15        │ T                             │                     57 │            2 │
     │ 2624813f-392d-4600-9236-a0c09027645e │ S         │ O           │ HO          │                       141 │                    539 │ 2020-09-15        │ T                             │                    141 │            3 │
     │ df3ac679-6da8-4678-b347-81bef6eac5bc │ P         │ O           │ CH          │                       688 │                    120 │ 2022-03-15        │ T                             │                    688 │            4 │
+    │ 077140e2-e752-4bb9-9143-552229636965 │ P         │ O           │ CH          │                       862 │                   NULL │ 2022-09-15        │ T                             │                    862 │            5 │
     │ 102bf12e-be20-47de-9833-9c3840540609 │ P         │ O           │ HO          │                       869 │                    291 │ 2022-09-15        │ T                             │                    869 │            6 │
+    │ d2717912-2fa2-4eb8-84e2-34f87a1f38d3 │ P         │ O           │ SO          │                      1045 │                   NULL │ 2023-03-15        │ T                             │                   1045 │            7 │
+    │ 102c8567-ec63-4ac7-9cf0-1f9e2bb63996 │ P         │ O           │ IM          │                      1073 │                   NULL │ 2023-04-15        │ T                             │                   1073 │            8 │
     └──────────────────────────────────────┴───────────┴─────────────┴─────────────┴───────────────────────────┴────────────────────────┴───────────────────┴───────────────────────────────┴────────────────────────┴──────────────┘
 ```
 
@@ -1059,6 +1073,11 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌──────────────────────────────────────┬────────────────────────┬──────────────────────────┬─────────────────────────────┬───────────────┬──────────────────────────────────────┬─────────────────────────────┬──────────────────────────────┐
     │              SubstanzId              │ TypeOfSYST_TypSubstanz │ SYST_TypSubstanzATC_Code │ SYST_TypSubstanzATC_Version │  Bezeichnung  │                SYSTId                │ z_substance_prediction_name │ z_substance_prediction_score │
     ├──────────────────────────────────────┼────────────────────────┼──────────────────────────┼─────────────────────────────┼───────────────┼──────────────────────────────────────┼─────────────────────────────┼──────────────────────────────┤
+    │ 2f5803c7-df95-4f64-8c58-4e33914db7db │ Bezeichnung            │ NULL                     │ NULL                        │ Docetaxel     │ df3ac679-6da8-4678-b347-81bef6eac5bc │ Docetaxel                   │                          1.0 │
+    │ 7c3b7991-ada9-4f92-8ced-2ca789307cc2 │ Bezeichnung            │ NULL                     │ NULL                        │ Cabazitaxel   │ 077140e2-e752-4bb9-9143-552229636965 │ Cabazitaxel                 │                          1.0 │
+    │ f802f4ba-562e-4053-8f6a-f7105e41566e │ Bezeichnung            │ NULL                     │ NULL                        │ Enzalutamid   │ 102bf12e-be20-47de-9833-9c3840540609 │ Enzalutamid                 │                          1.0 │
+    │ 478a99ec-4942-47da-b609-785ca6557171 │ Bezeichnung            │ NULL                     │ NULL                        │ Zoledronsäure │ d2717912-2fa2-4eb8-84e2-34f87a1f38d3 │ Zoledronsäure               │                          1.0 │
+    │ 6e49d638-8b4d-4c7c-82e4-ce4a9e648f75 │ Bezeichnung            │ NULL                     │ NULL                        │ Denosumab     │ 102c8567-ec63-4ac7-9cf0-1f9e2bb63996 │ Denosumab                   │                          1.0 │
     └──────────────────────────────────────┴────────────────────────┴──────────────────────────┴─────────────────────────────┴───────────────┴──────────────────────────────────────┴─────────────────────────────┴──────────────────────────────┘
 ```
 
@@ -1068,6 +1087,14 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌──────────────────────────────────────┬─────────────────────┬──────────────────────────┬───────────────────────────────────────┬──────────────────────────────────────────┐
     │                SYSTId                │ TypeOfProtokoll_Typ │       Bezeichnung        │ Protokoll_TypProtokollschluessel_Code │ Protokoll_TypProtokollschluessel_Version │
     ├──────────────────────────────────────┼─────────────────────┼──────────────────────────┼───────────────────────────────────────┼──────────────────────────────────────────┤
+    │ 73aa6922-bc09-4af1-8004-d9c20d3be370 │ Bezeichnung         │ Bicalutamidflareup       │ NULL                                  │ NULL                                     │
+    │ e38d4eed-ad2d-4f6f-b032-86af238e02ca │ Bezeichnung         │ Leuprorelin->fortlaufend │ NULL                                  │ NULL                                     │
+    │ 2624813f-392d-4600-9236-a0c09027645e │ Bezeichnung         │ Abirateron+Prednisolon   │ NULL                                  │ NULL                                     │
+    │ df3ac679-6da8-4678-b347-81bef6eac5bc │ Bezeichnung         │ Docetaxel                │ NULL                                  │ NULL                                     │
+    │ 077140e2-e752-4bb9-9143-552229636965 │ Bezeichnung         │ Cabazitaxelfortl.        │ NULL                                  │ NULL                                     │
+    │ 102bf12e-be20-47de-9833-9c3840540609 │ Bezeichnung         │ Enzalutamidfortl.        │ NULL                                  │ NULL                                     │
+    │ d2717912-2fa2-4eb8-84e2-34f87a1f38d3 │ Bezeichnung         │ Zoledronsäurefortl.      │ NULL                                  │ NULL                                     │
+    │ 102c8567-ec63-4ac7-9cf0-1f9e2bb63996 │ Bezeichnung         │ Denosumabfortl.          │ NULL                                  │ NULL                                     │
     └──────────────────────────────────────┴─────────────────────┴──────────────────────────┴───────────────────────────────────────┴──────────────────────────────────────────┘
 ```
 
@@ -1093,6 +1120,13 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌──────────────────────────────────────┬──────────────────────────────────────┬─────────┬──────────┬──────────┬──────────┬─────────────────┬─────────┬──────────────┬─────────────────┬─────────┬─────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬──────────────┐
     │                TNMId                 │           FolgeereignisId            │ Version │ y_Symbol │ r_Symbol │ a_Symbol │ c_p_u_Praefix_T │    T    │ TNM_m_Symbol │ c_p_u_Praefix_N │    N    │ c_p_u_Praefix_M │    M    │    L    │    V    │   Pn    │    S    │ UICC_Stadium │
     ├──────────────────────────────────────┼──────────────────────────────────────┼─────────┼──────────┼──────────┼──────────┼─────────────────┼─────────┼──────────────┼─────────────────┼─────────┼─────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────────────┤
+    │ 00f3ce83-391f-4c4a-891d-de01c969d5ef │ 00f3ce83-391f-4c4a-891d-de01c969d5ef │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ 98f85314-5e08-4447-aab1-0000f4d5313b │ 98f85314-5e08-4447-aab1-0000f4d5313b │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ 28b5a28c-32b9-4b2d-913e-89c4185c0406 │ 28b5a28c-32b9-4b2d-913e-89c4185c0406 │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ 38ce200a-9dbe-4d52-a747-f7b8441e98cb │ 38ce200a-9dbe-4d52-a747-f7b8441e98cb │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ f9784935-338a-4099-b5d5-efc66265f621 │ f9784935-338a-4099-b5d5-efc66265f621 │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ d0b9b58a-485e-4053-a168-95eab8c78552 │ d0b9b58a-485e-4053-a168-95eab8c78552 │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
+    │ f2a1bcd8-691f-4ec6-8466-40d144db1d8b │ f2a1bcd8-691f-4ec6-8466-40d144db1d8b │ NULL    │ NULL     │ NULL     │ NULL     │ NULL            │ NULL    │ NULL         │ NULL            │ NULL    │ NULL            │ NULL    │ NULL    │ NULL    │ NULL    │ NULL    │ NULL         │
     └──────────────────────────────────────┴──────────────────────────────────────┴─────────┴──────────┴──────────┴──────────┴─────────────────┴─────────┴──────────────┴─────────────────┴─────────┴─────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────────┘
 ```
 

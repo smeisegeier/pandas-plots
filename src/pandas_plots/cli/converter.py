@@ -482,6 +482,34 @@ def scale_images(markdown_filepath: str):
         return False
 
 
+def fix_toc_for_gitlab(markdown_filepath):
+    if not os.path.exists(markdown_filepath):
+        print(f"Error: File '{markdown_filepath}' not found.")
+        return
+
+    # Read the original content
+    with open(markdown_filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Pattern 1: Headers like `## <a id='...'></a>[text](#toc0_)`
+    # Moves anchor to the line below and uses name attribute
+    pattern_headers = r"^(#+)\s*<a\s+(?:id|name)=['\"](.*?)['\"]\s*>\s*</a>\s*\[(.*?)\]\(#toc0_\)"
+    replacement_headers = r"\1 [\3](#toc0_)\n<a name='\2'></a>"
+    content = re.sub(pattern_headers, replacement_headers, content, flags=re.MULTILINE)
+
+    # Pattern 2: Bold text like `**Table of contents**<a id='...'></a>`
+    # Moves anchor to the line below and uses name attribute
+    pattern_bold = r"\*\*(.*?)\*\*\s*<a\s+(?:id|name)=['\"](.*?)['\"]\s*>\s*</a>"
+    replacement_bold = r"**\1**\n<a name='\2'></a>"
+    content = re.sub(pattern_bold, replacement_bold, content)
+
+    # Overwrite the original file
+    with open(markdown_filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    print(f"└ ✅ SUCCESS: File '{markdown_filepath}' has been updated for GitLab.")
+
+
 def jupyter_to_md(
     path: str,
     to: Literal["markdown", "html", "pdf"] = "markdown",
@@ -497,6 +525,10 @@ def jupyter_to_md(
     Converts a Jupyter notebook into a Markdown file with embedded plotly digrams
     and styled dataframes.
     ⚠️ `execute=True` will force the tables as html output due to conversion processes
+
+    uses the following env variables:
+        `RENDERER`: is set to `svg` but reset to "" after
+        `GIT_HOST`: if `gitlab`, fix the TOC html ags
 
     Args:
         path (str): The path to the Jupyter notebook file.
@@ -629,6 +661,9 @@ def jupyter_to_md(
     )
 
     scale_images(target_md_path)
+
+    if os.getenv("GIT_HOST") == "gitlab":
+        fix_toc_for_gitlab(target_md_path)
 
 
 # * Keep the original function name as primary, alias if needed
