@@ -26,6 +26,7 @@ def print_filter(
     
     if show_as_details:
         display(Markdown(f"<details>\n<summary>filter-sql</summary>\n\n```sql\n{cleaned_filter}\n```\n\n</details>"))
+        print("\n")
     else:
         display(Markdown("<!-- START_TOKEN -->"))
         print("-- filter-sql")

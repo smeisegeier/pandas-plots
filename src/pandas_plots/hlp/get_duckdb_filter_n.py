@@ -105,15 +105,16 @@ def get_duckdb_filter_n(
     # Define the COUNT clause based on the distinct_metric argument (using its final state from setup)
     if distinct_metric:
         count_clause = f"count(DISTINCT {distinct_metric})"
-        count_label = f"counts: distinct {distinct_metric}"
+        count_label = f"count: distinct {distinct_metric}"
     else:
         count_clause = "count(*)"
-        count_label = "counts: all rows (no grouping)"
+    #     count_label = "counts: all rows (no grouping)"
 
     # --- Print the Metric/Count Label ---
     if show_filter:
-        print(count_label)
-        print("---")
+        if distinct_metric:
+            print(count_label)
+            print("---")
 
     if filters is None or not filters:
         if show_filter:
