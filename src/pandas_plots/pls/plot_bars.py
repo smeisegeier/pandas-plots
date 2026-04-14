@@ -203,10 +203,7 @@ def plot_bars(
     elif title:
         title_str = f"{title}, {_title_str_n}"
     else:
-        title_str = f"{caption}, {_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}, {_title_str_n}"
-
-    # * layot caption if provided
-    caption = set_caption(caption)
+        title_str = f"{set_caption(caption)}{_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}, {_title_str_n}"
 
     # * sort df
     df = df.sort_values(

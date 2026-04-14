@@ -30,6 +30,7 @@ def plot_stacked_bars(
     renderer: Literal["png", "svg", None] = None,
     caption: str = "",  # * dont use None, f-string will print this as 'None'
     caption_only_n: bool = False,
+    no_n: bool = False,
     sort_values: bool = False,
     sort_values_index: bool = False,
     sort_values_color: bool = False,
@@ -62,6 +63,7 @@ def plot_stacked_bars(
     - renderer (Literal["png", "svg", None]): Defines the output format.
     - caption (str): Optional caption for additional context.
     - caption_only_n (bool): If True, shows only the count (n) in the title, ignoring the caption.
+    - no_n (bool): If True, does not show the count (n) in the title.
     - sort_values (bool): ⚠️ DEPRECATED
     - show_total (bool): If True, adds a row with the total sum of all categories.
     - precision (int): Number of decimal places for numerical values.
@@ -144,13 +146,14 @@ def plot_stacked_bars(
     _title_str_top_index = f"TOP{top_n_index} " if top_n_index > 0 else ""
     _title_str_top_color = f"TOP{top_n_color} " if top_n_color > 0 else ""
     _title_str_null = ", NULL excluded" if dropna else ""
+    _n_str = "" if no_n else f", n={n:_}"
 
     if caption_only_n:
-        _title_str = f"n={n:_}"
+        _title_str = _n_str.replace(",", "").strip()
     elif title:
-        _title_str = f"{title}, n={n:_}"
+        _title_str = f"{title}{_n_str}"
     else:
-        _title_str = f"{set_caption(caption)}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}, n={n:_}"
+        _title_str = f"{set_caption(caption)}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_n_str}"
 
     _df = df.copy().assign(facet=None)
     _df.columns = ["index", "col", "value", "facet"] if not swap else ["col", "index", "value", "facet"]
