@@ -36,6 +36,7 @@ def plot_facet_stacked_bars(
     sort_values_facet: bool = False,
     relative: bool = False,
     show_pct: bool = False,
+    fill_index: bool = False,
 ) -> None:
     """
     A function to plot multiple (subplots_per_row) stacked bar charts, facetted by the third column, with the first column as the index and the second column as the colors.
@@ -67,6 +68,9 @@ def plot_facet_stacked_bars(
     - sort_values_facet (bool): Whether to sort the facet column. Default is False.
     - relative (bool): Whether to show the bars as relative values (0-1 range). Default is False.
     - show_pct (bool): Whether to show the annotations as percentages. Default is False.
+    - fill_index (bool): Whether to add placeholder rows for all index x facet combinations with NULL color
+        and value 0. This ensures every facet subplot renders all index ticks symmetrically even when
+        certain combinations are absent from the data. Default is False.
 
     Returns: None
     """
@@ -96,6 +100,15 @@ def plot_facet_stacked_bars(
         df_copy["value"] = 1
     elif df_copy.shape[1] == 4:
         df_copy.columns = ["index", "col", "facet", "value"]
+
+    if fill_index:
+        _fill = pd.MultiIndex.from_product(
+            [df_copy["index"].unique(), df_copy["facet"].unique()],
+            names=["index", "facet"],
+        ).to_frame(index=False)
+        _fill["col"] = None
+        _fill["value"] = 0
+        df_copy = pd.concat([df_copy, _fill[["index", "col", "facet", "value"]]], ignore_index=True)
 
     n = df_copy["value"].sum()
     original_rows = len(df_copy)
