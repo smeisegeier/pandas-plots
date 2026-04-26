@@ -1,24 +1,24 @@
 import pandas as pd
 
-def find_cols(all_cols: list[str], stubs: list[str] = None):
-    """
-    Find all columns in a list of columns that contain any of the given stubs.
+# def find_cols(all_cols: list[str], stubs: list[str] = None):
+#     """
+#     Find all columns in a list of columns that contain any of the given stubs.
 
-    Parameters
-    ----------
-    all_cols : list[str]
-        List of columns to search in.
-    stubs : list[str]
-        List of strings to search for in column names.
+#     Parameters
+#     ----------
+#     all_cols : list[str]
+#         List of columns to search in.
+#     stubs : list[str]
+#         List of strings to search for in column names.
 
-    Returns
-    -------
-    list[str]
-        List of columns that contain any of the given stubs.
-    """
-    if all_cols is None or stubs is None:
-        return "❌ empty lists"
-    return [col for col in all_cols if any(match in col for match in stubs)]
+#     Returns
+#     -------
+#     list[str]
+#         List of columns that contain any of the given stubs.
+#     """
+#     if all_cols is None or stubs is None:
+#         return "❌ empty lists"
+#     return [col for col in all_cols if any(match in col for match in stubs)]
 
 def find_cols(all_cols: list[str], stubs: list[str] = None) -> list[str]:
     """

@@ -23,6 +23,7 @@ from .is_ipynb import is_ipynb
 from .prepend_uv_header import prepend_uv_header
 from .create_py_script import create_py_script
 from .setup_rendering import setup_rendering
+from .find_str_in_duckdb import find_str_in_duckdb
 
 __all__ = [
     "mean_confidence_interval",
@@ -45,5 +46,6 @@ __all__ = [
     "is_ipynb",
     "prepend_uv_header",
     "create_py_script",
-    "setup_rendering"
+    "setup_rendering",
+    "find_str_in_duckdb",
 ]

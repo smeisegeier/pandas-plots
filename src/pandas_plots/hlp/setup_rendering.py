@@ -2,7 +2,7 @@ import os
 import matplotlib.pyplot as plt
 from IPython import get_ipython
 
-def setup_rendering(render: bool = False):
+def setup_rendering(render: bool = True):
     """
     **⚠️ font size override is not active**
 
@@ -12,7 +12,7 @@ def setup_rendering(render: bool = False):
 
     Parameters
     ----------
-    render : bool, default=False
+    render : bool, default=True
         If True, environment variables are set for rendering plots to markdown.
         If False, environment variables are reset to default values.
 
