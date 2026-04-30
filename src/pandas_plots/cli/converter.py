@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import subprocess
 from typing import Literal
 
 import dataframe_image as dfi
@@ -551,48 +552,6 @@ def jupyter_to_md(
     if execute:
         print("⚠️ execute=True will force the tables as html output instead of png")
 
-    # # 1. Build the base CLI command
-    # command = [
-    #     "dataframe_image",
-    #     shlex.quote(path),  # Safely quote the notebook path
-    #     "--to=markdown",
-    #     f"--output-dir={shlex.quote(output_dir)}",
-    #     f"--chrome-path={shlex.quote(chrome_path)}",
-    #     "--table-conversion=chrome",
-    #     # "--center_df",
-    #     # "--max_rows=50",
-    #     # "--max_cols=25",
-    # ]
-
-    # # 2. Add optional/conditional arguments
-    # if execute:
-    #     command.append("--execute=True")
-
-    # if no_input:
-    #     command.append("--no-input")
-
-    # # Note: save_notebook=False, limit=None, document_name=None,
-    # # and latex_command=None are handled by default/don't exist in the CLI call.
-
-    # # 3. Execute the command
-    # try:
-    #     print(f"Executing command: {' '.join(command)}")
-    #     # Use subprocess.run for simple command execution
-    #     result = subprocess.run(
-    #         command,
-    #         check=True,  # Raises CalledProcessError for non-zero exit codes
-    #         capture_output=True,
-    #         text=True
-    #     )
-    #     # print("Conversion successful.")
-    #     # print("Output:\n", result.stdout) # Uncomment for debug output
-
-    # except subprocess.CalledProcessError as e:
-    #     print(f"└ Error during CLI conversion (Exit Code {e.returncode}):")
-    #     print("└ Stderr:\n", e.stderr)
-    #     # You might want to reraise the exception or handle it here
-    #     raise
-
     # * use python API - this wont convert tables to PNG!
     print(f"Converting {path} to Markdown using dataframe-image python API ..")
     dfi.convert(
@@ -616,6 +575,9 @@ def jupyter_to_md(
 
     # * reset RENDERER
     os.environ["RENDERER"] = ""  # <None> does not work
+
+    # * create output dir if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
 
     # * remove style block
     # 1. Get the filename without its original extension
@@ -675,15 +637,46 @@ def j2md(*args, **kwargs):
     return jupyter_to_md(*args, **kwargs)
 
 
-def test():
-    """Example of a second CLI function with proper argument parsing"""
-    parser = argparse.ArgumentParser(description="Another function in the CLI")
-    parser.add_argument("path", help="Path to process")
-    parser.add_argument("--output_dir", "-o", default="./output", help="Output directory (default: ./output)")
+def jupyter_to_html(
+    path: str,
+    output_dir: str = "./docs",
+    no_input: bool = True,
+    execute: bool = False,
+):
+    """
+    Converts a Jupyter notebook to HTML using `jupyter nbconvert`.
 
-    args = parser.parse_args()
-    print(f"Running another function on {args.path} with output to {args.output_dir}")
-    # Add your second functionality here
+    Args:
+        path (str): Path to the Jupyter notebook file.
+        output_dir (str): Directory where the HTML file will be saved. Defaults to "./docs".
+        no_input (bool): Exclude input cells from the output. Defaults to True.
+        execute (bool): Execute the notebook before converting. Defaults to False.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    command = [
+        "jupyter",
+        "nbconvert",
+        "--to",
+        "html",
+        f"--output-dir={output_dir}",
+        path,
+    ]
+
+    if no_input:
+        command.append("--no-input")
+    if execute:
+        command.append("--execute")
+
+    print(f"Converting {path} to HTML ..")
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        root = os.path.splitext(os.path.basename(path))[0]
+        print(f"└ ✅ SUCCESS: {os.path.join(output_dir, root + '.html')}")
+    except subprocess.CalledProcessError as e:
+        print(f"└ ❌ ERROR (exit {e.returncode}):\n{e.stderr}")
+        raise
 
 
 def main():

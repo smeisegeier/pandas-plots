@@ -43,6 +43,7 @@ a comprehensive python package for enhanced **data visualization** and **analysi
 - **venn diagrams** (`ven`): easy-to-create venn diagrams for set analysis
 - **helper functions** (`hlp`): utility functions for common data operations
 - **constants** (`const`): useful constants like color palettes
+- **cli** (`cli`): command-line interface for Jupyter notebook conversion
 
 ## 📦 installation
 <a id="markdown-%F0%9F%93%A6-installation" name="%F0%9F%93%A6-installation"></a>
