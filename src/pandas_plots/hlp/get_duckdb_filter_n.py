@@ -1,3 +1,5 @@
+import os
+
 import duckdb
 from IPython.display import display, Markdown
 
@@ -26,7 +28,7 @@ def get_duckdb_filter_n(
                                 (filter_string, caption_string).
         debug (bool): If True, prints the generated SQL queries instead of executing them.
         max_bar_length (int): The length of the ASCII bar (default is 30).
-                            If set to 0, the bars are hidden.
+                            If set to 0, the bars are hidden (this is triggered by "PDF" env).
         distinct_metric (str): If set (e.g., 'user_id'), the function calculates
                             COUNT(DISTINCT <distinct_metric>) instead of COUNT(*).
         first_n_filter_apply_to_rows (int): If > 0, takes the first n filters and applies
@@ -44,6 +46,10 @@ def get_duckdb_filter_n(
     # --- Flag to track if the connection was created here ---
     connection_is_ephemeral = False
     
+    # * override if target is pdf
+    if os.getenv("PDF") == "1":
+        max_bar_length = 0
+
     # Determine if bars should be shown based on the argument
     show_bars = max_bar_length > 0
     

@@ -59,6 +59,9 @@ def plot_box(
     if ser is None:
         return
 
+    if os.getenv("PDF") == "1":
+        summary = False
+
     # * drop na to keep scipy sane
     n_ = len(ser)
     ser.dropna(inplace=True)

@@ -77,6 +77,9 @@ def plot_boxes_large(
     else:
         plt.style.use("default")
 
+    if os.getenv("PDF") == "1":
+        summary = False
+
     scale_factor = 100
     plt.figure(figsize=(width / scale_factor, height / scale_factor))
 

@@ -61,6 +61,9 @@ def plot_histogram_large(
         )
         return
 
+    if os.getenv("PDF") == "1":
+        summary = False
+
     # * Only plot the first numeric column if DataFrame has multiple
     data_series = df.iloc[:, 0]
 

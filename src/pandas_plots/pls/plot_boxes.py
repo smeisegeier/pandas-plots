@@ -78,6 +78,9 @@ def plot_boxes(
     xlvl2 = 0
     xlvl3 = 50
 
+    if os.getenv("PDF") == "1":
+        summary = False
+
     col_cat = df.columns[0]
     col_num = df.columns[1]
 

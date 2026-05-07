@@ -67,6 +67,9 @@ def plot_histogram(
         )
         return
 
+    if os.getenv("PDF") == "1":
+        summary = False
+
     # * rounding
     df = df.map(lambda x: round(x, precision))
 

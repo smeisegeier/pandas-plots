@@ -1,6 +1,6 @@
 # <a id='toc1_'></a>[test area](#toc0_)
 
-**Table of contents**<a id='toc0_'></a>    
+**Inhalt**<a id='toc0_'></a>    
 - [test area](#toc1_)    
     - [load](#toc1_1_1_)    
   - [pls](#toc1_2_)    
@@ -32,6 +32,8 @@
 
 ### <a id='toc1_1_1_'></a>[load](#toc0_)
 
+> this is loading
+
     🐍 3.12.8 | 📦 matplotlib_venn: 0.11.10 | 📦 dataframe_image: 0.2.7 | 📦 plotly: 6.2.0 | 📦 kaleido: 1.0.0 | 📦 seaborn: 0.13.2 | 📦 pandas: 2.3.3 | 📦 numpy: 1.26.4 | 📦 duckdb: 1.3.2 | 📦 pandas-plots: 1.4.0
     True
 
@@ -40,11 +42,11 @@
 
 ```
     n = 3_241_401
-    └ [2020-2023.07]:                   n = 2_633_644 (100.0%) ██████████████████████████████
-    └ [not z_is_dco]:                   n = 2_547_636  (96.7%) ░█████████████████████████████
-    └ [keine M1]:                       n = 2_305_215  (87.5%) ░░░░██████████████████████████
-    └ [keine Verstorbenen < 180 Tage]:  n = 2_132_064  (81.0%) ░░░░░░████████████████████████
-    └ [lympho- und mesoendokr. Tumore]:    n = 27_653   (1.0%) ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    └ [2020-2023.07]:                   n = 2_633_644 (100.0%) 
+    └ [not z_is_dco]:                   n = 2_547_636  (96.7%) 
+    └ [keine M1]:                       n = 2_305_215  (87.5%) 
+    └ [keine Verstorbenen < 180 Tage]:  n = 2_132_064  (81.0%) 
+    └ [lympho- und mesoendokr. Tumore]:    n = 27_653   (1.0%)
 ```
 
 <details>
@@ -70,10 +72,10 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 ```
     count: distinct z_pat_id
     ---
-    n = 2_735_152                          (100.0%) ██████████████████████████████
-    └ [DJ 2020-2024]:        n = 2_729_035  (99.8%) ░█████████████████████████████
-    └ [Verstorben = 'N']:    n = 1_975_774  (72.2%) ░░░░░░░░░█████████████████████
-    └ [Vitalstatus >= 2020]: n = 1_975_074  (72.2%) ░░░░░░░░░█████████████████████
+    n = 2_735_152                          (100.0%) 
+    └ [DJ 2020-2024]:        n = 2_729_035  (99.8%) 
+    └ [Verstorben = 'N']:    n = 1_975_774  (72.2%) 
+    └ [Vitalstatus >= 2020]: n = 1_975_074  (72.2%)
 ```
 
 <details>
@@ -94,11 +96,7 @@ and year(Datum_Vitalstatus) between 2020 and 2025
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_8_7.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_8_7.svg">
-  <img alt="svg" src="test_files/output_8_7.svg">
-</picture>
+![svg](test_files/output_8_5.svg)
     
 
 
@@ -108,11 +106,11 @@ and year(Datum_Vitalstatus) between 2020 and 2025
     count: distinct z_pat_id
     ---
     n = 2_735_152
-    └ [2020-2023.07]:                   n = 2_415_210 (100.0%) ██████████████████████████████
-    └ [not z_is_dco]:                   n = 2_334_551  (96.7%) ░░████████████████████████████
-    └ [keine M1]:                       n = 2_113_894  (87.5%) ░░░░██████████████████████████
-    └ [keine Verstorbenen < 180 Tage]:  n = 1_956_584  (81.0%) ░░░░░░████████████████████████
-    └ [lympho- und mesoendokr. Tumore]:    n = 27_520   (1.1%) ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    └ [2020-2023.07]:                   n = 2_415_210 (100.0%) 
+    └ [not z_is_dco]:                   n = 2_334_551  (96.7%) 
+    └ [keine M1]:                       n = 2_113_894  (87.5%) 
+    └ [keine Verstorbenen < 180 Tage]:  n = 1_956_584  (81.0%) 
+    └ [lympho- und mesoendokr. Tumore]:    n = 27_520   (1.1%)
 ```
 
 <details>
@@ -156,29 +154,17 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_12_5.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_12_5.png">
-  <img alt="png" src="test_files/output_12_5.png">
-</picture>
+![png](test_files/output_12_4.png)
     
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_13_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_13_1.png">
-  <img alt="" src="test_files/output_13_1.png" width="500">
-</picture>
+<img src="test_files/output_13_1.png" width="500">
     
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_14_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_14_1.png">
-  <img alt="" src="test_files/output_14_1.png" width="500">
-</picture>
+<img src="test_files/output_14_1.png" width="500">
     
 
 
@@ -191,49 +177,39 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_17_0.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_17_0.svg">
-  <img alt="svg" src="test_files/output_17_0.svg">
-</picture>
+![svg](test_files/output_17_0.svg)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_18_0.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_18_0.svg">
-  <img alt="pl" src="test_files/output_18_0.svg">
-</picture>
+![svg](test_files/output_18_0.svg)
+    
+
+
+
+<!-- ALT_TEXT:pl-->
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_19_1.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_19_1.svg">
-  <img alt="test" src="test_files/output_19_1.svg">
-</picture>
+![svg](test_files/output_19_1.svg)
+    
+
+
+
+<!-- ALT_TEXT:test-->
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_20_1.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_20_1.svg">
-  <img alt="svg" src="test_files/output_20_1.svg">
-</picture>
+![svg](test_files/output_20_1.svg)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_21_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_21_0.png">
-  <img alt="png" src="test_files/output_21_0.png">
-</picture>
+![png](test_files/output_21_0.png)
     
 
 
@@ -245,11 +221,12 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_21_3.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_21_3.svg">
-  <img alt="test" src="test_files/output_21_3.svg">
-</picture>
+<!-- ALT_TEXT:test-->
+
+
+
+    
+![svg](test_files/output_21_3.svg)
     
 
 
@@ -260,18 +237,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_23_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_23_0.png">
-  <img alt="png" src="test_files/output_23_0.png">
-</picture>
-    
-
-
-    
-    column (n = 6_433) |   notnull    |  min  | lower |  q25  | median | mean  |  q75  | upper |  max   |  std  |  cv  
-    -------------------+--------------+-------+-------+-------+--------+-------+-------+-------+--------+-------+------
-    distance           | 6_433 (100%) | 0.000 | 0.000 | 0.980 |  1.640 | 3.025 | 3.210 | 6.550 | 36.700 | 3.828 | 1.266
+![png](test_files/output_23_0.png)
     
 
 
@@ -282,60 +248,27 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_26_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_26_0.png">
-  <img alt="png" src="test_files/output_26_0.png">
-</picture>
-    
-
-
-    
-    column (n = 45) |  notnull  |  min  | lower |  q25  | median | mean  |  q75   | upper  |  max   |  std   |  cv  
-    ----------------+-----------+-------+-------+-------+--------+-------+--------+--------+--------+--------+------
-    distance        | 45 (100%) | 0.000 | 0.000 | 0.000 |  0.900 | 7.171 | 12.600 | 26.350 | 36.660 | 10.708 | 1.493
+![png](test_files/output_26_0.png)
     
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_26_3.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_26_3.svg">
-  <img alt="test" src="test_files/output_26_3.svg">
-</picture>
-    
+<!-- ALT_TEXT:test-->
+
 
 
     
-    column (n = 45) |  notnull  |  min  | lower |  q25  | median | mean  |  q75   | upper  |  max   |  std   |  cv  
-    ----------------+-----------+-------+-------+-------+--------+-------+--------+--------+--------+--------+------
-    distance        | 45 (100%) | 0.000 | 0.000 | 0.000 |  0.900 | 7.171 | 12.600 | 26.350 | 36.660 | 10.708 | 1.493
+![svg](test_files/output_26_2.svg)
     
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_27_1.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_27_1.svg">
-  <img alt="test" src="test_files/output_27_1.svg">
-</picture>
-    
+<!-- ALT_TEXT:test-->
+
 
 
     
-    column (n = 6_433) |   notnull    | min  | lower | q25  | median | mean | q75  | upper |  max  | std  |  cv 
-    -------------------+--------------+------+-------+------+--------+------+------+-------+-------+------+-----
-    distance           | 6_433 (100%) | 0.00 |  0.00 | 0.98 |   1.64 | 3.02 | 3.21 |  6.55 | 36.70 | 3.83 | 1.27
-    
-    
-    item (n = 6_433) | count |  min  | lower |  q25  | median | mean  |  q75  | upper |  max  |  std  |  cv 
-    -----------------+-------+-------+-------+-------+--------+-------+-------+-------+-------+-------+-----
-    (NA)             |    45 |  0.00 |  0.00 |  0.00 |   0.90 |  7.17 | 12.60 | 26.35 | 36.66 | 10.71 | 1.49
-    Bronx            |   137 |  0.00 |  0.00 |  2.36 |   4.31 |  6.61 |  9.44 | 19.62 | 24.20 |  5.95 | 0.90
-    Brooklyn         |   501 |  0.00 |  0.00 |  1.53 |   3.63 |  5.03 |  7.30 | 15.70 | 26.92 |  4.49 | 0.89
-    Manhattan        | 5_206 |  0.00 |  0.00 |  0.91 |   1.50 |  2.39 |  2.60 |  5.13 | 30.23 |  2.91 | 1.21
-    Queens           |   542 |  0.00 |  0.00 |  1.34 |   3.56 |  5.96 |  9.89 | 22.51 | 36.70 |  5.89 | 0.99
-    Staten Island    |     2 | 15.51 | 15.51 | 15.68 |  15.86 | 15.86 | 16.03 | 16.20 | 16.20 |  0.49 | 0.03
+![svg](test_files/output_27_1.svg)
     
 
 
@@ -356,28 +289,12 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_28_2.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_28_2.png">
-  <img alt="#test" src="test_files/output_28_2.png">
-</picture>
-    
+<!-- ALT_TEXT:#test-->
+
 
 
     
-    column (n = 6_433) |   notnull    | min  | lower | q25  | median | mean | q75  | upper |  max  | std  |  cv 
-    -------------------+--------------+------+-------+------+--------+------+------+-------+-------+------+-----
-    distance           | 6_433 (100%) | 0.00 |  0.00 | 0.98 |   1.64 | 3.02 | 3.21 |  6.55 | 36.70 | 3.83 | 1.27
-    
-    
-    item (n = 6_433) | count |  min  | lower |  q25  | median | mean  |  q75  | upper |  max  |  std  |  cv 
-    -----------------+-------+-------+-------+-------+--------+-------+-------+-------+-------+-------+-----
-    (NA)             |    45 |  0.00 |  0.00 |  0.00 |   0.90 |  7.17 | 12.60 | 26.35 | 36.66 | 10.71 | 1.49
-    Bronx            |   137 |  0.00 |  0.00 |  2.36 |   4.31 |  6.61 |  9.44 | 19.62 | 24.20 |  5.95 | 0.90
-    Brooklyn         |   501 |  0.00 |  0.00 |  1.53 |   3.63 |  5.03 |  7.30 | 15.70 | 26.92 |  4.49 | 0.89
-    Manhattan        | 5_206 |  0.00 |  0.00 |  0.91 |   1.50 |  2.39 |  2.60 |  5.13 | 30.23 |  2.91 | 1.21
-    Queens           |   542 |  0.00 |  0.00 |  1.34 |   3.56 |  5.96 |  9.89 | 22.51 | 36.70 |  5.89 | 0.99
-    Staten Island    |     2 | 15.51 | 15.51 | 15.68 |  15.86 | 15.86 | 16.03 | 16.20 | 16.20 |  0.49 | 0.03
+![png](test_files/output_28_2.png)
     
 
 
@@ -388,11 +305,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_31_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_31_0.png">
-  <img alt="png" src="test_files/output_31_0.png">
-</picture>
+![png](test_files/output_31_0.png)
     
 
 
@@ -403,11 +316,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_33_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_33_0.png">
-  <img alt="png" src="test_files/output_33_0.png">
-</picture>
+![png](test_files/output_33_0.png)
     
 
 
@@ -449,11 +358,12 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_35_2.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_35_2.svg">
-  <img alt="[tumor-id] over [treatment], n=12 id (26 events)" src="test_files/output_35_2.svg">
-</picture>
+<!-- ALT_TEXT:[tumor-id] over [treatment], n=12 id (26 events)-->
+
+
+
+    
+![svg](test_files/output_35_2.svg)
     
 
 
@@ -541,11 +451,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_40_4.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_40_4.svg">
-  <img alt="svg" src="test_files/output_40_4.svg">
-</picture>
+![svg](test_files/output_40_4.svg)
     
 
 
@@ -734,47 +640,31 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     ┌─────────────┬──────────────────────────────┬───────────────────┐
     │ z_kkr_label │ z_first_treatment_after_days │ z_first_treatment │
     ├─────────────┼──────────────────────────────┼───────────────────┤
-    │ 09-BY       │                            1 │ sy                │
-    │ 08-BW       │                            0 │ op                │
-    │ 06-HE       │                           47 │ sy                │
+    │ 16-TH       │                           35 │ sy                │
+    │ 05-NW       │                            0 │ op                │
+    │ 13-MV       │                          241 │ sy                │
     └─────────────┴──────────────────────────────┴───────────────────┘
 ```
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_44_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_44_0.png">
-  <img alt="png" src="test_files/output_44_0.png">
-</picture>
+![png](test_files/output_44_0.png)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_45_0.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_45_0.svg">
-  <img alt="svg" src="test_files/output_45_0.svg">
-</picture>
+![svg](test_files/output_45_0.svg)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_46_0.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_46_0.svg">
-  <img alt="svg" src="test_files/output_46_0.svg">
-</picture>
+![svg](test_files/output_46_0.svg)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_47_0.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_47_0.svg">
-  <img alt="svg" src="test_files/output_47_0.svg">
-</picture>
+![svg](test_files/output_47_0.svg)
     
 
 
@@ -815,11 +705,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     └─────────┴─────────────┴────────────────┴────────┘
 ```
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_48_4.svg">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_48_4.svg">
-  <img alt="svg" src="test_files/output_48_4.svg">
-</picture>
+![svg](test_files/output_48_4.svg)
     
 
 
@@ -849,41 +735,25 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_51_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_51_0.png">
-  <img alt="png" src="test_files/output_51_0.png">
-</picture>
+![png](test_files/output_51_0.png)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_52_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_52_0.png">
-  <img alt="png" src="test_files/output_52_0.png">
-</picture>
+![png](test_files/output_52_0.png)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_53_0.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_53_0.png">
-  <img alt="png" src="test_files/output_53_0.png">
-</picture>
+![png](test_files/output_53_0.png)
     
 
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_53_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_53_1.png">
-  <img alt="png" src="test_files/output_53_1.png">
-</picture>
+![png](test_files/output_53_1.png)
     
 
 
@@ -897,11 +767,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_55_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_55_1.png">
-  <img alt="png" src="test_files/output_55_1.png">
-</picture>
+![png](test_files/output_55_1.png)
     
 
 
@@ -913,11 +779,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_56_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_56_1.png">
-  <img alt="png" src="test_files/output_56_1.png">
-</picture>
+![png](test_files/output_56_1.png)
     
 
 
@@ -991,11 +853,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_59_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_59_1.png">
-  <img alt="png" src="test_files/output_59_1.png">
-</picture>
+![png](test_files/output_59_1.png)
     
 
 
@@ -1371,11 +1229,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="test_files_dark/output_66_1.png">
-  <source media="(prefers-color-scheme: light)" srcset="test_files/output_66_1.png">
-  <img alt="png" src="test_files/output_66_1.png">
-</picture>
+![png](test_files/output_66_1.png)
     
 
 

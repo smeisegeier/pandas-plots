@@ -445,6 +445,60 @@ def _scale_images(markdown_filepath: str):
         return False
 
 
+def _cleanse_for_pdf(markdown_filepath: str) -> bool:
+    try:
+        with open(markdown_filepath, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        new_lines = [line for line in lines if not re.match(r"^> \[!.*\]", line)]
+        if len(new_lines) != len(lines):
+            with open(markdown_filepath, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+            print(f"└ ✅ SUCCESS: Callout lines removed from: {markdown_filepath}")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No callout lines found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
+
+_GERMAN_REPLACEMENTS: list[tuple[str, str]] = [
+    ("Table of contents", "Inhalt"),
+]
+
+
+def _apply_german_translations(markdown_filepath: str) -> bool:
+    try:
+        with open(markdown_filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        original = content
+        for source, target in _GERMAN_REPLACEMENTS:
+            content = content.replace(source, target)
+
+        if content != original:
+            with open(markdown_filepath, "w", encoding="utf-8") as f:
+                f.write(content)
+            print(f"└ ✅ SUCCESS: German translations applied to: {markdown_filepath}")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No translatable text found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
+
 def _fix_toc_for_gitlab(markdown_filepath):
     if not os.path.exists(markdown_filepath):
         print(f"Error: File '{markdown_filepath}' not found.")
@@ -683,6 +737,8 @@ def jupyter_to_md(
     center_df=True,
     chrome_path=PATH_CHROME,
     theme: Literal["dark", "light", "system"] | None = None,
+    is_german: bool = False,
+    to_pdf: bool = False,
 ):
     """
     Converts a Jupyter notebook into a Markdown file with embedded plotly diagrams
@@ -692,7 +748,7 @@ def jupyter_to_md(
         `RENDERER`: is set to `svg` but reset to "" after
         `GIT_HOST`: if `gitlab`, fix the TOC html tags
         `OVERRIDE`: this forces the notebook to not override theme / renderer
-    
+
     If theme="system": forces `execute`, overrides theme
 
     Args:
@@ -708,6 +764,8 @@ def jupyter_to_md(
             "light"  — single run, images in _files.
             "dark"   — single run, images renamed to _files_dark, markdown refs updated.
             "system" — double run (dark + light); wraps images in <picture> for prefers-color-scheme.
+        is_german (bool, optional): Whether to use german language for some auto generated text
+        to_pdf (bool, optional): does not convert, but makes the markdown pdf friendly (eg. strips out github callouts)
 
     Returns:
         None
@@ -717,6 +775,10 @@ def jupyter_to_md(
 
     root = os.path.splitext(os.path.basename(path))[0]
     target_md_path = os.path.join(output_dir, root + ".md")
+    
+    # suppress dark theme when pdf
+    if to_pdf:
+        theme = "light"
 
     _theme_note = (
         f"{theme}"
@@ -834,6 +896,12 @@ def jupyter_to_md(
     if os.getenv("GIT_HOST") == "gitlab":
         _fix_toc_for_gitlab(target_md_path)
 
+    if to_pdf:
+        _cleanse_for_pdf(target_md_path)
+
+    if is_german:
+        _apply_german_translations(target_md_path)
+
 
 # * Keep the original function name as primary, alias if needed
 def j2md(*args, **kwargs):
@@ -846,6 +914,7 @@ def jupyter_to_html(
     no_input: bool = True,
     execute: bool = False,
     use_base64: bool = False,
+    is_german: bool = False,
 ):
     """
     Converts a Jupyter notebook to HTML using `jupyter nbconvert`.
@@ -880,7 +949,10 @@ def jupyter_to_html(
     try:
         subprocess.run(command, check=True, capture_output=True, text=True)
         root = os.path.splitext(os.path.basename(path))[0]
-        print(f"└ ✅ SUCCESS: {os.path.join(output_dir, root + '.html')}")
+        target_html_path = os.path.join(output_dir, root + ".html")
+        print(f"└ ✅ SUCCESS: {target_html_path}")
+        if is_german:
+            _apply_german_translations(target_html_path)
     except subprocess.CalledProcessError as e:
         print(f"└ ❌ ERROR (exit {e.returncode}):\n{e.stderr}")
         raise
@@ -930,4 +1002,3 @@ def cli_j2html():
         execute=args.execute,
         use_base64=args.use_base64,
     )
-

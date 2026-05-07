@@ -4,7 +4,11 @@ import matplotlib.pyplot as plt
 from IPython import get_ipython
 
 
-def setup_rendering(static: bool = True, apply_dark_theme: bool = False):
+def setup_rendering(
+    static: bool = True,
+    apply_dark_theme: bool = False,
+    to_pdf: bool = False,
+):
     """
     **⚠️ font size override is not active**
 
@@ -55,7 +59,7 @@ def setup_rendering(static: bool = True, apply_dark_theme: bool = False):
 
     # * always have static output when called from converter
     static = True if os.getenv("OVERRIDE") == "1" else static
-
+    
     if static:
         apply_viz_settings()
         os.environ["RENDERER"] = "svg"
@@ -71,7 +75,13 @@ def setup_rendering(static: bool = True, apply_dark_theme: bool = False):
 
     # * when override is set, this code was called by converter execution -> dont change
     if os.getenv("OVERRIDE") != "1":
-        if apply_dark_theme:
+        if apply_dark_theme and not to_pdf:
             os.environ["THEME"] = "dark"
         else:
             os.environ["THEME"] = "light"
+
+    if to_pdf:
+        os.environ["RENDERER"] = "svg"
+        os.environ["PDF"] = "1"
+    else:
+        os.environ.pop("PDF", None)

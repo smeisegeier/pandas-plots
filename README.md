@@ -80,6 +80,7 @@ from pandas_plots import tbl, pls, hlp, const
 >- supports alternative texts in images
 >- html output can use image folders or inline base64 encoding
 >- supports easy csv export of diagram data
+>- can force pdf friendly options to avoid pdf artifacts
 
 ### notebook setup
 <a id="markdown-notebook-setup" name="notebook-setup"></a>
