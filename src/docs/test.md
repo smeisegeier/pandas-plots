@@ -96,7 +96,7 @@ and year(Datum_Vitalstatus) between 2020 and 2025
 
 
     
-![svg](test_files/output_8_5.svg)
+<img alt="svg" src="test_files/output_8_5.svg">
     
 
 
@@ -154,17 +154,17 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_12_4.png)
+<img alt="png" src="test_files/output_12_4.png">
     
 
 
 
-<img src="test_files/output_13_1.png" width="500">
+<img alt="png" src="test_files/output_13_1.png" width="500">
     
 
 
 
-<img src="test_files/output_14_1.png" width="500">
+<img alt="png" src="test_files/output_14_1.png" width="500">
     
 
 
@@ -177,39 +177,29 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![svg](test_files/output_17_0.svg)
+<img alt="svg" src="test_files/output_17_0.svg">
     
 
 
 
     
-![svg](test_files/output_18_0.svg)
+<img alt="svg" src="test_files/output_18_0.svg">
     
 
 
 
-<!-- ALT_TEXT:pl-->
-
-
-
-    
-![svg](test_files/output_19_1.svg)
+<img alt="pl" src="test_files/output_19_1.svg">
     
 
 
 
-<!-- ALT_TEXT:test-->
-
-
-
-    
-![svg](test_files/output_20_1.svg)
+<img alt="test" src="test_files/output_20_1.svg">
     
 
 
 
     
-![png](test_files/output_21_0.png)
+<img alt="png" src="test_files/output_21_0.png">
     
 
 
@@ -221,12 +211,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-<!-- ALT_TEXT:test-->
-
-
-
-    
-![svg](test_files/output_21_3.svg)
+<img alt="test" src="test_files/output_21_3.svg">
     
 
 
@@ -237,7 +222,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_23_0.png)
+<img alt="png" src="test_files/output_23_0.png">
     
 
 
@@ -248,27 +233,17 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_26_0.png)
+<img alt="png" src="test_files/output_26_0.png">
     
 
 
 
-<!-- ALT_TEXT:test-->
-
-
-
-    
-![svg](test_files/output_26_2.svg)
+<img alt="test" src="test_files/output_26_2.svg">
     
 
 
 
-<!-- ALT_TEXT:test-->
-
-
-
-    
-![svg](test_files/output_27_1.svg)
+<img alt="test" src="test_files/output_27_1.svg">
     
 
 
@@ -289,12 +264,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-<!-- ALT_TEXT:#test-->
-
-
-
-    
-![png](test_files/output_28_2.png)
+<img alt="#test" src="test_files/output_28_2.png">
     
 
 
@@ -305,7 +275,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_31_0.png)
+<img alt="png" src="test_files/output_31_0.png">
     
 
 
@@ -316,7 +286,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_33_0.png)
+<img alt="png" src="test_files/output_33_0.png">
     
 
 
@@ -358,12 +328,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
 
-<!-- ALT_TEXT:[tumor-id] over [treatment], n=12 id (26 events)-->
-
-
-
-    
-![svg](test_files/output_35_2.svg)
+<img alt="[tumor-id] over [treatment], n=12 id (26 events)" src="test_files/output_35_2.svg">
     
 
 
@@ -451,7 +416,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-![svg](test_files/output_40_4.svg)
+<img alt="svg" src="test_files/output_40_4.svg">
     
 
 
@@ -646,25 +611,25 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     └─────────────┴──────────────────────────────┴───────────────────┘
 ```
 
-![png](test_files/output_44_0.png)
+<img alt="png" src="test_files/output_44_0.png">
     
 
 
 
     
-![svg](test_files/output_45_0.svg)
+<img alt="svg" src="test_files/output_45_0.svg">
     
 
 
 
     
-![svg](test_files/output_46_0.svg)
+<img alt="svg" src="test_files/output_46_0.svg">
     
 
 
 
     
-![svg](test_files/output_47_0.svg)
+<img alt="svg" src="test_files/output_47_0.svg">
     
 
 
@@ -705,7 +670,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
     └─────────┴─────────────┴────────────────┴────────┘
 ```
 
-![svg](test_files/output_48_4.svg)
+<img alt="svg" src="test_files/output_48_4.svg">
     
 
 
@@ -735,25 +700,25 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_51_0.png)
+<img alt="png" src="test_files/output_51_0.png">
     
 
 
 
     
-![png](test_files/output_52_0.png)
+<img alt="png" src="test_files/output_52_0.png">
     
 
 
 
     
-![png](test_files/output_53_0.png)
+<img alt="png" src="test_files/output_53_0.png">
     
 
 
 
     
-![png](test_files/output_53_1.png)
+<img alt="png" src="test_files/output_53_1.png">
     
 
 
@@ -767,7 +732,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_55_1.png)
+<img alt="png" src="test_files/output_55_1.png">
     
 
 
@@ -779,7 +744,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_56_1.png)
+<img alt="png" src="test_files/output_56_1.png">
     
 
 
@@ -853,7 +818,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_59_1.png)
+<img alt="png" src="test_files/output_59_1.png">
     
 
 
@@ -1229,7 +1194,7 @@ and z_icd10 in ('C91.0', 'C92.0', 'C83.3', 'C82.4')
 
 
     
-![png](test_files/output_66_1.png)
+<img alt="png" src="test_files/output_66_1.png">
     
 
 

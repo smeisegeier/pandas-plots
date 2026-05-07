@@ -355,13 +355,61 @@ def _remove_css_style_from_md(markdown_filepath: str):
         print(f"└ Error writing to file: {e}")
 
 
+def _normalize_md_images(markdown_filepath: str) -> bool:
+    """
+    Converts all Markdown image syntax ![alt](src) to <img alt="alt" src="src"> tags.
+    Skips lines inside fenced code blocks. Runs before _scale_images so that all
+    subsequent transforms only need to handle <img> tags.
+    """
+    try:
+        with open(markdown_filepath, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        new_lines = []
+        changes_made = False
+        in_code_block = False
+
+        for line in lines:
+            if re.match(r"^\s*```", line):
+                in_code_block = not in_code_block
+                new_lines.append(line)
+                continue
+
+            if in_code_block:
+                new_lines.append(line)
+                continue
+
+            def _replace(m: re.Match) -> str:
+                nonlocal changes_made
+                changes_made = True
+                return f'<img alt="{m.group(1)}" src="{m.group(2)}">'
+
+            new_lines.append(re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", _replace, line))
+
+        if changes_made:
+            with open(markdown_filepath, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+            print(f"└ ✅ SUCCESS: MD images normalized to <img> in: {markdown_filepath}")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No MD image syntax found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
+
 def _scale_images(markdown_filepath: str):
     """
     Processes a Markdown file to scale images using HTML width attribute.
 
     Looks for SCALE comments like <!-- SCALE-60% --> or <!-- SCALE-800 -->,
-    checks if the next non-empty line contains an image declaration ![png](path) or ![svg](path),
-    and replaces both with an HTML <img> tag with the specified width.
+    checks if the next non-empty line contains an <img src="..."> tag (after
+    _normalize_md_images has run), and injects a width attribute.
 
     Patterns:
     - SCALE-60% -> width="60%"
@@ -398,23 +446,23 @@ def _scale_images(markdown_filepath: str):
 
                 img_path = None
 
+                img_tag_base = None
+
                 if img_line_idx < len(lines):
                     img_line = lines[img_line_idx]
-                    # Check for image pattern ![png](...) or ![svg](...)
-                    img_pattern = re.match(r"^!\[(png|svg)\]\(([^)]+)\)\s*$", img_line)
-
+                    img_pattern = re.match(r'^(<img\b[^>]*)>\s*$', img_line)
                     if img_pattern:
-                        img_path = img_pattern.group(2)  # path to image
+                        img_tag_base = img_pattern.group(1)
+                        src_match = re.search(r'src="([^"]+)"', img_tag_base)
+                        img_path = src_match.group(1) if src_match else None
 
                 if img_path is not None:
-                    # Build width attribute value
                     if has_percent:
                         width_attr = f"{scale_value}%"
                     else:
                         width_attr = scale_value
 
-                    # Replace with HTML img tag
-                    html_img = f'<img src="{img_path}" width="{width_attr}">\n'
+                    html_img = f'{img_tag_base} width="{width_attr}">\n'
                     new_lines.append(html_img)
 
                     # Skip both SCALE comment and image line
@@ -527,12 +575,58 @@ def _fix_toc_for_gitlab(markdown_filepath):
     print(f"└ ✅ SUCCESS: File '{markdown_filepath}' has been updated for GitLab.")
 
 
+def _inject_alt_text(markdown_filepath: str) -> bool:
+    """
+    Scans a Markdown file for <!-- ALT_TEXT:xxx --> tokens preceding <img> tags
+    and updates the alt attribute accordingly, consuming the token.
+    """
+    try:
+        with open(markdown_filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+        original_content = content
+
+        _ALT_TOKEN = r"<!-- ALT_TEXT:(.*?)-->"
+        _OPT_ALT_LEAD = r"(?:" + _ALT_TOKEN + r"\s*)?"
+
+        def _replace(match: re.Match) -> str:
+            alt_from_token = match.group(1)
+            if alt_from_token is None:
+                return match.group(0)
+            all_attrs = match.group(2)
+            src_match = re.search(r'src="([^"]+)"', all_attrs)
+            if not src_match:
+                return match.group(0)
+            src = src_match.group(1)
+            alt = alt_from_token.strip()
+            extra = re.sub(r'\s*(?:alt|src)="[^"]*"', "", all_attrs).strip()
+            extra_str = f" {extra}" if extra else ""
+            return f'<img alt="{alt}" src="{src}"{extra_str}>'
+
+        content = re.sub(_OPT_ALT_LEAD + r'<img\b([^>]*)>', _replace, content)
+
+        if content != original_content:
+            with open(markdown_filepath, "w", encoding="utf-8") as f:
+                f.write(content)
+            print(f"└ ✅ SUCCESS: Alt text injected in: {markdown_filepath}")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No ALT_TEXT tokens found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
+
 def _apply_system_theming(markdown_filepath: str) -> bool:
     """
-    Scans a Markdown file for ![alt](image) and <img src="..."> tags and replaces each
-    with a <picture> element that selects between light and dark variants via
-    prefers-color-scheme, provided a matching dark image exists in _files_dark/.
-    Extra attributes (e.g. width) on <img> tags are preserved.
+    Scans a Markdown file for <img> tags and replaces each with a <picture> element
+    that selects between light and dark variants via prefers-color-scheme, provided
+    a matching dark image exists in _files_dark/. Extra attributes (e.g. width) are preserved.
+    Assumes _inject_alt_text has already run so alt attributes are correct.
     """
     try:
         with open(markdown_filepath, "r", encoding="utf-8") as f:
@@ -560,28 +654,18 @@ def _apply_system_theming(markdown_filepath: str) -> bool:
         _OPT_ALT_LEAD = r"(?:" + _ALT_TOKEN + r"\s*)?"
         _OPT_ALT_TRAIL = r"(?:\s*" + _ALT_TOKEN + r")?"
 
-        def replace_md_image(match: re.Match) -> str:
-            # groups: 1=leading token, 2=md alt, 3=src, 4=trailing token
-            alt_from_token = match.group(1) or match.group(4)
-            md_alt, src = match.group(2), match.group(3)
-            alt = alt_from_token.strip() if alt_from_token else md_alt
-            return _picture_block(src, alt, "") or f"![{md_alt}]({src})"
-
         def replace_html_img(match: re.Match) -> str:
-            # groups: 1=leading token, 2=src, 3=rest attrs, 4=trailing token
-            alt_from_token = match.group(1) or match.group(4)
-            src = match.group(2)
-            rest = match.group(3).strip()
-            extra = f" {rest}" if rest else ""
-            if alt_from_token is not None:
-                alt = alt_from_token.strip()
-            else:
-                alt_match = re.search(r'alt="([^"]*)"', rest)
-                alt = alt_match.group(1) if alt_match else ""
-            # remove alt from extra_attrs to avoid duplication
-            extra = re.sub(r'\s*alt="[^"]*"', "", extra)
-            orig_img = f'<img src="{src}"{" " + rest if rest else ""}>'
-            return _picture_block(src, alt, extra) or orig_img
+            # group 1=all img attrs (no token — _inject_alt_text already ran)
+            all_attrs = match.group(1)
+            src_match = re.search(r'src="([^"]+)"', all_attrs)
+            if not src_match:
+                return match.group(0)
+            src = src_match.group(1)
+            alt_match = re.search(r'alt="([^"]*)"', all_attrs)
+            alt = alt_match.group(1) if alt_match else ""
+            extra = re.sub(r'\s*(?:alt|src)="[^"]*"', "", all_attrs).strip()
+            extra_str = f" {extra}" if extra else ""
+            return _picture_block(src, alt, extra_str) or match.group(0)
 
         def replace_picture(match: re.Match) -> str:
             # groups: 1=leading token, 2=full <picture>…</picture>, 3=trailing token
@@ -591,17 +675,8 @@ def _apply_system_theming(markdown_filepath: str) -> bool:
             alt = alt_from_token.strip()
             return re.sub(r'alt="[^"]*"', f'alt="{alt}"', match.group(2), count=1)
 
-        content = re.sub(
-            _OPT_ALT_LEAD + r"!\[([^\]]*)\]\(([^)]+)\)" + _OPT_ALT_TRAIL,
-            replace_md_image,
-            content,
-        )
-        content = re.sub(
-            _OPT_ALT_LEAD + r'<img src="([^"]+)"([^>]*)>' + _OPT_ALT_TRAIL,
-            replace_html_img,
-            content,
-        )
-        # patch alt in already-converted <picture> elements
+        content = re.sub(r'<img\b([^>]*)>', replace_html_img, content)
+        # patch alt in already-converted <picture> elements (re-run safety)
         content = re.sub(
             _OPT_ALT_LEAD + r"(<picture>.*?</picture>)" + _OPT_ALT_TRAIL,
             replace_picture,
@@ -888,7 +963,9 @@ def jupyter_to_md(
         stop_token="└─────────",
     )
 
+    _normalize_md_images(target_md_path)
     _scale_images(target_md_path)
+    _inject_alt_text(target_md_path)
 
     if theme == "system":
         _apply_system_theming(target_md_path)
