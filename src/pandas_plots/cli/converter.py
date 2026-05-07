@@ -1,16 +1,20 @@
 import argparse
 import os
 import re
+import shutil
 import subprocess
 from typing import Literal
 
 import dataframe_image as dfi
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
 
+# * change to ungoogled-chromium since chromium is depr
 PATH_CHROME = "/Applications/Chromium.app/Contents/MacOS/Chromium"
 # os.environ["BROWSER_PATH"] = PATH_CHROME
 
 
-def remove_duckdb_table_header(markdown_filepath: str, start_token: str, stop_token: str) -> bool:
+def _remove_duckdb_table_header(markdown_filepath: str, start_token: str, stop_token: str) -> bool:
     """
     Processes a Markdown file to find a block defined by start and stop tokens.
     Removes line 3 (the type header line) within each block.
@@ -69,7 +73,7 @@ def remove_duckdb_table_header(markdown_filepath: str, start_token: str, stop_to
         return False
 
 
-def enclose_block_as_code(
+def _enclose_block_as_code(
     markdown_filepath: str, start_token: str, stop_token: str, language: str = "", remove_token_lines: bool = True
 ) -> bool:
     """
@@ -227,7 +231,7 @@ def enclose_block_as_code(
         return False
 
 
-def add_br_to_md(markdown_filepath, is_debug=False):
+def _add_br_to_md(markdown_filepath, is_debug=False):
     """
     Processes a Markdown file line-by-line to insert the '<br>' tag before
     markdown headings (##, ###, ####, etc.) if not already preceded by '<br>'.
@@ -303,49 +307,7 @@ def add_br_to_md(markdown_filepath, is_debug=False):
         return False
 
 
-def remove_pandas_style_from_md(markdown_filepath):
-    """
-    Removes the default Pandas HTML style block, cleans up excessive blank lines,
-    and encloses recognized ASCII tables with Markdown code fences.
-    """
-    try:
-        # 1. Read the file content
-        with open(markdown_filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        original_content = content
-
-        # 2. STEP: REMOVE HTML STYLE BLOCK
-        style_pattern = re.compile(r"<style\s*.*?>.*?</style>", re.DOTALL | re.IGNORECASE)
-        content = re.sub(style_pattern, "", content)
-
-        # 3. STEP: ENCLOSE ASCII TABLES WITH CODE FENCES
-        # content = enclose_ascii_table_in_code_block(content)
-
-        # 4. STEP: CLEAN UP EXCESSIVE BLANK LINES
-        # Replaces three or more consecutive blank lines with two.
-        content = re.sub(r"\n\s*\n\s*\n", "\n\n", content)
-
-        if content != original_content:
-            # 5. Write the cleaned content back to the file
-            with open(markdown_filepath, "w", encoding="utf-8") as f:
-                content = content.strip()  # Final global strip before writing to prevent extra blank lines at EOF
-                f.write(content)
-            print(f"└ ✅ CLEANED: File successfully processed: {markdown_filepath}")
-            return True
-        else:
-            print(f"└ ℹ️ NO CHANGES: No elements found to clean in: {markdown_filepath}")
-            return False
-
-    except FileNotFoundError:
-        print(f"❌ ERROR: File not found at {markdown_filepath}")
-        return False
-    except Exception as e:
-        print(f"❌ ERROR DURING PROCESSING: {e}")
-        return False
-
-
-def remove_css_style_from_md(markdown_filepath: str):
+def _remove_css_style_from_md(markdown_filepath: str):
     """
     Reads a file (assumed to contain Markdown/HTML content), removes two
     specific, problematic CSS rules from the embedded <style> block, and
@@ -393,7 +355,7 @@ def remove_css_style_from_md(markdown_filepath: str):
         print(f"└ Error writing to file: {e}")
 
 
-def scale_images(markdown_filepath: str):
+def _scale_images(markdown_filepath: str):
     """
     Processes a Markdown file to scale images using HTML width attribute.
 
@@ -483,7 +445,7 @@ def scale_images(markdown_filepath: str):
         return False
 
 
-def fix_toc_for_gitlab(markdown_filepath):
+def _fix_toc_for_gitlab(markdown_filepath):
     if not os.path.exists(markdown_filepath):
         print(f"Error: File '{markdown_filepath}' not found.")
         return
@@ -511,34 +473,241 @@ def fix_toc_for_gitlab(markdown_filepath):
     print(f"└ ✅ SUCCESS: File '{markdown_filepath}' has been updated for GitLab.")
 
 
+def _apply_system_theming(markdown_filepath: str) -> bool:
+    """
+    Scans a Markdown file for ![alt](image) and <img src="..."> tags and replaces each
+    with a <picture> element that selects between light and dark variants via
+    prefers-color-scheme, provided a matching dark image exists in _files_dark/.
+    Extra attributes (e.g. width) on <img> tags are preserved.
+    """
+    try:
+        with open(markdown_filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        md_dir = os.path.dirname(os.path.abspath(markdown_filepath))
+        original_content = content
+
+        def _picture_block(src: str, alt: str, extra_attrs: str) -> str | None:
+            if "_files/" not in src or "_files_dark/" in src:
+                return None
+            dark_src = src.replace("_files/", "_files_dark/", 1)
+            if not os.path.exists(os.path.join(md_dir, dark_src)):
+                return None
+            img_tag = f'<img alt="{alt}" src="{src}"{extra_attrs}>'
+            return (
+                f"<picture>\n"
+                f'  <source media="(prefers-color-scheme: dark)" srcset="{dark_src}">\n'
+                f'  <source media="(prefers-color-scheme: light)" srcset="{src}">\n'
+                f"  {img_tag}\n"
+                f"</picture>"
+            )
+
+        _ALT_TOKEN = r"<!-- ALT_TEXT:(.*?)-->"
+        _OPT_ALT_LEAD = r"(?:" + _ALT_TOKEN + r"\s*)?"
+        _OPT_ALT_TRAIL = r"(?:\s*" + _ALT_TOKEN + r")?"
+
+        def replace_md_image(match: re.Match) -> str:
+            # groups: 1=leading token, 2=md alt, 3=src, 4=trailing token
+            alt_from_token = match.group(1) or match.group(4)
+            md_alt, src = match.group(2), match.group(3)
+            alt = alt_from_token.strip() if alt_from_token else md_alt
+            return _picture_block(src, alt, "") or f"![{md_alt}]({src})"
+
+        def replace_html_img(match: re.Match) -> str:
+            # groups: 1=leading token, 2=src, 3=rest attrs, 4=trailing token
+            alt_from_token = match.group(1) or match.group(4)
+            src = match.group(2)
+            rest = match.group(3).strip()
+            extra = f" {rest}" if rest else ""
+            if alt_from_token is not None:
+                alt = alt_from_token.strip()
+            else:
+                alt_match = re.search(r'alt="([^"]*)"', rest)
+                alt = alt_match.group(1) if alt_match else ""
+            # remove alt from extra_attrs to avoid duplication
+            extra = re.sub(r'\s*alt="[^"]*"', "", extra)
+            orig_img = f'<img src="{src}"{" " + rest if rest else ""}>'
+            return _picture_block(src, alt, extra) or orig_img
+
+        def replace_picture(match: re.Match) -> str:
+            # groups: 1=leading token, 2=full <picture>…</picture>, 3=trailing token
+            alt_from_token = match.group(1) or match.group(3)
+            if alt_from_token is None:
+                return match.group(0)
+            alt = alt_from_token.strip()
+            return re.sub(r'alt="[^"]*"', f'alt="{alt}"', match.group(2), count=1)
+
+        content = re.sub(
+            _OPT_ALT_LEAD + r"!\[([^\]]*)\]\(([^)]+)\)" + _OPT_ALT_TRAIL,
+            replace_md_image,
+            content,
+        )
+        content = re.sub(
+            _OPT_ALT_LEAD + r'<img src="([^"]+)"([^>]*)>' + _OPT_ALT_TRAIL,
+            replace_html_img,
+            content,
+        )
+        # patch alt in already-converted <picture> elements
+        content = re.sub(
+            _OPT_ALT_LEAD + r"(<picture>.*?</picture>)" + _OPT_ALT_TRAIL,
+            replace_picture,
+            content,
+            flags=re.DOTALL,
+        )
+
+        if content != original_content:
+            with open(markdown_filepath, "w", encoding="utf-8") as f:
+                f.write(content)
+            print(f"└ ✅ SUCCESS: GitHub theming applied to: {markdown_filepath}")
+            return True
+        else:
+            print(f"└ ℹ️ NO CHANGES: No themeable images found in: {markdown_filepath}")
+            return False
+
+    except FileNotFoundError:
+        print(f"❌ ERROR: File not found at {markdown_filepath}")
+        return False
+    except Exception as e:
+        print(f"❌ ERROR DURING PROCESSING: {e}")
+        return False
+
+
+def _reconcile_dark_filenames(light_dir: str, dark_dir: str) -> None:
+    """
+    Renames files in dark_dir to match light_dir where cell index and extension agree
+    but the output index within the cell differs (e.g. output_8_8.svg → output_8_7.svg).
+    Only renames when there is exactly one candidate on each side for a given cell+ext pair.
+    """
+    if not os.path.isdir(light_dir) or not os.path.isdir(dark_dir):
+        return
+
+    # Build map: (cell_index, ext) -> filename  for each side
+    def _index_files(directory):
+        result: dict[tuple[str, str], str] = {}
+        for fname in os.listdir(directory):
+            m = re.match(r"^(output_(\d+)_\d+)(\.\w+)$", fname)
+            if not m:
+                continue
+            cell_idx = m.group(2)
+            ext = m.group(3)
+            key = (cell_idx, ext)
+            if key in result:
+                result[key] = None  # ambiguous — more than one file for this cell+ext
+            else:
+                result[key] = fname
+        return result
+
+    light_map = _index_files(light_dir)
+    dark_map = _index_files(dark_dir)
+
+    for key, light_name in light_map.items():
+        dark_name = dark_map.get(key)
+        if light_name is None or dark_name is None:
+            continue
+        if light_name != dark_name:
+            old_path = os.path.join(dark_dir, dark_name)
+            new_path = os.path.join(dark_dir, light_name)
+            os.rename(old_path, new_path)
+            print(f"└ ✅ reconciled dark filename: {dark_name} → {light_name}")
+
+
+def _single_run(
+    path: str,
+    to: str,
+    center_df: bool,
+    chrome_path: str,
+    output_dir: str,
+    no_input: bool,
+    execute: bool,
+    root: str,
+) -> str:
+    """Pre-execute (if requested), convert notebook to markdown, rename files dir. Returns md path."""
+    if execute:
+        print(f"Pre-executing {path} ..")
+        with open(path) as f:
+            nb = nbformat.read(f, as_version=4)
+        ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+        ep.preprocess(nb, {"metadata": {"path": os.path.dirname(os.path.abspath(path))}})
+        _exec_path = path.replace(".ipynb", "_executed.ipynb")
+        with open(_exec_path, "w") as f:
+            nbformat.write(nb, f)
+        _convert_path = _exec_path
+    else:
+        _convert_path = path
+
+    print(f"Converting {path} to Markdown using dataframe-image python API ..")
+    try:
+        dfi.convert(
+            _convert_path,
+            to=to,
+            center_df=center_df,
+            max_rows=None,
+            max_cols=None,
+            execute=False,
+            save_notebook=False,
+            limit=None,
+            document_name=root,
+            table_conversion="chrome",
+            chrome_path=chrome_path,
+            latex_command=None,
+            output_dir=output_dir,
+            no_input=no_input,
+        )
+    finally:
+        if execute:
+            os.remove(_exec_path)
+
+    if execute:
+        _exec_files_dir = os.path.join(output_dir, root + "_executed_files")
+        _orig_files_dir = os.path.join(output_dir, root + "_files")
+        target_md_path = os.path.join(output_dir, root + ".md")
+        if os.path.exists(_exec_files_dir):
+            if os.path.exists(_orig_files_dir):
+                shutil.rmtree(_orig_files_dir)
+            os.rename(_exec_files_dir, _orig_files_dir)
+            with open(target_md_path, "r") as f:
+                content = f.read()
+            content = content.replace(root + "_executed_files", root + "_files")
+            with open(target_md_path, "w") as f:
+                f.write(content)
+
+    return os.path.join(output_dir, root + ".md")
+
+
 def jupyter_to_md(
     path: str,
-    to: Literal["markdown", "html", "pdf"] = "markdown",
+    to: Literal["markdown", "pdf"] = "markdown",
     output_dir: str = "./docs",
     no_input=True,
     execute=False,
     center_df=True,
-    # chrome_path="/opt/homebrew/bin/chromium",
-    # * change to ungoogled-chromium since chromium is depr
     chrome_path=PATH_CHROME,
+    theme: Literal["dark", "light", "system"] | None = None,
 ):
     """
-    Converts a Jupyter notebook into a Markdown file with embedded plotly digrams
+    Converts a Jupyter notebook into a Markdown file with embedded plotly diagrams
     and styled dataframes.
-    ⚠️ `execute=True` will force the tables as html output due to conversion processes
 
-    uses the following env variables:
+    Uses the following env variables:
         `RENDERER`: is set to `svg` but reset to "" after
-        `GIT_HOST`: if `gitlab`, fix the TOC html ags
+        `GIT_HOST`: if `gitlab`, fix the TOC html tags
+        `OVERRIDE`: this forces the notebook to not override theme / renderer
+    
+    If theme="system": forces `execute`, overrides theme
 
     Args:
         path (str): The path to the Jupyter notebook file.
         output_dir (str, optional): The directory where the Markdown file will be generated. Defaults to "./docs".
         no_input (bool, optional): Whether to remove input cells from the Markdown output. Defaults to False.
-        execute (bool, optional): Whether to execute the notebook before conversion. Defaults to True.
+        execute (bool, optional): Whether to execute the notebook before conversion. Defaults to False.
+        to (Literal["markdown", "pdf"], optional): The output format. Defaults to "markdown". ⚠️ `pdf` is experimental
         center_df (bool, optional): Whether to center the dataframes. Defaults to True.
-        chrome_path (str, optional): The path to the Chrome executable. Defaults to "/opt/homebrew/bin/chromium".
-        convert_tables_to_png (bool, optional): Whether to convert dataframes to PNGs using dataframe-image. Defaults to True.
+        chrome_path (str, optional): The path to the Chrome executable.
+        theme (Literal["dark", "light", "system"] | None, optional):
+            None     — notebook controls theme via setup_rendering (default).
+            "light"  — single run, images in _files.
+            "dark"   — single run, images renamed to _files_dark, markdown refs updated.
+            "system" — double run (dark + light); wraps images in <picture> for prefers-color-scheme.
 
     Returns:
         None
@@ -546,54 +715,89 @@ def jupyter_to_md(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # * if this isnt set, plotly digrams will not be rendered
-    os.environ["RENDERER"] = "svg"
+    root = os.path.splitext(os.path.basename(path))[0]
+    target_md_path = os.path.join(output_dir, root + ".md")
 
-    if execute:
-        print("⚠️ execute=True will force the tables as html output instead of png")
-
-    # * use python API - this wont convert tables to PNG!
-    print(f"Converting {path} to Markdown using dataframe-image python API ..")
-    dfi.convert(
-        path,
-        # to="markdown",
-        to=to,
-        # use='latex',
-        center_df=center_df,
-        max_rows=None,
-        max_cols=None,
-        execute=execute,
-        save_notebook=False,  # * don't save notebook, it will duplicate the file
-        limit=None,
-        document_name=None,
-        table_conversion="chrome",
-        chrome_path=chrome_path,
-        latex_command=None,
-        output_dir=output_dir,
-        no_input=no_input,
+    _theme_note = (
+        f"{theme}"
+        if (execute or theme == "system" or theme is None)
+        else "⚠️ is taken from ipynb source since `execute` is not set!"
     )
+    print(f"[theme: {_theme_note}]")
+
+    # * set override to prevent theme setting in the notebook
+    # if theme is not None:
+    os.environ["OVERRIDE"] = "1"
+
+    if theme == "system":
+        # Run 1: dark — execute, convert, then stash images in _files_dark
+        print("[1/2] dark theme ..")
+        os.environ["THEME"] = "dark"
+        _single_run(
+            path=path,
+            to=to,
+            center_df=center_df,
+            chrome_path=chrome_path,
+            output_dir=output_dir,
+            no_input=no_input,
+            execute=True,
+            root=root,
+        )
+        _files_dir = os.path.join(output_dir, root + "_files")
+        _dark_files_dir = os.path.join(output_dir, root + "_files_dark")
+        if os.path.exists(_files_dir):
+            if os.path.exists(_dark_files_dir):
+                shutil.rmtree(_dark_files_dir)
+            os.rename(_files_dir, _dark_files_dir)
+
+        # Run 2: light — execute, convert; _files stays as the default referenced by the markdown
+        print("[2/2] light theme ..")
+        os.environ["THEME"] = "light"
+        _single_run(
+            path=path,
+            to=to,
+            center_df=center_df,
+            chrome_path=chrome_path,
+            output_dir=output_dir,
+            no_input=no_input,
+            execute=True,
+            root=root,
+        )
+        _reconcile_dark_filenames(
+            light_dir=os.path.join(output_dir, root + "_files"),
+            dark_dir=os.path.join(output_dir, root + "_files_dark"),
+        )
+    else:
+        if theme is not None:
+            os.environ["THEME"] = theme
+        _single_run(path, to, center_df, chrome_path, output_dir, no_input, execute, root)
+        if theme == "dark":
+            _files_dir = os.path.join(output_dir, root + "_files")
+            _dark_files_dir = os.path.join(output_dir, root + "_files_dark")
+            if os.path.exists(_files_dir):
+                if os.path.exists(_dark_files_dir):
+                    shutil.rmtree(_dark_files_dir)
+                os.rename(_files_dir, _dark_files_dir)
+                with open(target_md_path, "r") as f:
+                    content = f.read()
+                content = content.replace(root + "_files/", root + "_files_dark/")
+                with open(target_md_path, "w") as f:
+                    f.write(content)
+                print("└ ✅ renamed _files → _files_dark and updated markdown references.")
+
+    os.environ.pop("THEME", None)
+    os.environ.pop("OVERRIDE", None)
 
     # * reset RENDERER
     os.environ["RENDERER"] = ""  # <None> does not work
 
-    # * create output dir if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
-
-    # * remove style block
-    # 1. Get the filename without its original extension
-    root = os.path.splitext(os.path.basename(path))[0]
-
-    # 2. Construct the full path using the correct .md extension
-    target_md_path = os.path.join(output_dir, root + ".md")
-
-    # 3. remove style
-    # remove_pandas_style_from_md(target_md_path)
-    remove_css_style_from_md(target_md_path)
+    # * remove style
+    _remove_css_style_from_md(target_md_path)
 
     # 4. add br
-    add_br_to_md(target_md_path, is_debug=False)
+    _add_br_to_md(target_md_path, is_debug=False)
 
-    enclose_block_as_code(
+    _enclose_block_as_code(
         markdown_filepath=target_md_path,
         start_token="<!-- START_TOKEN_PYTHON -->",
         stop_token="<!-- END_TOKEN_PYTHON -->",
@@ -601,14 +805,14 @@ def jupyter_to_md(
         remove_token_lines=True,
     )
 
-    enclose_block_as_code(
+    _enclose_block_as_code(
         markdown_filepath=target_md_path,
         start_token="<!-- START_TOKEN -->",
         stop_token="<!-- END_TOKEN -->",
         language="",
         remove_token_lines=True,
     )
-    enclose_block_as_code(
+    _enclose_block_as_code(
         markdown_filepath=target_md_path,
         start_token="┌──────",
         stop_token="└─────────",
@@ -616,23 +820,22 @@ def jupyter_to_md(
         remove_token_lines=False,
     )
 
-    remove_duckdb_table_header(
+    _remove_duckdb_table_header(
         markdown_filepath=target_md_path,
         start_token="┌──────",
         stop_token="└─────────",
     )
 
-    scale_images(target_md_path)
+    _scale_images(target_md_path)
+
+    if theme == "system":
+        _apply_system_theming(target_md_path)
 
     if os.getenv("GIT_HOST") == "gitlab":
-        fix_toc_for_gitlab(target_md_path)
+        _fix_toc_for_gitlab(target_md_path)
 
 
 # * Keep the original function name as primary, alias if needed
-def jupyter_2_md(*args, **kwargs):
-    return jupyter_to_md(*args, **kwargs)
-
-
 def j2md(*args, **kwargs):
     return jupyter_to_md(*args, **kwargs)
 
@@ -642,6 +845,7 @@ def jupyter_to_html(
     output_dir: str = "./docs",
     no_input: bool = True,
     execute: bool = False,
+    use_base64: bool = False,
 ):
     """
     Converts a Jupyter notebook to HTML using `jupyter nbconvert`.
@@ -651,6 +855,7 @@ def jupyter_to_html(
         output_dir (str): Directory where the HTML file will be saved. Defaults to "./docs".
         no_input (bool): Exclude input cells from the output. Defaults to True.
         execute (bool): Execute the notebook before converting. Defaults to False.
+        use_base64 (bool): Use base64 inline encoding for images. Defaults to False (i.e. images are stored in a folder).
     """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -668,6 +873,8 @@ def jupyter_to_html(
         command.append("--no-input")
     if execute:
         command.append("--execute")
+    if not use_base64:
+        command.append("--HTMLExporter.preprocessors=['nbconvert.preprocessors.ExtractOutputPreprocessor']")
 
     print(f"Converting {path} to HTML ..")
     try:
@@ -679,8 +886,8 @@ def jupyter_to_html(
         raise
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Convert Jupyter notebooks to markdown")
+def cli_j2md():
+    parser = argparse.ArgumentParser(description="Convert Jupyter notebooks to Markdown")
     parser.add_argument("path", help="Path to the Jupyter notebook to convert")
     parser.add_argument("--output-dir", "-o", default="./docs", help="Output directory (default: ./docs)")
     parser.add_argument("--no-input", action="store_true", help="Exclude input cells in output (default: False)")
@@ -697,17 +904,30 @@ def main():
 
     args = parser.parse_args()
 
-    # Convert no_execute to execute (invert the logic)
-    execute = not args.no_execute
-
     jupyter_to_md(
         path=args.path,
         output_dir=args.output_dir,
         no_input=args.no_input,
-        execute=execute,
+        execute=not args.no_execute,
         chrome_path=args.chrome_path,
     )
 
 
-if __name__ == "__main__":
-    main()
+def cli_j2html():
+    parser = argparse.ArgumentParser(description="Convert Jupyter notebooks to HTML")
+    parser.add_argument("path", help="Path to the Jupyter notebook to convert")
+    parser.add_argument("--output-dir", "-o", default="./docs", help="Output directory (default: ./docs)")
+    parser.add_argument("--no-input", action="store_true", help="Exclude input cells in output (default: False)")
+    parser.add_argument("--execute", action="store_true", help="Execute notebook before conversion (default: False)")
+    parser.add_argument("--use-base64", action="store_true", help="Inline images as base64 (default: False)")
+
+    args = parser.parse_args()
+
+    jupyter_to_html(
+        path=args.path,
+        output_dir=args.output_dir,
+        no_input=args.no_input,
+        execute=args.execute,
+        use_base64=args.use_base64,
+    )
+

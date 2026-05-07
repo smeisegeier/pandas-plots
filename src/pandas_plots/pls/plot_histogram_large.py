@@ -5,9 +5,9 @@ import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 
+from ..helper import _add_alt_text, _set_caption
 from ..hlp import *
 from ..tbl import print_summary
-from ..helper import set_caption
 
 
 def plot_histogram_large(
@@ -20,6 +20,7 @@ def plot_histogram_large(
     title: str = None,
     png_path: Path | str = None,
     summary: bool = False,
+    alt_text: str = None,
 ) -> None:
     """
     A function to plot a histogram based on a large number of *numeric* columns in a DataFrame
@@ -30,7 +31,7 @@ def plot_histogram_large(
         - a dataframe with only numeric columns
 
 
-    Parameters:
+    Args:
         df_ser (pd.DataFrame | pd.Series): The input containing the data to be plotted.
         nbins (int): The number of bins in the histogram. If set to -1, the number of bins
                      will be calculated based on the data span (Seaborn will use 'auto' by default
@@ -41,7 +42,8 @@ def plot_histogram_large(
         caption (str): The caption for the plot.
         title (str): The title of the plot.
         png_path (Path | str, optional): The path to save the image as a png file.
-        summary (bool): Whether to print a summary table of the data. # UPDATED: Docstring for summary
+        summary (bool): Whether to print a summary table of the data.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -78,7 +80,7 @@ def plot_histogram_large(
     plt.figure(figsize=(width / scale_factor, height / scale_factor))
 
     # * Title and Labels
-    _caption = set_caption(caption)
+    _caption = _set_caption(caption)
     title_str = title or f"{_caption}[{data_series.name or 'Value'}], n={data_series.shape[0]:_.0f}"
 
     # * Determine number of bins (Fixes TypeError: bins must be an integer, a string, or an array)
@@ -102,6 +104,8 @@ def plot_histogram_large(
 
     # * Display the plot
     plt.tight_layout()
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
     plt.show()
 
     # * save to png if path is provided

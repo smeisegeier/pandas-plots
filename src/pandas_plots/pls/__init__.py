@@ -19,6 +19,8 @@ from .plot_sankey import plot_sankey
 from .plot_stacked_bars import plot_stacked_bars
 from .plot_upset import plot_upset
 from .plot_uml_graph import plot_uml_graph
+from .plot_venn2 import plot_venn2
+from .plot_venn3 import plot_venn3
 
 # Re-export all functions to maintain the same interface
 __all__ = [
@@ -37,6 +39,8 @@ __all__ = [
     "plot_pie",
     "plot_upset",
     "plot_uml_graph",
+    "plot_venn2",
+    "plot_venn3",
 ]
 
 # Add methods to pandas DataFrame to enable chaining

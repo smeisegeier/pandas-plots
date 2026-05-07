@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from pandas_plots import const
-from pandas_plots.helper import assign_column_colors
+from pandas_plots.helper import _add_alt_text, _assign_column_colors
 
 NA_EVENT = "(NA)"
 
@@ -24,6 +24,7 @@ def plot_sankey(
     # palette_link=const.PALETTE_SANKEY_LINK,
     palette_start=["#808080"],
     palette_na=const.COLOR_NA,
+    alt_text: str = None,
 ):
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
@@ -60,6 +61,7 @@ def plot_sankey(
                                 Defaults to PALETTE_SANKEY_START from helper.
         palette_na (list[str], optional): Color palette for (NA) links.
                                 Defaults to PALETTE_SANKEY_NA from helper.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to chart title if not provided.
     """
     # --- Example Usage with Enlarged Pandas DataFrame if no DataFrame is provided ---
     if df is None:
@@ -357,7 +359,7 @@ def plot_sankey(
 
     # Assign colors to link types using assign_column_colors helper
     unique_link_types = list(set(link_types))
-    link_type_colors = assign_column_colors(
+    link_type_colors = _assign_column_colors(
         columns=unique_link_types,
         color_palette=palette_link,
         null_label="",
@@ -392,13 +394,16 @@ def plot_sankey(
     chart_title += overlap_title_part
     chart_title += f", n={formatted_total_ids} id ({formatted_total_rows} events)"
 
+    is_dark = os.getenv("THEME") == "dark"
+    node_line_color = "white" if is_dark else "black"
+
     fig = go.Figure(
         data=[
             go.Sankey(
                 node=dict(
                     pad=15,
                     thickness=20,
-                    line=dict(color="black", width=0.5),
+                    line={"color": node_line_color, "width": 0.5},
                     label=display_labels,
                     color="blue",
                     align="left",
@@ -408,5 +413,13 @@ def plot_sankey(
         ]
     )
 
-    fig.update_layout(title_text=chart_title, font_size=font_size, width=width, height=height)
+    fig.update_layout(
+        title_text=chart_title,
+        font_size=font_size,
+        width=width,
+        height=height,
+        template="plotly_dark" if is_dark else "plotly",
+    )
+    alt_text = alt_text or chart_title
+    _add_alt_text(alt_text)
     fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)

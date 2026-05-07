@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 
+from ..helper import _add_alt_text
 from ..hlp import *
 
 
@@ -18,19 +19,21 @@ def plot_joint(
     caption: str = "",
     title: str = "",
     png_path: Path | str = None,
+    alt_text: str = None,
 ) -> None:
     """
     Generate a seaborn joint plot for *two numeric* columns of a given DataFrame.
 
-    Parameters:
-        - df: The DataFrame containing the data to be plotted.
-        - kind: The type of plot to generate (default is "hex").
-        - precision: The number of decimal places to round the data to (default is 2).
-        - size: The size of the plot (default is 5).
-        - dropna: Whether to drop NA values before plotting (default is False).
-        - caption: A caption for the plot.
-        - title: The title of the plot.
-        - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+    Args:
+        df: The DataFrame containing the data to be plotted.
+        kind: The type of plot to generate (default is "hex").
+        precision: The number of decimal places to round the data to (default is 2).
+        size: The size of the plot (default is 5).
+        dropna: Whether to drop NA values before plotting (default is False).
+        caption: A caption for the plot.
+        title: The title of the plot.
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -98,6 +101,9 @@ def plot_joint(
     #     dropna=dropna,
     #     cmap=_cmap,
     # )
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
+
     # * save to png if path is provided
     if png_path is not None:
         fig.savefig(Path(png_path).as_posix())

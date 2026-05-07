@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 from pandas_plots import const
 
 # from ..hlp import *
-from ..helper import aggregate_data, assign_column_colors, set_caption
+from ..helper import _add_alt_text, _aggregate_data, _assign_column_colors, _set_caption
 
 
 def plot_facet_stacked_bars(
@@ -25,7 +25,7 @@ def plot_facet_stacked_bars(
     caption: str = "",
     caption_only_n: bool = False,
     title: str = "",
-    renderer: Optional[Literal["png", "svg", None]] = "png",
+    renderer: Optional[Literal["png", "svg", ""]] = "",
     annotations: bool = False,
     precision: int = 0,
     png_path: Optional[Path] = None,
@@ -37,40 +37,42 @@ def plot_facet_stacked_bars(
     relative: bool = False,
     show_pct: bool = False,
     fill_index: bool = False,
+    alt_text: str = None,
 ) -> None:
     """
     A function to plot multiple (subplots_per_row) stacked bar charts, facetted by the third column, with the first column as the index and the second column as the colors.
 
-    Parameters:
-    - df (pd.DataFrame): Input DataFrame with 3 or 4 columns.
-    - subplots_per_row (int): The number of subplots to display per row.
-    - top_n_index (int): The number of top indexes to include in the chart. Default is 0, which includes all indexes.
-    - top_n_color (int): The number of top colors to include in the chart. Default is 0, which includes all colors.
-    - top_n_facet (int): The number of top facets to include in the chart. Default is 0, which includes all facets.
-    - null_label (str): The label to use for null values. Default is "<NA>".
-    - first_col_grey (bool): Whether to use a grey color for the first column. Default is False.
-    - subplot_size (int): The size of each subplot in pixels. Default is 300.
-    - color_palette (str | list[str]): Name of the color palette to use, or a list of colors.
-        - Default: `const.PALETTE_RKI1`
-        - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
-        - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
-    - caption (str): An optional string indicating the caption for the chart.
-    - caption_only_n (bool): An optional boolean indicating whether to show only the number of observations in the caption.
-    - title (str): The title of the chart.
-    - renderer (str): The output format. Default is "png".
-    - annotations (bool): Whether to include annotations on the chart. Default is False.
-    - precision (int): The number of decimal places to round the values to. Default is 0.
-    - png_path (str): The path to save the chart to, if provided.
-    - show_other (bool): Whether to include "<other>" for columns not in top_n_color. Default is False.
-    - sort_values (bool): ⚠️ DEPRECATED - has no effect
-    - sort_values_index (bool): Whether to sort the index column. Default is False.
-    - sort_values_color (bool): Whether to sort the color column. Default is False.
-    - sort_values_facet (bool): Whether to sort the facet column. Default is False.
-    - relative (bool): Whether to show the bars as relative values (0-1 range). Default is False.
-    - show_pct (bool): Whether to show the annotations as percentages. Default is False.
-    - fill_index (bool): Whether to add placeholder rows for all index x facet combinations with NULL color
-        and value 0. This ensures every facet subplot renders all index ticks symmetrically even when
-        certain combinations are absent from the data. Default is False.
+    Args:
+        df (pd.DataFrame): Input DataFrame with 3 or 4 columns.
+        subplots_per_row (int): The number of subplots to display per row.
+        top_n_index (int): The number of top indexes to include in the chart. Default is 0, which includes all indexes.
+        top_n_color (int): The number of top colors to include in the chart. Default is 0, which includes all colors.
+        top_n_facet (int): The number of top facets to include in the chart. Default is 0, which includes all facets.
+        null_label (str): The label to use for null values. Default is "<NA>".
+        first_col_grey (bool): Whether to use a grey color for the first column. Default is False.
+        subplot_size (int): The size of each subplot in pixels. Default is 300.
+        color_palette (str | list[str]): Name of the color palette to use, or a list of colors.
+            - Default: `const.PALETTE_RKI1`
+            - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+            - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
+        caption (str): An optional string indicating the caption for the chart.
+        caption_only_n (bool): An optional boolean indicating whether to show only the number of observations in the caption.
+        title (str): The title of the chart.
+        renderer (str): The output format. Default is "png".
+        annotations (bool): Whether to include annotations on the chart. Default is False.
+        precision (int): The number of decimal places to round the values to. Default is 0.
+        png_path (str): The path to save the chart to, if provided.
+        show_other (bool): Whether to include "<other>" for columns not in top_n_color. Default is False.
+        sort_values (bool): ⚠️ DEPRECATED - has no effect
+        sort_values_index (bool): Whether to sort the index column. Default is False.
+        sort_values_color (bool): Whether to sort the color column. Default is False.
+        sort_values_facet (bool): Whether to sort the facet column. Default is False.
+        relative (bool): Whether to show the bars as relative values (0-1 range). Default is False.
+        show_pct (bool): Whether to show the annotations as percentages. Default is False.
+        fill_index (bool): Whether to add placeholder rows for all index x facet combinations with NULL color
+            and value 0. This ensures every facet subplot renders all index ticks symmetrically even when
+            certain combinations are absent from the data. Default is False.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -113,7 +115,7 @@ def plot_facet_stacked_bars(
     n = df_copy["value"].sum()
     original_rows = len(df_copy)
 
-    aggregated_df = aggregate_data(  # Assumes aggregate_data is accessible
+    aggregated_df = _aggregate_data(  # Assumes aggregate_data is accessible
         df_copy,
         top_n_index,
         top_n_color,
@@ -152,7 +154,7 @@ def plot_facet_stacked_bars(
         category_orders["facet"] = sum_by_facet.index.tolist()
 
     columns_for_color = sorted(aggregated_df["col"].unique().tolist())
-    column_colors_map = assign_column_colors(
+    column_colors_map = _assign_column_colors(
         columns_for_color, color_palette, null_label, first_col_grey=first_col_grey
     )  # Assumes assign_column_colors is accessible
 
@@ -176,7 +178,7 @@ def plot_facet_stacked_bars(
     elif title:
         title_str = f"{title}, {title_str_n}"
     else:
-        title_str = f"{set_caption(caption)} {'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] {'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] {'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}], {title_str_n}"
+        title_str = f"{_set_caption(caption)} {'TOP ' + str(top_n_index) + ' ' if top_n_index > 0 else ''}[{original_column_names[0]}] {'TOP ' + str(top_n_color) + ' ' if top_n_color > 0 else ''}[{original_column_names[1]}] {'TOP ' + str(top_n_facet) + ' ' if top_n_facet > 0 else ''}[{original_column_names[2]}], {title_str_n}"
 
     fig = px.bar(
         aggregated_df,
@@ -233,6 +235,8 @@ def plot_facet_stacked_bars(
         png_path = Path(png_path)
         fig.write_image(str(png_path))
 
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
     fig.show(
         renderer=renderer or os.getenv("RENDERER"),
         width=subplot_size * subplots_per_row,

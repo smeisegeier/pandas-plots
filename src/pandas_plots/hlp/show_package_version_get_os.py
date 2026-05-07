@@ -14,7 +14,7 @@ def show_package_version(
     """
     Display the versions of the specified packages.
 
-    Parameters:
+    Args:
         packages (list[str], optional): A list of package names.
         sep (str, optional): The separator to use when joining the package names and versions. Defaults to " | ".
         include_demo_packages: If True, inlude all demo packages
@@ -60,7 +60,7 @@ def get_os(is_os: OperatingSystem = None, verbose: bool = False) -> bool | str:
     """
     A function that checks the operating system and returns a boolean value based on the operating system to check.
 
-    Parameters:
+    Args:
         is_os (OperatingSystem): The operating system to check against. Defaults to None.
         Values are
             - OperatingSystem.WINDOWS

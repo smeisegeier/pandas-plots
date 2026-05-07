@@ -3,8 +3,8 @@ import pandas as pd
 
 def find_str_in_duckdb(con: duckdb.DuckDBPyConnection, search_term: str, use_regex: bool = False):
     """
-    Search for a given string in all tables of a DuckDB database.  
-    ⚠️ regex: you must preface with `(?i)` to ignore case
+    Find a given string in all tables of a DuckDB database.  
+    ⚠️ regex: preface with `(?i)` to ignore case
 
     Args:
         con (duckdb.DuckDBPyConnection): The DuckDB connection object.

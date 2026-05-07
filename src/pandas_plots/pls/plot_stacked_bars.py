@@ -8,10 +8,11 @@ import plotly.express as px
 from pandas_plots import const
 
 from ..helper import (
-    aggregate_data,
-    assign_column_colors,
-    group_kkr,
-    set_caption,
+    _aggregate_data,
+    _assign_column_colors,
+    _group_kkr,
+    _set_caption,
+    _add_alt_text,
 )
 
 
@@ -28,7 +29,7 @@ def plot_stacked_bars(
     width: int = 1600,
     title: str = None,
     renderer: Literal["png", "svg", None] = None,
-    caption: str = "",  # * dont use None, f-string will print this as 'None'
+    caption: str = None,
     caption_only_n: bool = False,
     no_n: bool = False,
     sort_values: bool = False,
@@ -44,38 +45,41 @@ def plot_stacked_bars(
     show_pct_bar: bool = False,
     kkr_col: Optional[str] = None,
     first_col_grey: bool = False,
+    alt_text: str = None,
 ) -> None:
     """
     Generates a stacked bar plot using the provided DataFrame.
 
-    Parameters:
-    - df (pd.DataFrame): The input DataFrame with at least two categorical columns and one numerical column.
-    - top_n_index (int): Limit the number of categories displayed on the index axis.
-    - top_n_color (int): Limit the number of categories displayed in the color legend.
-    - dropna (bool): If True, removes rows with missing values; otherwise, replaces them with `null_label`.
-    - swap (bool): If True, swaps the first two columns.
-    - normalize (bool): ⚠️ DEPRECATED
-    - relative (bool): If True, normalizes the bars to a percentage scale.
-    - orientation (Literal["h", "v"]): Defines the orientation of the bars ("v" for vertical, "h" for horizontal).
-    - height (int): Height of the plot.
-    - width (int): Width of the plot.
-    - title (str): Custom title for the plot.
-    - renderer (Literal["png", "svg", None]): Defines the output format.
-    - caption (str): Optional caption for additional context.
-    - caption_only_n (bool): If True, shows only the count (n) in the title, ignoring the caption.
-    - no_n (bool): If True, does not show the count (n) in the title.
-    - sort_values (bool): ⚠️ DEPRECATED
-    - show_total (bool): If True, adds a row with the total sum of all categories.
-    - precision (int): Number of decimal places for numerical values.
-    - png_path (Path | str): If specified, saves the plot as a PNG file.
-    - color_palette (str | list[str]): Name of the color palette to use, or a list of color codes. Example 🎨 names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
-    - null_label (str): Label for null values.
-    - show_other (bool): If True, shows the "Other" category in the legend.
-    - sort_values_index (bool): If True, sorts the index categories by group sum
-    - sort_values_color (bool): If True, sorts the columns categories by group sum
-    - show_pct_all (bool): If True, formats the bar text with percentages from the total n.
-    - show_pct_bar (bool): If True, formats the bar text with percentages from the bar's total.
-    - kkr_col (str): Edge case: Name of the column that contains kkr name to ensure all kkr are shown
+    Args:
+        df (pd.DataFrame): The input DataFrame with at least two categorical columns and one numerical column.
+        top_n_index (int): Limit the number of categories displayed on the index axis.
+        top_n_color (int): Limit the number of categories displayed in the color legend.
+        dropna (bool): If True, removes rows with missing values; otherwise, replaces them with `null_label`.
+        swap (bool): If True, swaps the first two columns.
+        normalize (bool): ⚠️ DEPRECATED
+        relative (bool): If True, normalizes the bars to a percentage scale.
+        orientation (Literal["h", "v"]): Defines the orientation of the bars ("v" for vertical, "h" for horizontal).
+        height (int): Height of the plot.
+        width (int): Width of the plot.
+        title (str): Custom title for the plot.
+        renderer (Literal["png", "svg", None]): Defines the output format.
+        caption (str): Optional caption for additional context.
+        caption_only_n (bool): If True, shows only the count (n) in the title, ignoring the caption.
+        no_n (bool): If True, does not show the count (n) in the title.
+        sort_values (bool): ⚠️ DEPRECATED
+        show_total (bool): If True, adds a row with the total sum of all categories.
+        precision (int): Number of decimal places for numerical values.
+        png_path (Path | str): If specified, saves the plot as a PNG file.
+        color_palette (str | list[str]): Name of the color palette to use, or a list of color codes.
+            Example 🎨 names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+        null_label (str): Label for null values.
+        show_other (bool): If True, shows the "Other" category in the legend.
+        sort_values_index (bool): If True, sorts the index categories by group sum
+        sort_values_color (bool): If True, sorts the columns categories by group sum
+        show_pct_all (bool): If True, formats the bar text with percentages from the total n.
+        show_pct_bar (bool): If True, formats the bar text with percentages from the bar's total.
+        kkr_col (str): Edge case: Name of the column that contains kkr name to ensure all kkr are shown
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -102,9 +106,13 @@ def plot_stacked_bars(
     #     return
 
     df = df.copy()  # Copy the input DataFrame to avoid modifying the original
+    
+    # * alt text handling. prio order: alt_text -> title -> caption
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
 
     if kkr_col:
-        df = group_kkr(df=df, kkr_col=kkr_col)
+        df = _group_kkr(df=df, kkr_col=kkr_col)
 
     # * add count column[2] as a service if none is present
     if len(df.columns) == 2:
@@ -153,12 +161,12 @@ def plot_stacked_bars(
     elif title:
         _title_str = f"{title}{_n_str}"
     else:
-        _title_str = f"{set_caption(caption)}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_n_str}"
+        _title_str = f"{_set_caption(caption)}{_title_str_top_index}[{col_index}] by {_title_str_top_color}[{col_color}]{_title_str_null}{_n_str}"
 
     _df = df.copy().assign(facet=None)
     _df.columns = ["index", "col", "value", "facet"] if not swap else ["col", "index", "value", "facet"]
 
-    aggregated_df = aggregate_data(
+    aggregated_df = _aggregate_data(
         df=_df,
         top_n_index=top_n_index,
         top_n_color=top_n_color,
@@ -218,7 +226,7 @@ def plot_stacked_bars(
     else:
         index_unique = sorted(df["index"].unique().tolist())
 
-    color_map = assign_column_colors(colors_unique, color_palette, null_label, first_col_grey)
+    color_map = _assign_column_colors(colors_unique, color_palette, null_label, first_col_grey)
 
     cat_orders = {
         "index": index_unique,

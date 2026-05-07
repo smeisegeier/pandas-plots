@@ -5,7 +5,7 @@ def to_series(df) -> pd.Series | None:
     """
     Converts a pandas DataFrame to a pandas Series.
 
-    Parameters:
+    Args:
         df (pd.DataFrame): The DataFrame to be converted.
 
     Returns:

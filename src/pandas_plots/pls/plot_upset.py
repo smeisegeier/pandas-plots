@@ -1,7 +1,11 @@
+import os
 from typing import Literal
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from upsetplot import plot as upset
+
+from ..helper import _add_alt_text
 
 
 def plot_upset(
@@ -21,27 +25,30 @@ def plot_upset(
     max_subset_rank=30,
     # sum_over: str = None,
     show_n: bool = True,
+    alt_text: str = None,
 ) -> None:
     """
     Plot the upset plot of the given data.
 
     Uses this great package: https://github.com/jnothman/UpSetPlot
 
-    Parameters:
-    - data: a pandas Series or DataFrame
-    - show_percentages: a boolean indicating whether to show percentages in the plot
-    - sort_by: a Literal indicating the sorting order for the plot
-    - sort_categories_by: a Literal indicating the sorting order for the categories
-    - orientation: a Literal indicating the orientation of the plot
-    - include_false_subsets: a boolean indicating whether to include false subsets in the plot
-    - size: an integer indicating the size of each element in the plot
-    - totals_plot_elements: an integer indicating the maximum number of elements to plot in the totals plot
-    - intersection_plot_elements: an integer indicating the maximum number of elements to plot in the intersection plot
-    - max_degree: an integer indicating the maximum degree of the subsets to plot
-    - min_subset_size: a string indicating the minimum size of the subsets to plot (eg "10%")
-    - max_subset_size: a string indicating the maximum size of the subsets to plot (eg "50%")
-    - max_subset_rank: an integer indicating the maximum rank of the subsets to plot
-    - show_n: a boolean indicating whether to show the number of elements in the plot
+    Args:
+        data: a pandas Series or DataFrame
+        show_percentages: a boolean indicating whether to show percentages in the plot
+        sort_by: a Literal indicating the sorting order for the plot
+        sort_categories_by: a Literal indicating the sorting order for the categories
+        orientation: a Literal indicating the orientation of the plot
+        include_false_subsets: a boolean indicating whether to include false subsets in the plot
+        size: an integer indicating the size of each element in the plot
+        totals_plot_elements: an integer indicating the maximum number of elements to plot in the totals plot
+        intersection_plot_elements: an integer indicating the maximum number of elements to plot in the
+            intersection plot
+        max_degree: an integer indicating the maximum degree of the subsets to plot
+        min_subset_size: a string indicating the minimum size of the subsets to plot (eg "10%")
+        max_subset_size: a string indicating the maximum size of the subsets to plot (eg "50%")
+        max_subset_rank: an integer indicating the maximum rank of the subsets to plot
+        show_n: a boolean indicating whether to show the number of elements in the plot
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns:
     None
@@ -74,6 +81,12 @@ def plot_upset(
     if show_n:
         print(n_str)
 
+    if os.getenv("THEME") == "dark":
+        plt.style.use("dark_background")
+    else:
+        plt.style.use("default")
+
+    _add_alt_text(alt_text)
     _ = upset(
         df_out,
         orientation=orientation,
@@ -91,3 +104,4 @@ def plot_upset(
         max_subset_size=max_subset_size,
         max_subset_rank=max_subset_rank,
     )
+    plt.style.use("default")  # Reset style

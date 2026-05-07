@@ -3,18 +3,16 @@
 
 from pathlib import Path
 from typing import Literal, Optional
-from ..helper import group_kkr
 
 import pandas as pd
 
-NA_EVENT = '(NA)'
+from ..helper import _group_kkr
 
-TOTAL_LITERAL = Literal[
-    "sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"
-]
-KPI_LITERAL = Literal[
-    "rag_abs", "rag_rel", "min_max_xy", "max_min_xy", "min_max_x", "max_min_x"
-]
+NA_EVENT = "(NA)"
+
+TOTAL_LITERAL = Literal["sum", "mean", "median", "min", "max", "std", "var", "skew", "kurt"]
+KPI_LITERAL = Literal["rag_abs", "rag_rel", "min_max_xy", "max_min_xy", "min_max_x", "max_min_x"]
+
 
 def pivot_df(
     df: pd.DataFrame,
@@ -37,7 +35,7 @@ def pivot_df(
     font_size_th: int = 0,
     font_size_td: int = 0,
     col1_width: int = 0,
-    color_highlight_style:  Literal['bright','medium'] = 'medium',
+    color_highlight_style: Literal["bright", "medium"] = "medium",
     png_path: str | Path = None,
     png_conversion: Literal["chrome", "selenium"] = "selenium",
     kkr_col: Optional[str] = None,
@@ -47,7 +45,7 @@ def pivot_df(
     A function to pivot a DataFrame based on specified parameters hand over to the *show_num_df* function.
     It does not provide much added value since the built-in pivot_table function does the same thing.
     However, it can be useful in certain situations (applying top_n_index and top_n_columns).
-    
+
     First two must be [index] and [columns]
     If 3 columns are given, last one must be the weights column.
     If 2 columns are given, column 3 will be added as flat count.
@@ -91,10 +89,8 @@ def pivot_df(
         pd.DataFrame: The pivoted DataFrame.
     """
     # * ensure arguments match parameter definition
-    if (pct_axis and pct_axis not in ["x", "xy"]) or (
-        data_bar_axis and data_bar_axis not in ["x", "y", "xy"]
-    ):
-        print(f"❌ axis not supported")
+    if (pct_axis and pct_axis not in ["x", "xy"]) or (data_bar_axis and data_bar_axis not in ["x", "y", "xy"]):
+        print("❌ axis not supported")
         return
 
     # * if only 2 are provided, add cnt col
@@ -112,8 +108,7 @@ def pivot_df(
     df = df.copy()
 
     if kkr_col:
-        df = group_kkr(df=df, kkr_col=kkr_col)
-
+        df = _group_kkr(df=df, kkr_col=kkr_col)
 
     col_index = df.columns[0]
     col_column = df.columns[1]
@@ -130,11 +125,7 @@ def pivot_df(
     if top_n_index > 0:
         # * get top n -> series
         # * on pivot tables (all cells are values) you can also use sum for each column[df.sum(axis=1) > n]
-        ser_top_n = (
-            df.groupby(col_index)[col_value]
-            .sum()
-            .sort_values(ascending=False)[:top_n_index]
-        )
+        ser_top_n = df.groupby(col_index)[col_value].sum().sort_values(ascending=False)[:top_n_index]
         # * only process top n indexes. this does not change pct values
         df = df[df[col_index].isin(ser_top_n.index)]
 
@@ -142,11 +133,7 @@ def pivot_df(
     if top_n_columns > 0:
         # * get top n -> series
         # * on pivot tables (all cells are values) you can also use sum for each column[df.sum(axis=1) > n]
-        ser_top_n_col = (
-            df.groupby(col_column)[col_value]
-            .sum()
-            .sort_values(ascending=False)[:top_n_columns]
-        )
+        ser_top_n_col = df.groupby(col_column)[col_value].sum().sort_values(ascending=False)[:top_n_columns]
         # * only process top n columns. this does not change pct values
         df = df[df[col_column].isin(ser_top_n_col.index)]
 
@@ -160,6 +147,7 @@ def pivot_df(
     df = df.fillna(0)  # .astype(_type)
 
     from .show_num_df import show_num_df
+
     return show_num_df(
         df,
         total_mode=total_mode,
@@ -177,7 +165,7 @@ def pivot_df(
         font_size_th=font_size_th,
         font_size_td=font_size_td,
         col1_width=col1_width,
-        color_highlight_style = color_highlight_style,
+        color_highlight_style=color_highlight_style,
         png_path=png_path,
         png_conversion=png_conversion,
         total_exclude=total_exclude,

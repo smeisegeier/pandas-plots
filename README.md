@@ -8,10 +8,13 @@ a comprehensive python package for enhanced **data visualization** and **analysi
 <!-- TOC -->
 
 - [pandas-plots](#pandas-plots)
-    - [🚀 features](#%F0%9F%9A%80-features)
     - [📦 installation](#%F0%9F%93%A6-installation)
-    - [🛠️ usage](#%F0%9F%9B%A0%EF%B8%8F-usage)
-    - [examples](#examples)
+    - [🚀 features](#%F0%9F%9A%80-features)
+    - [📤 publishing](#%F0%9F%93%A4-publishing)
+        - [notebook setup](#notebook-setup)
+        - [convert to markdown](#convert-to-markdown)
+        - [convert to html](#convert-to-html)
+    - [🔍 examples](#%F0%9F%94%8D-examples)
         - [styled table](#styled-table)
         - [table description](#table-description)
         - [upset plot](#upset-plot)
@@ -24,10 +27,7 @@ a comprehensive python package for enhanced **data visualization** and **analysi
     - [📚 api reference](#%F0%9F%93%9A-api-reference)
         - [table utilities tbl](#table-utilities-tbl)
         - [plotting functions pls](#plotting-functions-pls)
-        - [venn diagrams ven](#venn-diagrams-ven)
         - [helper functions hlp](#helper-functions-hlp)
-    - [⚙️ configuration](#%E2%9A%99%EF%B8%8F-configuration)
-        - [environment settings](#environment-settings)
     - [🧩 prerequisites](#%F0%9F%A7%A9-prerequisites)
     - [🤝 contributing](#%F0%9F%A4%9D-contributing)
     - [📄 license](#%F0%9F%93%84-license)
@@ -35,39 +35,109 @@ a comprehensive python package for enhanced **data visualization** and **analysi
 
 <!-- /TOC -->
 
-## 🚀 features
-<a id="markdown-%F0%9F%9A%80-features" name="%F0%9F%9A%80-features"></a>
-
-- **table utilities** (`tbl`): enhanced table display and description functions
-- **plotting functions** (`pls`): comprehensive visualization tools with plotly
-- **venn diagrams** (`ven`): easy-to-create venn diagrams for set analysis
-- **helper functions** (`hlp`): utility functions for common data operations
-- **constants** (`const`): useful constants like color palettes
-- **cli** (`cli`): command-line interface for Jupyter notebook conversion
+<br>
 
 ## 📦 installation
 <a id="markdown-%F0%9F%93%A6-installation" name="%F0%9F%93%A6-installation"></a>
 
+install package using uv (recommended)
+
 ```bash
-# using uv (recommended)
 uv add -U pandas-plots
 ```
 
-🚨 this package relies on installed `ungoogled-chromium` to make static image conversion work. regular `chromium` is deprecated
-
-## 🛠️ usage
-<a id="markdown-%F0%9F%9B%A0%EF%B8%8F-usage" name="%F0%9F%9B%A0%EF%B8%8F-usage"></a>
+use in python source
 
 ```python
-from pandas_plots import tbl, pls, ven, hlp, const
-
-# for public examples: load sample dataset from seaborn
-import seaborn as sb
-df = sb.load_dataset('taxis')
+from pandas_plots import tbl, pls, hlp, const
 ```
 
-## examples
-<a id="markdown-examples" name="examples"></a>
+
+<br>
+
+## 🚀 features
+<a id="markdown-%F0%9F%9A%80-features" name="%F0%9F%9A%80-features"></a>
+
+- **table utilities** (`tbl`): style dataframes as HTML tables with heatmaps, totals, kpi indicators, and percentages; describe column distributions with a single call
+- **plotting functions** (`pls`): plotly-based box plots, histograms, stacked bars, sankey diagrams, upset plots, facet charts, and more
+- **helper functions** (`hlp`): configure rendering for markdown export, cascade duckdb filters with counts, notebook and file utilities
+- **cli** (`cli`): convert Jupyter notebooks to Markdown or HTML for publishing
+<!-- - **constants** (`const`): useful constants like color palettes -->
+
+<br>
+
+## 📤 publishing
+<a id="markdown-%F0%9F%93%A4-publishing" name="%F0%9F%93%A4-publishing"></a>
+
+> [!TIP]
+>this package enables `.ipynb` publishing:
+>
+>- converts notebooks to `markdown` or `html`
+>- styled pandas tables are rendered as images, retaining all features
+>- images can be scaled for better visual impression
+>- supports `github` and `gitlab` anchors
+>- supports github auto theme (`theme="system"`)
+>- supports alternative texts in images
+>- html output can use image folders or inline base64 encoding
+>- supports easy csv export of diagram data
+
+### notebook setup
+<a id="markdown-notebook-setup" name="notebook-setup"></a>
+
+call `hlp.setup_rendering()` at the top of your notebook to configure alle  rendering settings:
+
+```python
+# src/my_notebook.ipynb
+
+from pandas_plots import hlp
+
+hlp.setup_rendering(
+    static=True,           # True for static rendering, False for interactive
+    apply_dark_theme=False
+)
+```
+
+### convert to markdown
+<a id="markdown-convert-to-markdown" name="convert-to-markdown"></a>
+
+```python
+# src/convert.ipynb
+
+from pandas_plots.cli.converter import jupyter_to_md
+
+jupyter_to_md(
+    path="src/my_notebook.ipynb",
+    output_dir="./docs",      # output folder (created if missing)
+    no_input=True,            # strip input cells from output
+    execute=True,             # re-execute notebook before converting
+    theme="system",           # None | "light" | "dark" | "system"
+    chrome_path="/Applications/Chromium.app/Contents/MacOS/Chromium"  #  path to `ungoogled-chromium` binary
+)
+```
+
+### convert to html
+<a id="markdown-convert-to-html" name="convert-to-html"></a>
+
+```python
+from pandas_plots.cli.converter import jupyter_to_html
+
+jupyter_to_html(
+    path="src/my_notebook.ipynb",
+    output_dir="./docs",
+    no_input=True,
+    execute=False,
+    use_base64=False,  # False = images in separate folder, True = inline base64
+)
+```
+
+> [!WARNING]
+> conversion requires `ungoogled-chromium` installed, normal `chromium` wont work anymore (see prerequisites section below)
+
+<br>
+
+## 🔍 examples
+<a id="markdown-%F0%9F%94%8D-examples" name="%F0%9F%94%8D-examples"></a>
+
 
 <!-- <br> -->
 
@@ -210,7 +280,7 @@ set_a = {'ford','ferrari','mercedes', 'bmw'}
 set_b = {'opel','bmw','bentley','audi'}
 set_c = {'ferrari','bmw','chrysler','renault','peugeot','fiat'}
 
-_df, _details = ven.show_venn3(
+_df, _details = pls.plot_venn3(
     title="taxis",
     a_set=set_a,
     a_label="cars1",
@@ -224,6 +294,8 @@ _df, _details = ven.show_venn3(
 ```
 
 ![venn](https://github.com/smeisegeier/pandas-plots/blob/main/img/2024-02-19-20-49-52.png?raw=true)
+
+<br>
 
 <br>
 
@@ -261,14 +333,8 @@ _df, _details = ven.show_venn3(
 | `plot_histogram_large()` | for large datasets using seaborn |
 | `plot_upset()` | generates an upset plot based on upsetplot |
 | `plot_uml_graph()` | generates a uml graph based on mermaid for structured data |
-
-### venn diagrams (ven)
-<a id="markdown-venn-diagrams-ven" name="venn-diagrams-ven"></a>
-
-| function | description |
-|----------|-------------|
-| `show_venn2()` | displays a venn diagram for 2 sets |
-| `show_venn3()` | displays a venn diagram for 3 sets |
+| `plot_venn2()` | displays a venn diagram for 2 sets |
+| `plot_venn3()` | displays a venn diagram for 3 sets |
 
 ### helper functions (hlp)
 <a id="markdown-helper-functions-hlp" name="helper-functions-hlp"></a>
@@ -288,27 +354,15 @@ _df, _details = ven.show_venn3(
 | `add_measures_to_pyg_config()` | adds measures to a pygwalker config file |
 | `get_tum_details()` | prints details of a specific tumor (requires connection to clinical cancer data) |
 | `get_duckdb_filter_n()` | print rowcounts for cascading filters in duckdb with ansi bars |
-| `print_filter()` | print filter as markdown sql codeblock |
+| `print_filter()` | prints filter as markdown sql codeblock |
 | `is_ipynb()` | detects if code is running in jupyter notebook |
 | `prepend_uv_header()` | prepends uv header to a .py script to make it executable for `uv run` command |
 | `create_py_script()` | creates a .py script from a .ipynb file |
 | `setup_rendering()` | triggers clean(er) rendering of plots and pandas tables to markdown |
+| `find_str_in_duckdb()` | finds a given string in all tables of a DuckDB database |
+| `export_plot_data()` | exports the dataframe used for a plot to ./data/<name>.csv |
 
-## ⚙️ configuration
-<a id="markdown-%E2%9A%99%EF%B8%8F-configuration" name="%E2%9A%99%EF%B8%8F-configuration"></a>
-
-### environment settings
-<a id="markdown-environment-settings" name="environment-settings"></a>
-
-```python
-# * set theme: light / dark
-# * this will affect all plots
-os.environ['THEME'] = 'light'
-
-# * set renderer: svg / png for static images, '' for interactive plots
-# * note: only static images will be rendered in markdown
-os.environ['RENDERER'] = 'svg'
-```
+<br>
 
 ## 🧩 prerequisites
 <a id="markdown-%F0%9F%A7%A9-prerequisites" name="%F0%9F%A7%A9-prerequisites"></a>
@@ -318,15 +372,21 @@ os.environ['RENDERER'] = 'svg'
 
 > ⚠️ this package depends on `numpy<2.0.0` since `UpSetPlot` is still tied to the previous versions
 
+<br>
+
 ## 🤝 contributing
 <a id="markdown-%F0%9F%A4%9D-contributing" name="%F0%9F%A4%9D-contributing"></a>
 
 contributions are welcome! please feel free to submit a pull request. for major changes, please open an issue first to discuss what you would like to change.
 
+<br>
+
 ## 📄 license
 <a id="markdown-%F0%9F%93%84-license" name="%F0%9F%93%84-license"></a>
 
 this project is licensed under the **MIT** license - see the [license](license) file for details.
+
+<br>
 
 ## 🏷️ tags
 <a id="markdown-%F0%9F%8F%B7%EF%B8%8F-tags" name="%F0%9F%8F%B7%EF%B8%8F-tags"></a>

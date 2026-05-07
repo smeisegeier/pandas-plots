@@ -5,7 +5,7 @@ from typing import Literal
 import pandas as pd
 import plotly.express as px
 
-from ..helper import set_caption
+from ..helper import _set_caption
 from ..hlp import *
 from ..tbl import print_summary
 
@@ -34,7 +34,7 @@ def plot_histogram(
 
     ⚠️ on large dataframes, this diagram will be EXTREMELY bloated. use the `_large` version!
 
-    Parameters:
+    Args:
         df_ser (pd.DataFrame | pd.Series): The input containing the data to be plotted.
         histnorm (Literal["probability", "probability density", "density", "percent", None]): The normalization mode for the histogram. Default is None.
         nbins (int): The number of bins in the histogram. Default is 0. If its set to -1, the number of bins will represent the integer span of the data.
@@ -70,7 +70,7 @@ def plot_histogram(
     # * rounding
     df = df.map(lambda x: round(x, precision))
 
-    _caption = set_caption(caption)
+    _caption = _set_caption(caption)
 
     # * nbins defaults to number of unique values
     if nbins == -1:

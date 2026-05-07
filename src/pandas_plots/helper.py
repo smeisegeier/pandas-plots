@@ -1,17 +1,18 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
+from IPython.display import display, Markdown
 
 from .const import OTHER_LABEL
 
 
 # * cleanse all variations of None
-def clean_set(_set: set) -> set:
+def _clean_set(_set: set) -> set:
     return _set - set([np.nan, None, ""])
 
 
 # * process venn details
-def create_details(
+def _create_details(
     venn: dict,
     venn_details_keys: list,
     verbose: int,
@@ -58,7 +59,7 @@ def create_details(
     return df, details
 
 
-def aggregate_data(
+def _aggregate_data(
     df: pd.DataFrame,
     top_n_index: int,
     top_n_color: int,
@@ -130,7 +131,7 @@ def aggregate_data(
     return aggregated_df
 
 
-def assign_column_colors(columns, color_palette, null_label, first_col_grey=False, sort_columns=True):
+def _assign_column_colors(columns, color_palette, null_label, first_col_grey=False, sort_columns=True):
     """
     Assigns colors to columns, with a special gray color for null values.
 
@@ -166,11 +167,11 @@ def assign_column_colors(columns, color_palette, null_label, first_col_grey=Fals
     return colors
 
 
-def set_caption(caption: str) -> str:
+def _set_caption(caption: str) -> str:
     return f"{' '.join(caption.split())}, " if caption else ""
 
 
-def group_kkr(df: pd.DataFrame, kkr_col: str) -> pd.DataFrame:
+def _group_kkr(df: pd.DataFrame, kkr_col: str) -> pd.DataFrame:
     """
     Groups and counts a DataFrame by kkr_col and other_col (row count only).
     It preserves all non-zero counts and inserts zero-count placeholders
@@ -263,3 +264,7 @@ def group_kkr(df: pd.DataFrame, kkr_col: str) -> pd.DataFrame:
         result_df = result_df[final_cols]
 
     return result_df
+
+def _add_alt_text(text: str) -> None:
+    if text:
+        display(Markdown(f"<!-- ALT_TEXT:{text}-->"))

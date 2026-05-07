@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 from pandas_plots import const
 
-from ..helper import assign_column_colors, set_caption
+from ..helper import _add_alt_text, _assign_column_colors, _set_caption
 from ..hlp import *
 from ..tbl import print_summary
 
@@ -30,6 +30,7 @@ def plot_boxes_large(
     color_palette: str | list[str] = const.PALETTE_RKI1,
     null_label: str = "(NA)",
     first_col_grey: bool = False,
+    alt_text: str = None,
 ) -> None:
     """
     Plots vertical box plots for each unique item in the DataFrame using Seaborn/Matplotlib.
@@ -57,6 +58,7 @@ def plot_boxes_large(
             - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
         null_label (str): Label for null values.
         first_col_grey (bool): If True, sets the first category to grey.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -98,7 +100,7 @@ def plot_boxes_large(
 
     # * assign colors
     colors_unique = df[col_cat].unique().tolist()
-    color_map = assign_column_colors(colors_unique, color_palette, null_label, first_col_grey)
+    color_map = _assign_column_colors(colors_unique, color_palette, null_label, first_col_grey)
     # convert dict to list in the order of colors_unique
     color_list = [color_map[cat] for cat in colors_unique]
 
@@ -110,7 +112,7 @@ def plot_boxes_large(
     elif title:
         plot_title = f"{title}, {n_str}"
     else:
-        plot_title = f"{set_caption(caption)} [{col_cat}] by [{col_num}]{log_str}, {n_str}"
+        plot_title = f"{_set_caption(caption)} [{col_cat}] by [{col_num}]{log_str}, {n_str}"
 
     # * Determine flier/outlier display
     showfliers = True
@@ -156,6 +158,8 @@ def plot_boxes_large(
 
     # * Display the plot
     plt.tight_layout()
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
     plt.show()
 
     if summary:

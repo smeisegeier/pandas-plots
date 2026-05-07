@@ -21,17 +21,17 @@ def add_bitmask_label(
     if the bitmask value is 0, it will be replaced with the zero_code.
     the method can be chained in pandas as well as in duckdb: df.add_bitmask_label(...)
 
-    Parameters:
-    - data (pd.DataFrame | pd.Series | duckdb.DuckDBPyRelation): Input data.
-    - bitmask_col (str): The name of the column containing bitmask values (ignored if input is Series).
-    - labels (list[str]): Labels corresponding to the bits, in the correct order.
-    - separator (str): Separator for combining labels. Default is "|".
-    - zero_code (str): Value to return for bitmask value 0. Default is "-".
-    - keep_col (bool): If True, retains the bitmask column. If False, removes it. Default is True.
-    - con (duckdb.Connection): DuckDB connection object. Required if data is a DuckDB Relation.
+    Args:
+        data (pd.DataFrame | pd.Series | duckdb.DuckDBPyRelation): Input data.
+        bitmask_col (str): The name of the column containing bitmask values (ignored if input is Series).
+        labels (list[str]): Labels corresponding to the bits, in the correct order.
+        separator (str): Separator for combining labels. Default is "|".
+        zero_code (str): Value to return for bitmask value 0. Default is "-".
+        keep_col (bool): If True, retains the bitmask column. If False, removes it. Default is True.
+        con (duckdb.Connection): DuckDB connection object. Required if data is a DuckDB Relation.
 
     Returns:
-    - pd.DataFrame | duckdb.DuckDBPyRelation: The modified data with the new column added.
+        pd.DataFrame | duckdb.DuckDBPyRelation: The modified data with the new column added.
     """
     # * check possible input formats
     if isinstance(data, ddb.DuckDBPyRelation):

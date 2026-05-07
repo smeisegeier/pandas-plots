@@ -11,14 +11,14 @@ def mean_confidence_interval(data, confidence=0.95, use_median=False, n_bootstra
     Calculate the mean or median and confidence interval.
     For median, uses bootstrapping for a more robust confidence interval.
 
-    Parameters:
-    data (array-like): The input data.
-    confidence (float, optional): The confidence level for the interval. Defaults to 0.95.
-    use_median (bool, optional): If True, calculates median and its confidence interval. Defaults to False.
-    n_bootstraps (int, optional): Number of bootstrap samples for median CI. Only used if use_median is True.
+    Args:
+        data (array-like): The input data.
+        confidence (float, optional): The confidence level for the interval. Defaults to 0.95.
+        use_median (bool, optional): If True, calculates median and its confidence interval. Defaults to False.
+        n_bootstraps (int, optional): Number of bootstrap samples for median CI. Only used if use_median is True.
 
     Returns:
-    tuple: A tuple containing the central value (mean or median), margin of error, lower bound, and upper bound.
+        tuple: A tuple containing the central value (mean or median), margin of error, lower bound, and upper bound.
     """
     from .to_series import to_series
     data = to_series(data)

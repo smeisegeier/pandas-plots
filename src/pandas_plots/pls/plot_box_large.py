@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sb
 from matplotlib import pyplot as plt
 
-from ..helper import set_caption
+from ..helper import _add_alt_text, _set_caption
 from ..hlp import *
 from ..tbl import print_summary
 
@@ -28,6 +28,7 @@ def plot_box_large(
     x_max: float = None,
     use_log: bool = False,
     png_path: Path | str = None,
+    alt_text: str = None,
 ) -> None:
     """
     Plots a horizontal box or violin plot for a pandas Series.
@@ -59,6 +60,7 @@ def plot_box_large(
         renderer (Literal["png", "svg", None], optional): This argument is maintained
                 for compatibility but is **ignored** as Seaborn/Matplotlib uses
                 `plt.show()` for display.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns:
         None
@@ -97,7 +99,7 @@ def plot_box_large(
     elif title:
         plot_title = f"{title}, {n_str}"
     else:
-        plot_title = f"{set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
+        plot_title = f"{_set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
 
     # ----------------------------------------------------
     # --- Seaborn Plotting ---
@@ -207,6 +209,8 @@ def plot_box_large(
 
     # Display the plot
     plt.tight_layout()
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
     plt.show()
 
     if summary:

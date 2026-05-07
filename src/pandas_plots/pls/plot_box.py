@@ -5,9 +5,9 @@ from typing import Literal
 import pandas as pd
 import plotly.express as px
 
+from ..helper import _add_alt_text, _set_caption
 from ..hlp import *
 from ..tbl import print_summary
-from ..helper import set_caption
 
 
 def plot_box(
@@ -19,7 +19,7 @@ def plot_box(
     annotations: bool = True,
     summary: bool = True,
     caption: str = None,
-    caption_only_n : bool = False,
+    caption_only_n: bool = False,
     title: str = None,
     violin: bool = False,
     x_min: float = None,
@@ -27,6 +27,7 @@ def plot_box(
     use_log: bool = False,
     png_path: Path | str = None,
     renderer: Literal["png", "svg", None] = None,
+    alt_text: str = None,
 ) -> None:
     """
     Plots a horizontal box plot for the given pandas Series.
@@ -50,6 +51,7 @@ def plot_box(
         use_log: Use logarithmic scale for the axis.
         png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
         renderer (Literal["png", "svg", None], optional): The renderer to use for saving the image. Defaults to None.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -84,9 +86,8 @@ def plot_box(
     elif title:
         plot_title = f"{title}, {n_str}"
     else:
-        plot_title = f"{set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
-    
-    
+        plot_title = f"{_set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
+
     dict = {
         "data_frame": ser,
         "orientation": "h",
@@ -176,6 +177,8 @@ def plot_box(
         height=height,
     )
 
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
     fig.show(
         renderer=renderer or os.getenv("RENDERER"),
         width=width,

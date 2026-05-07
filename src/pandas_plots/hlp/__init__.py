@@ -4,6 +4,8 @@ Helper functions module for pandas-plots.
 This module contains various helper functions that were previously in hlp.py.
 """
 
+import pandas as pd
+
 from .mean_confidence_interval import mean_confidence_interval
 from .to_series import to_series
 from .replace_delimiter_outside_quotes import replace_delimiter_outside_quotes
@@ -24,6 +26,7 @@ from .prepend_uv_header import prepend_uv_header
 from .create_py_script import create_py_script
 from .setup_rendering import setup_rendering
 from .find_str_in_duckdb import find_str_in_duckdb
+from .export_plot_data import export_plot_data
 
 __all__ = [
     "mean_confidence_interval",
@@ -48,4 +51,7 @@ __all__ = [
     "create_py_script",
     "setup_rendering",
     "find_str_in_duckdb",
+    "export_plot_data",
 ]
+
+pd.DataFrame.export_plot_data = export_plot_data

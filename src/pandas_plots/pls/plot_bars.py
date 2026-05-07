@@ -7,7 +7,7 @@ import plotly.express as px
 
 from pandas_plots import const
 
-from ..helper import assign_column_colors, set_caption
+from ..helper import _add_alt_text, _assign_column_colors, _set_caption
 from ..hlp import *
 
 
@@ -31,6 +31,7 @@ def plot_bars(
     precision: int = 0,
     renderer: Literal["png", "svg", None] = None,
     png_path: Path | str = None,
+    alt_text: str = None,
 ) -> None:
     """
     A function to plot a bar chart based on a *categorical* column (must be string or bool) and a numerical value.
@@ -38,33 +39,34 @@ def plot_bars(
         - a dataframe w/ exactly 2 columns: string and numerical OR
         - a series, then value_counts() is applied upon to form the numercal, and use_ci is set to false
 
-    Parameters:
-    - df_in: df or series.
-    - caption: An optional string indicating the caption for the chart.
-    - caption_only_n: An optional boolean indicating whether to show only the number of observations in the caption.
-    - top_n_index: An optional integer indicating the number of top indexes to include in the chart. Default is 0, which includes all indexes.
-    - top_n_minvalue: An optional integer indicating the minimum value to be included in the chart. Default is 0, which includes all values.
-    - dropna: A boolean indicating whether to drop NaN values from the chart. Default is False.
-    - orientation: A string indicating the orientation of the chart. It can be either "h" for horizontal or "v" for vertical. Default is "v".
-    - sort_values: A boolean indicating whether to sort the values in the chart. Default is False.
-    - normalize: A boolean indicating whether to show pct values in the chart. Default is False.
-    - color_palette: Name of the color palette to use, or a list of colors.
-        - Default: `const.PALETTE_RKI1`
-        - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
-        - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
-    - null_label: Label for null values. Default is "(NA)".
-    - height: An optional integer indicating the height of the chart. Default is 500.
-    - width: An optional integer indicating the width of the chart. Default is 2000.
-    - title: An optional string indicating the title of the chart. If not provided, the title will be the name of the index column.
-    - use_ci: A boolean indicating whether to use confidence intervals (95%) on mean values for the chart. Default is False.
-        - if True, the function will add the lower and upper bounds of the confidence interval to the chart.
-        - enforces vertical orientation.
-        - enforces nomalize=False
-        - enforces dropna=True
-    - ci_agg: Aggregation method for confidence intervals. Can be "mean" or "median". Default is "mean".
-    - precision: An integer indicating the number of decimal places to round the values to. Default is 0.
-    - renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is None.
-    - png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+    Args:
+        df_in: df or series.
+        caption: An optional string indicating the caption for the chart.
+        caption_only_n: An optional boolean indicating whether to show only the number of observations in the caption.
+        top_n_index: An optional integer indicating the number of top indexes to include in the chart. Default is 0, which includes all indexes.
+        top_n_minvalue: An optional integer indicating the minimum value to be included in the chart. Default is 0, which includes all values.
+        dropna: A boolean indicating whether to drop NaN values from the chart. Default is False.
+        orientation: A string indicating the orientation of the chart. It can be either "h" for horizontal or "v" for vertical. Default is "v".
+        sort_values: A boolean indicating whether to sort the values in the chart. Default is False.
+        normalize: A boolean indicating whether to show pct values in the chart. Default is False.
+        color_palette: Name of the color palette to use, or a list of colors.
+            - Default: `const.PALETTE_RKI1`
+            - 🎨 Plotly names: `D3`, `Pastel`, `Dark24`, `Light24`, `Plotly`
+            - Example: `const.PALETTE_RKI1`, `const.PALETTE_RKI2`
+        null_label: Label for null values. Default is "(NA)".
+        height: An optional integer indicating the height of the chart. Default is 500.
+        width: An optional integer indicating the width of the chart. Default is 2000.
+        title: An optional string indicating the title of the chart. If not provided, the title will be the name of the index column.
+        use_ci: A boolean indicating whether to use confidence intervals (95%) on mean values for the chart. Default is False.
+            - if True, the function will add the lower and upper bounds of the confidence interval to the chart.
+            - enforces vertical orientation.
+            - enforces nomalize=False
+            - enforces dropna=True
+        ci_agg: Aggregation method for confidence intervals. Can be "mean" or "median". Default is "mean".
+        precision: An integer indicating the number of decimal places to round the values to. Default is 0.
+        renderer: A string indicating the renderer to use for displaying the chart. It can be "png", "svg", or None. Default is None.
+        png_path (Path | str, optional): The path to save the image as a png file. Defaults to None.
+        alt_text (str, optional): Custom alt text for accessibility. Defaults to title or caption if not provided.
 
     Returns: None
     """
@@ -203,7 +205,7 @@ def plot_bars(
     elif title:
         title_str = f"{title}, {_title_str_n}"
     else:
-        title_str = f"{set_caption(caption)}{_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}, {_title_str_n}"
+        title_str = f"{_set_caption(caption)}{_title_str_minval}{_title_str_top}[{col_name}] by [{col_index}]{_title_str_null}, {_title_str_n}"
 
     # * sort df
     df = df.sort_values(
@@ -213,7 +215,9 @@ def plot_bars(
 
     # * assign colors AFTER sorting, so palette order matches bar order
     colors_unique = df[col_index].unique().tolist()
-    color_map = assign_column_colors(colors_unique, color_palette, null_label, first_col_grey=False, sort_columns=False)
+    color_map = _assign_column_colors(
+        colors_unique, color_palette, null_label, first_col_grey=False, sort_columns=False
+    )
 
     # ! plot
     _fig = px.bar(
@@ -294,6 +298,8 @@ def plot_bars(
         )
 
     # * set axis title
+    alt_text = alt_text or title or caption
+    _add_alt_text(alt_text)
     _fig.show(
         renderer=renderer or os.getenv("RENDERER"),
         width=width,

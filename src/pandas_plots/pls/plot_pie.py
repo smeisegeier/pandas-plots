@@ -4,7 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from ..helper import set_caption
+from ..helper import _set_caption
 from ..hlp import *
 
 
@@ -78,7 +78,7 @@ def plot_pie(
         wedge_properties = dict(width=1.0 - donut_size, edgecolor="w")
 
     # * Apply Title
-    plot_title = f"{set_caption(caption)}{label}, n={n:_}"
+    plot_title = f"{_set_caption(caption)}{label}, n={n:_}"
     plt.title(plot_title)
 
     # * 4. Create the pie chart using Matplotlib
