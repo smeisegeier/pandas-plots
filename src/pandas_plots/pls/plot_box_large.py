@@ -20,6 +20,7 @@ def plot_box_large(
     width: int = 1200,
     annotations: bool = False,
     summary: bool = True,
+    plot: bool = True,
     caption: str = None,
     caption_only_n: bool = False,
     title: str = None,
@@ -69,9 +70,6 @@ def plot_box_large(
     if ser is None:
         return
     
-    if os.getenv("PDF") == "1":
-        summary = False
-
     # * drop na to keep scipy sane
     n_ = len(ser)
     # ser.dropna(inplace=True)
@@ -80,152 +78,159 @@ def plot_box_large(
     # --- Data and Layout Setup ---
     # ----------------------------------------------------
 
-    # * apply theme early
-    if os.getenv("THEME") == "dark":
-        plt.style.use("dark_background")
-    else:
-        plt.style.use("default")
+    if plot:
+        # * apply theme early
+        if os.getenv("THEME") == "dark":
+            plt.style.use("dark_background")
+        else:
+            plt.style.use("default")
 
-    # Seaborn/Matplotlib setup for size
-    # figsize takes (width, height) in inches, so we scale by a factor (e.g., 100 DPI)
-    scale_factor = 100
-    plt.figure(figsize=(width / scale_factor, height / scale_factor))
+        # Seaborn/Matplotlib setup for size
+        # figsize takes (width, height) in inches, so we scale by a factor (e.g., 100 DPI)
+        scale_factor = 100
+        plt.figure(figsize=(width / scale_factor, height / scale_factor))
 
-    # Create a dummy DataFrame suitable for Seaborn's y/x mapping for a single Series
-    # We use 'value' for the numeric data and a constant 'category' for the y-axis
-    df_plot = pd.DataFrame({"value": ser.values, "category": ser.name or "Series"})
+        # Create a dummy DataFrame suitable for Seaborn's y/x mapping for a single Series
+        # We use 'value' for the numeric data and a constant 'category' for the y-axis
+        df_plot = pd.DataFrame({"value": ser.values, "category": ser.name or "Series"})
 
-    log_str = " (log-scale)" if use_log else ""
-    n_str = f"n={n_:_}"
-    if caption_only_n:
-        plot_title = n_str
-    elif title:
-        plot_title = f"{title}, {n_str}"
-    else:
-        plot_title = f"{_set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
+        log_str = " (log-scale)" if use_log else ""
+        n_str = f"n={n_:_}"
+        if caption_only_n:
+            plot_title = n_str
+        elif title:
+            plot_title = f"{title}, {n_str}"
+        else:
+            plot_title = f"{_set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
 
-    # ----------------------------------------------------
-    # --- Seaborn Plotting ---
-    # ----------------------------------------------------
+        # ----------------------------------------------------
+        # --- Seaborn Plotting ---
+        # ----------------------------------------------------
 
-    if violin:
-        # Use violinplot
-        ax = sb.violinplot(
-            data=df_plot,
-            x="value",
-            y="category",
-            orient="h",
-            cut=0,  # Seaborn argument to control how far the plot extends past whiskers
-            inner="box",  # Show a mini boxplot inside the violin
-        )
-    else:
-        # Use boxplot
-        # The 'points' argument is partially supported via 'fliersize' and 'showfliers'
+        if violin:
+            # Use violinplot
+            ax = sb.violinplot(
+                data=df_plot,
+                x="value",
+                y="category",
+                orient="h",
+                cut=0,  # Seaborn argument to control how far the plot extends past whiskers
+                inner="box",  # Show a mini boxplot inside the violin
+            )
+        else:
+            # Use boxplot
+            # The 'points' argument is partially supported via 'fliersize' and 'showfliers'
 
-        # Determine flier/outlier display
-        showfliers = True
-        flier_size = 5  # Default size
-        if points == "outliers" or points == "all":
+            # Determine flier/outlier display
             showfliers = True
-        elif points is None or points == "suspectedoutliers":
-            # Note: Seaborn/Matplotlib doesn't distinguish between 'outliers' and 'suspected' like Plotly
-            # 'suspectedoutliers' is not directly translatable, so we'll treat it as 'None' (no fliers)
-            if points == "suspectedoutliers":
-                showfliers = False
+            flier_size = 5  # Default size
+            if points == "outliers" or points == "all":
+                showfliers = True
+            elif points is None or points == "suspectedoutliers":
+                # Note: Seaborn/Matplotlib doesn't distinguish between 'outliers' and 'suspected' like Plotly
+                # 'suspectedoutliers' is not directly translatable, so we'll treat it as 'None' (no fliers)
+                if points == "suspectedoutliers":
+                    showfliers = False
 
-        ax = sb.boxplot(
-            data=df_plot,
-            x="value",
-            y="category",
-            orient="h",
-            palette="tab10",
-            showfliers=showfliers,
-            flierprops={"markerfacecolor": "red", "markersize": flier_size} if showfliers else {},
-        )
-
-    # Apply axis limits and scale
-    if use_log:
-        ax.set_xscale("log")
-        # use_log: bool = False, # Handled above with ax.set_xscale
-
-    if (x_min is not None) and (x_max is not None):
-        ax.set_xlim(x_min, x_max)
-        # x_min: float = None, # Handled above with ax.set_xlim
-        # x_max: float = None, # Handled above with ax.set_xlim
-
-    ax.set_title(plot_title)
-    ax.set_ylabel("")  # Remove the category label on the y-axis
-
-    # ----------------------------------------------------
-    # --- Annotations and Summary ---
-    # ----------------------------------------------------
-
-    # Recalculate stats for annotations
-    median = ser.median()
-    mean = ser.mean()
-    q25 = ser.quantile(0.25)
-    q75 = ser.quantile(0.75)
-    min_val = ser.min()
-    max_val = ser.max()
-    iqr = q75 - q25
-
-    # Calculate fences (Matplotlib standard)
-    fence0_ = q25 - 1.5 * iqr
-    fence0 = fence0_ if fence0_ > min_val else min_val
-    fence1_ = q75 + 1.5 * iqr
-    fence1 = fence1_ if fence1_ < max_val else max_val
-
-    # Note: Annotations in Matplotlib are tedious and highly dependent on figure size.
-    # The Plotly yshift logic (lvl1, lvl2, lvl3) is not easily portable.
-    # We use a simple constant y position (0.5 for the single series) and a vertical offset.
-
-    if annotations:
-        y_pos = 0.5  # Center of the single boxplot on the y-axis
-        v_offset = 0.05  # Vertical distance for labels
-
-        # Simplified annotation loop to place labels above/below the plot
-        labels = [
-            (min_val, f"min: {min_val:.{precision}f}", v_offset),
-            (fence0, f"lower: {fence0:.{precision}f}", v_offset * 2),
-            (q25, f"q25: {q25:.{precision}f}", v_offset),
-            (median, f"median: {median:.{precision}f}", -v_offset * 2),
-            (mean, f"mean: {mean:.{precision}f}", v_offset * 3),
-            (q75, f"q75: {q75:.{precision}f}", -v_offset),
-            (fence1, f"upper: {fence1:.{precision}f}", v_offset),
-            (max_val, f"max: {max_val:.{precision}f}", -v_offset * 3),
-        ]
-
-        for x, text, offset in labels:
-            ax.annotate(
-                text,
-                xy=(x, y_pos),
-                xytext=(x, y_pos + offset),
-                ha="center",
-                arrowprops=dict(facecolor="black", arrowstyle="->", connectionstyle="arc3,rad=0.0"),
-                fontsize=8,
+            ax = sb.boxplot(
+                data=df_plot,
+                x="value",
+                y="category",
+                orient="h",
+                palette="tab10",
+                showfliers=showfliers,
+                flierprops={"markerfacecolor": "red", "markersize": flier_size} if showfliers else {},
             )
 
-    # height: int = 200, # Handled by plt.figure(figsize=...)
-    # width: int = 1200, # Handled by plt.figure(figsize=...)
-    # caption: str = None, # Handled in title
-    # renderer: Literal["png", "svg", None] = None, # NOT SUPPORTED/COMMENTED OUT
+        # Apply axis limits and scale
+        if use_log:
+            ax.set_xscale("log")
+            # use_log: bool = False, # Handled above with ax.set_xscale
 
-    # Display the plot
-    plt.tight_layout()
-    alt_text = alt_text or title or caption
-    _add_alt_text(alt_text)
-    plt.show()
+        if (x_min is not None) and (x_max is not None):
+            ax.set_xlim(x_min, x_max)
+            # x_min: float = None, # Handled above with ax.set_xlim
+            # x_max: float = None, # Handled above with ax.set_xlim
+
+        ax.set_title(plot_title)
+        ax.set_ylabel("")  # Remove the category label on the y-axis
+
+        # ----------------------------------------------------
+        # --- Annotations ---
+        # ----------------------------------------------------
+
+        # Recalculate stats for annotations
+        median = ser.median()
+        mean = ser.mean()
+        q25 = ser.quantile(0.25)
+        q75 = ser.quantile(0.75)
+        min_val = ser.min()
+        max_val = ser.max()
+        iqr = q75 - q25
+
+        # Calculate fences (Matplotlib standard)
+        fence0_ = q25 - 1.5 * iqr
+        fence0 = fence0_ if fence0_ > min_val else min_val
+        fence1_ = q75 + 1.5 * iqr
+        fence1 = fence1_ if fence1_ < max_val else max_val
+
+        # Note: Annotations in Matplotlib are tedious and highly dependent on figure size.
+        # The Plotly yshift logic (lvl1, lvl2, lvl3) is not easily portable.
+        # We use a simple constant y position (0.5 for the single series) and a vertical offset.
+
+        if annotations:
+            y_pos = 0.5  # Center of the single boxplot on the y-axis
+            v_offset = 0.05  # Vertical distance for labels
+
+            # Simplified annotation loop to place labels above/below the plot
+            labels = [
+                (min_val, f"min: {min_val:.{precision}f}", v_offset),
+                (fence0, f"lower: {fence0:.{precision}f}", v_offset * 2),
+                (q25, f"q25: {q25:.{precision}f}", v_offset),
+                (median, f"median: {median:.{precision}f}", -v_offset * 2),
+                (mean, f"mean: {mean:.{precision}f}", v_offset * 3),
+                (q75, f"q75: {q75:.{precision}f}", -v_offset),
+                (fence1, f"upper: {fence1:.{precision}f}", v_offset),
+                (max_val, f"max: {max_val:.{precision}f}", -v_offset * 3),
+            ]
+
+            for x, text, offset in labels:
+                ax.annotate(
+                    text,
+                    xy=(x, y_pos),
+                    xytext=(x, y_pos + offset),
+                    ha="center",
+                    arrowprops={"facecolor": "black", "arrowstyle": "->", "connectionstyle": "arc3,rad=0.0"},
+                    fontsize=8,
+                )
+
+        # height: int = 200, # Handled by plt.figure(figsize=...)
+        # width: int = 1200, # Handled by plt.figure(figsize=...)
+        # caption: str = None, # Handled in title
+        # renderer: Literal["png", "svg", None] = None, # NOT SUPPORTED/COMMENTED OUT
+
+        # Display the plot
+        plt.tight_layout()
+        alt_text = alt_text or title or caption
+        _add_alt_text(alt_text)
+        plt.show()
+
+        # * save to png if path is provided
+        if png_path is not None:
+            plt.savefig(Path(png_path).as_posix(), format="png")
+
+        # Clear the figure to prevent display issues if multiple plots are run
+        plt.close()
+        plt.style.use("default")
 
     if summary:
-        print_summary(ser.to_frame())
-
-    # * save to png if path is provided
-    if png_path is not None:
-        plt.savefig(Path(png_path).as_posix(), format="png")
-
-    # Clear the figure to prevent display issues if multiple plots are run
-    plt.close()
-    plt.style.use("default")
+        if os.getenv("PDF") == "1":
+            from IPython.display import display
+            _res = print_summary(ser.to_frame(), show=False)
+            if _res:
+                display(pd.DataFrame([_res]))
+        else:
+            print_summary(ser.to_frame())
     return
 
 

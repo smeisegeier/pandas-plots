@@ -32,6 +32,7 @@ def plot_boxes(
     null_label: str = "(NA)",
     first_col_grey: bool = False,
     alt_text: str = None,
+    plot: bool = True,
 ) -> None:
     """
     Plot vertical boxes for each unique item in the DataFrame and add annotations for statistics.
@@ -78,9 +79,6 @@ def plot_boxes(
     xlvl2 = 0
     xlvl3 = 50
 
-    if os.getenv("PDF") == "1":
-        summary = False
-
     col_cat = df.columns[0]
     col_num = df.columns[1]
 
@@ -109,104 +107,104 @@ def plot_boxes(
     else:
         plot_title = f"{_set_caption(caption)} [{df.columns[0]}] by [{df.columns[1]}]{log_str}, {n_str}"
 
-    # * main plot
-    fig = px.box(
-        df,
-        x=df.iloc[:, 0],
-        y=df.iloc[:, 1],
-        color=df.iloc[:, 0],
-        facet_col=facet_col,
-        template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
-        orientation="v",
-        points=points,
-        log_y=use_log,
-        color_discrete_map=color_map,
-        title=plot_title,
-    )
+    if plot:
+        # * main plot
+        fig = px.box(
+            df,
+            x=df.iloc[:, 0],
+            y=df.iloc[:, 1],
+            color=df.iloc[:, 0],
+            facet_col=facet_col,
+            template="plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
+            orientation="v",
+            points=points,
+            log_y=use_log,
+            color_discrete_map=color_map,
+            title=plot_title,
+        )
 
-    # * Set the order of the x-axis categories
-    fig.update_xaxes(categoryorder="array", categoryarray=items)
+        # * Set the order of the x-axis categories
+        fig.update_xaxes(categoryorder="array", categoryarray=items)
 
-    # * yshift is trivial
-    YS = 0
+        # * yshift is trivial
+        YS = 0
 
-    # * loop annotations
-    if annotations:
-        for i, item in enumerate(items):
-            max = round(df[df.iloc[:, 0] == item].iloc[:, 1].max(), precision)
-            min = round(df[df.iloc[:, 0] == item].iloc[:, 1].min(), precision)
-            mean = round(df[df.iloc[:, 0] == item].iloc[:, 1].mean(), precision)
-            median = round(df[df.iloc[:, 0] == item].iloc[:, 1].median(), precision)
-            q25 = round(df[df.iloc[:, 0] == item].iloc[:, 1].quantile(0.25), precision)
-            q75 = round(df[df.iloc[:, 0] == item].iloc[:, 1].quantile(0.75), precision)
-            fence0_ = round(q25 - 1.5 * (q75 - q25), precision)
-            fence0 = fence0_ if fence0_ > min else min
-            fence1_ = round(q75 + 1.5 * (q75 - q25), precision)
-            fence1 = fence1_ if fence1_ < max else max
-            fig.add_annotation(x=i, y=min, text=f"min: {min}", yshift=YS, showarrow=True, xshift=xlvl1)
-            fig.add_annotation(
-                x=i,
-                y=fence0,
-                text=f"lower: {fence0}",
-                yshift=YS,
-                showarrow=True,
-                xshift=xlvl3,
-            )
-            fig.add_annotation(x=i, y=q25, text=f"q25: {q25}", yshift=YS, showarrow=True, xshift=xlvl2)
-            fig.add_annotation(
-                x=i,
-                y=mean,
-                text=f"mean: {mean}",
-                yshift=YS,
-                showarrow=True,
-                xshift=xlvl1,
-            )
-            fig.add_annotation(
-                x=i,
-                y=median,
-                text=f"median: {median}",
-                yshift=YS,
-                showarrow=True,
-                xshift=xlvl3,
-            )
-            fig.add_annotation(x=i, y=q75, text=f"q75: {q75}", yshift=YS, showarrow=True, xshift=xlvl2)
-            fig.add_annotation(
-                x=i,
-                y=fence1,
-                text=f"upper: {fence1}",
-                yshift=YS,
-                showarrow=True,
-                xshift=xlvl3,
-            )
-            fig.add_annotation(x=i, y=max, text=f"max: {max}", yshift=YS, showarrow=True, xshift=xlvl1)
+        # * loop annotations
+        if annotations:
+            for i, item in enumerate(items):
+                max = round(df[df.iloc[:, 0] == item].iloc[:, 1].max(), precision)
+                min = round(df[df.iloc[:, 0] == item].iloc[:, 1].min(), precision)
+                mean = round(df[df.iloc[:, 0] == item].iloc[:, 1].mean(), precision)
+                median = round(df[df.iloc[:, 0] == item].iloc[:, 1].median(), precision)
+                q25 = round(df[df.iloc[:, 0] == item].iloc[:, 1].quantile(0.25), precision)
+                q75 = round(df[df.iloc[:, 0] == item].iloc[:, 1].quantile(0.75), precision)
+                fence0_ = round(q25 - 1.5 * (q75 - q25), precision)
+                fence0 = fence0_ if fence0_ > min else min
+                fence1_ = round(q75 + 1.5 * (q75 - q25), precision)
+                fence1 = fence1_ if fence1_ < max else max
+                fig.add_annotation(x=i, y=min, text=f"min: {min}", yshift=YS, showarrow=True, xshift=xlvl1)
+                fig.add_annotation(
+                    x=i,
+                    y=fence0,
+                    text=f"lower: {fence0}",
+                    yshift=YS,
+                    showarrow=True,
+                    xshift=xlvl3,
+                )
+                fig.add_annotation(x=i, y=q25, text=f"q25: {q25}", yshift=YS, showarrow=True, xshift=xlvl2)
+                fig.add_annotation(
+                    x=i,
+                    y=mean,
+                    text=f"mean: {mean}",
+                    yshift=YS,
+                    showarrow=True,
+                    xshift=xlvl1,
+                )
+                fig.add_annotation(
+                    x=i,
+                    y=median,
+                    text=f"median: {median}",
+                    yshift=YS,
+                    showarrow=True,
+                    xshift=xlvl3,
+                )
+                fig.add_annotation(x=i, y=q75, text=f"q75: {q75}", yshift=YS, showarrow=True, xshift=xlvl2)
+                fig.add_annotation(
+                    x=i,
+                    y=fence1,
+                    text=f"upper: {fence1}",
+                    yshift=YS,
+                    showarrow=True,
+                    xshift=xlvl3,
+                )
+                fig.add_annotation(x=i, y=max, text=f"max: {max}", yshift=YS, showarrow=True, xshift=xlvl1)
 
-    fig.update_xaxes(title_text=df.columns[0])
-    fig.update_yaxes(title_text=df.columns[1])
-    fig.update_layout(boxmode="group", height=height, width=width)  # Ensures boxes are not too compressed
-    fig.update_layout(showlegend=False)
-    fig.update_traces(marker=dict(size=5), width=box_width)  # Adjust width (default ~0.5)
+        fig.update_xaxes(title_text=df.columns[0])
+        fig.update_yaxes(title_text=df.columns[1])
+        fig.update_layout(boxmode="group", height=height, width=width)  # Ensures boxes are not too compressed
+        fig.update_layout(showlegend=False)
+        fig.update_traces(marker=dict(size=5), width=box_width)  # Adjust width (default ~0.5)
 
-    alt_text = alt_text or title or caption
-    _add_alt_text(alt_text)
-    fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
+        alt_text = alt_text or title or caption
+        _add_alt_text(alt_text)
+        fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
+
+        # * save to png if path is provided
+        if png_path is not None:
+            fig.write_image(Path(png_path).as_posix())
+
     if summary:
-        # * sort df by first column before printing summary
-        # * print all data
-        print_summary(
-            df=df.sort_values(df.columns[0]),
-            precision=precision,
-            sparse=False,
-        )
-
-        # * print values
-        print_summary(
-            df=df.sort_values(df.columns[0]),
-            precision=precision,
-            sparse=True,
-        )
-
-    # * save to png if path is provided
-    if png_path is not None:
-        fig.write_image(Path(png_path).as_posix())
+        _df_sorted = df.sort_values(df.columns[0])
+        if os.getenv("PDF") == "1":
+            from IPython.display import display
+            _res = print_summary(df=_df_sorted, precision=precision, sparse=False, show=False)
+            if _res:
+                display(pd.DataFrame([_res]))
+            _res = print_summary(df=_df_sorted, precision=precision, sparse=True, show=False)
+            if _res:
+                display(pd.DataFrame([_res]))
+        else:
+            print_summary(df=_df_sorted, precision=precision, sparse=False)
+            print_summary(df=_df_sorted, precision=precision, sparse=True)
 
     return

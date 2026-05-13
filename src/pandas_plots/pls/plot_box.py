@@ -28,6 +28,7 @@ def plot_box(
     png_path: Path | str = None,
     renderer: Literal["png", "svg", None] = None,
     alt_text: str = None,
+    plot: bool = True,
 ) -> None:
     """
     Plots a horizontal box plot for the given pandas Series.
@@ -59,141 +60,135 @@ def plot_box(
     if ser is None:
         return
 
-    if os.getenv("PDF") == "1":
-        summary = False
-
     # * drop na to keep scipy sane
     n_ = len(ser)
     ser.dropna(inplace=True)
     # n = len(ser)
 
-    # hack
-    median = ser.median()
-    mean = ser.mean()
-    q25 = ser.quantile(0.25)
-    q75 = ser.quantile(0.75)
-    min = ser.min()
-    max = ser.max()
-    fence0_ = q25 - 1.5 * (q75 - q25)
-    fence0 = fence0_ if fence0_ > min else min
-    fence1_ = q75 + 1.5 * (q75 - q25)
-    fence1 = fence1_ if fence1_ < max else max
-    lvl1 = height * 0.05
-    lvl2 = height * 0.15
-    lvl3 = height * 0.25
+    if plot:
+        # hack
+        median = ser.median()
+        mean = ser.mean()
+        q25 = ser.quantile(0.25)
+        q75 = ser.quantile(0.75)
+        min = ser.min()
+        max = ser.max()
+        fence0_ = q25 - 1.5 * (q75 - q25)
+        fence0 = fence0_ if fence0_ > min else min
+        fence1_ = q75 + 1.5 * (q75 - q25)
+        fence1 = fence1_ if fence1_ < max else max
+        lvl1 = height * 0.05
+        lvl2 = height * 0.15
+        lvl3 = height * 0.25
 
-    log_str = " (log-scale)" if use_log else ""
-    n_str = f"n={n_:_}"
-    if caption_only_n:
-        plot_title = n_str
-    elif title:
-        plot_title = f"{title}, {n_str}"
-    else:
-        plot_title = f"{_set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
+        log_str = " (log-scale)" if use_log else ""
+        n_str = f"n={n_:_}"
+        if caption_only_n:
+            plot_title = n_str
+        elif title:
+            plot_title = f"{title}, {n_str}"
+        else:
+            plot_title = f"{_set_caption(caption)} [{ser.name}]{log_str}, {n_str}"
 
-    dict = {
-        "data_frame": ser,
-        "orientation": "h",
-        "template": "plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
-        "points": points,
-        # 'box':True,
-        "log_x": use_log,  # * logarithmic scale, axis is always x
-        # "notched": True,
-        "title": plot_title,
-    }
+        dict = {
+            "data_frame": ser,
+            "orientation": "h",
+            "template": "plotly_dark" if os.getenv("THEME") == "dark" else "plotly",
+            "points": points,
+            # 'box':True,
+            "log_x": use_log,  # * logarithmic scale, axis is always x
+            # "notched": True,
+            "title": plot_title,
+        }
 
-    fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)
+        fig = px.violin(**{**dict, "box": True}) if violin else px.box(**dict)
 
-    if (x_min or x_min == 0) and (x_max or x_max == 0):
-        fig.update_xaxes(range=[x_min, x_max])
+        if (x_min or x_min == 0) and (x_max or x_max == 0):
+            fig.update_xaxes(range=[x_min, x_max])
 
-    # fig=px.violin(
-    #     ser,
-    #     template=os.getenv('THEME_PLOTLY'),
-    #     orientation='h',
-    #     height=height,
-    #     width=width,
-    #     points=points,
-    #     box=True,
-    #     title=f"{caption}[{ser.name}], n={len(ser):_}" if not title else title,
-    #     )
-    if annotations:
-        fig.add_annotation(
-            x=min,
-            text=f"min: {round(min, precision)}",
-            showarrow=True,
-            yshift=lvl1,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=fence0,
-            text=f"lower: {round(fence0, precision)}",
-            showarrow=True,
-            yshift=lvl3,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=q25,
-            text=f"q25: {round(q25, precision)}",
-            showarrow=True,
-            yshift=lvl2,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=median,
-            text=f"median: {round(median, precision)}",
-            showarrow=True,
-            yshift=lvl1,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=mean,
-            text=f"mean: {round(mean, precision)}",
-            showarrow=True,
-            yshift=lvl3,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=q75,
-            text=f"q75: {round(q75, precision)}",
-            showarrow=True,
-            yshift=lvl2,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=fence1,
-            text=f"upper: {round(fence1, precision)}",
-            showarrow=True,
-            yshift=lvl1,
-            y=-0,
-        )
-        fig.add_annotation(
-            x=max,
-            text=f"max: {round(max, precision)}",
-            showarrow=True,
-            yshift=lvl3,
-            y=-0,
+        if annotations:
+            fig.add_annotation(
+                x=min,
+                text=f"min: {round(min, precision)}",
+                showarrow=True,
+                yshift=lvl1,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=fence0,
+                text=f"lower: {round(fence0, precision)}",
+                showarrow=True,
+                yshift=lvl3,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=q25,
+                text=f"q25: {round(q25, precision)}",
+                showarrow=True,
+                yshift=lvl2,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=median,
+                text=f"median: {round(median, precision)}",
+                showarrow=True,
+                yshift=lvl1,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=mean,
+                text=f"mean: {round(mean, precision)}",
+                showarrow=True,
+                yshift=lvl3,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=q75,
+                text=f"q75: {round(q75, precision)}",
+                showarrow=True,
+                yshift=lvl2,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=fence1,
+                text=f"upper: {round(fence1, precision)}",
+                showarrow=True,
+                yshift=lvl1,
+                y=-0,
+            )
+            fig.add_annotation(
+                x=max,
+                text=f"max: {round(max, precision)}",
+                showarrow=True,
+                yshift=lvl3,
+                y=-0,
+            )
+
+        fig.update_layout(
+            width=width,
+            height=height,
         )
 
-    fig.update_layout(
-        width=width,
-        height=height,
-    )
+        alt_text = alt_text or title or caption
+        _add_alt_text(alt_text)
+        fig.show(
+            renderer=renderer or os.getenv("RENDERER"),
+            width=width,
+            height=height,
+        )
 
-    alt_text = alt_text or title or caption
-    _add_alt_text(alt_text)
-    fig.show(
-        renderer=renderer or os.getenv("RENDERER"),
-        width=width,
-        height=height,
-    )
+        # * save to png if path is provided
+        if png_path is not None:
+            fig.write_image(Path(png_path).as_posix())
 
     if summary:
         # * if only series is provided, col name is None
-        print_summary(ser.to_frame())
-
-    # * save to png if path is provided
-    if png_path is not None:
-        fig.write_image(Path(png_path).as_posix())
+        if os.getenv("PDF") == "1":
+            from IPython.display import display
+            _res = print_summary(ser.to_frame(), show=False)
+            if _res:
+                display(pd.DataFrame([_res]))
+        else:
+            print_summary(ser.to_frame())
 
     return
