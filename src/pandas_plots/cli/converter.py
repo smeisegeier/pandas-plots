@@ -951,16 +951,16 @@ def jupyter_to_md(
     )
     _enclose_block_as_code(
         markdown_filepath=target_md_path,
-        start_token="┌──────",
-        stop_token="└─────────",
+        start_token="┌──",
+        stop_token="└──",
         language="",
         remove_token_lines=False,
     )
 
     _remove_duckdb_table_header(
         markdown_filepath=target_md_path,
-        start_token="┌──────",
-        stop_token="└─────────",
+        start_token="┌──",
+        stop_token="└──",
     )
 
     _normalize_md_images(target_md_path)
