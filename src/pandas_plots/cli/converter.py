@@ -705,39 +705,38 @@ def _reconcile_dark_filenames(light_dir: str, dark_dir: str) -> None:
     """
     Renames files in dark_dir to match light_dir where cell index and extension agree
     but the output index within the cell differs (e.g. output_8_8.svg → output_8_7.svg).
-    Only renames when there is exactly one candidate on each side for a given cell+ext pair.
+    Handles both single and multiple outputs per cell, matching positionally by sub-index order.
+    Skips only when the count of candidates differs between light and dark for a given cell+ext pair.
     """
     if not os.path.isdir(light_dir) or not os.path.isdir(dark_dir):
         return
 
-    # Build map: (cell_index, ext) -> filename  for each side
-    def _index_files(directory):
-        result: dict[tuple[str, str], str] = {}
+    # Build map: (cell_index, ext) -> sorted list of filenames for each side
+    def _index_files(directory) -> dict[tuple[str, str], list[str]]:
+        result: dict[tuple[str, str], list[str]] = {}
         for fname in os.listdir(directory):
-            m = re.match(r"^(output_(\d+)_\d+)(\.\w+)$", fname)
+            m = re.match(r"^output_(\d+)_(\d+)(\.\w+)$", fname)
             if not m:
                 continue
-            cell_idx = m.group(2)
-            ext = m.group(3)
-            key = (cell_idx, ext)
-            if key in result:
-                result[key] = None  # ambiguous — more than one file for this cell+ext
-            else:
-                result[key] = fname
+            key = (m.group(1), m.group(3))  # (cell_idx, ext)
+            result.setdefault(key, []).append(fname)
+        for lst in result.values():
+            lst.sort(key=lambda f: int(re.search(r"_(\d+)\.\w+$", f).group(1)))
         return result
 
     light_map = _index_files(light_dir)
     dark_map = _index_files(dark_dir)
 
-    for key, light_name in light_map.items():
-        dark_name = dark_map.get(key)
-        if light_name is None or dark_name is None:
+    for key, light_names in light_map.items():
+        dark_names = dark_map.get(key)
+        if not dark_names or len(light_names) != len(dark_names):
             continue
-        if light_name != dark_name:
-            old_path = os.path.join(dark_dir, dark_name)
-            new_path = os.path.join(dark_dir, light_name)
-            os.rename(old_path, new_path)
-            print(f"└ ✅ reconciled dark filename: {dark_name} → {light_name}")
+        for light_name, dark_name in zip(light_names, dark_names):
+            if light_name != dark_name:
+                old_path = os.path.join(dark_dir, dark_name)
+                new_path = os.path.join(dark_dir, light_name)
+                os.rename(old_path, new_path)
+                print(f"└ ✅ reconciled dark filename: {dark_name} → {light_name}")
 
 
 def _single_run(
