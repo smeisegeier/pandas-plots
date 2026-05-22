@@ -1,6 +1,8 @@
 import numbers
+import os
 import numpy as np
 import pandas as pd
+from IPython.display import display
 from scipy import stats
 from typing import Literal
 
@@ -202,6 +204,45 @@ def _format_summary_table(name_list: list[str], summaries: list[dict], precision
 
     return output
 
+
+def _build_summary_df(
+    name_list: list[str], summaries: list[dict], precision: int, extended: bool, sparse: bool, total_df_count: int
+) -> pd.DataFrame:
+    """Builds the same summary as a pandas DataFrame (used in PDF mode)."""
+
+    metrics = ["count", "min", "lower", "q25", "median", "mean", "q75", "upper", "max", "std", "cv"]
+    if not sparse:
+        metrics.remove("count")
+        metrics.insert(0, "missings")
+    if extended:
+        metrics.extend(["sum", "skew", "kurto"])
+
+    def format_number_string(value, precision):
+        if not isinstance(value, numbers.Number):
+            return str(value)
+        if isinstance(value, (float, np.float32, np.float64)):
+            return f"{value:_.{precision}f}"
+        if isinstance(value, (int, np.int32, np.int64)):
+            return f"{value:_}"
+        return str(value)
+
+    col_labels = ["notnull" if (not sparse and m == "missings") else m for m in metrics]
+
+    rows = {}
+    for name, summary in zip(name_list, summaries):
+        rows[name] = {
+            label: format_number_string(summary.get(metric, "N/A"), precision)
+            for metric, label in zip(metrics, col_labels)
+        }
+
+    name_col_label_base = "item" if sparse else "column"
+    index_name = f"{name_col_label_base} (n = {total_df_count:_})"
+
+    result = pd.DataFrame.from_dict(rows, orient="index", columns=col_labels)
+    result.index.name = index_name
+    return result
+
+
 def print_summary(
     df: pd.DataFrame | pd.Series,
     show: bool = True,
@@ -278,14 +319,15 @@ def print_summary(
                 last_summary = summary
 
     if show and summary_list:
-        table_output = _format_summary_table(
-            name_list,
-            summary_list,
-            precision,
-            extended,
-            sparse,
-            total_df_count, # Pass the total count
-        )
-        print(table_output)
+        if os.getenv("PDF") == "1":
+            summary_df = _build_summary_df(
+                name_list, summary_list, precision, extended, sparse, total_df_count
+            )
+            display(summary_df)
+        else:
+            table_output = _format_summary_table(
+                name_list, summary_list, precision, extended, sparse, total_df_count
+            )
+            print(table_output)
 
     return last_summary

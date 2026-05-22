@@ -224,13 +224,7 @@ def plot_box_large(
         plt.style.use("default")
 
     if summary:
-        if os.getenv("PDF") == "1":
-            from IPython.display import display
-            _res = print_summary(ser.to_frame(), show=False)
-            if _res:
-                display(pd.DataFrame([_res]))
-        else:
-            print_summary(ser.to_frame())
+        print_summary(ser.to_frame())
     return
 
 

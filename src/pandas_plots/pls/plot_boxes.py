@@ -195,16 +195,7 @@ def plot_boxes(
 
     if summary:
         _df_sorted = df.sort_values(df.columns[0])
-        if os.getenv("PDF") == "1":
-            from IPython.display import display
-            _res = print_summary(df=_df_sorted, precision=precision, sparse=False, show=False)
-            if _res:
-                display(pd.DataFrame([_res]))
-            _res = print_summary(df=_df_sorted, precision=precision, sparse=True, show=False)
-            if _res:
-                display(pd.DataFrame([_res]))
-        else:
-            print_summary(df=_df_sorted, precision=precision, sparse=False)
-            print_summary(df=_df_sorted, precision=precision, sparse=True)
+        print_summary(df=_df_sorted, precision=precision, sparse=False)
+        print_summary(df=_df_sorted, precision=precision, sparse=True)
 
     return

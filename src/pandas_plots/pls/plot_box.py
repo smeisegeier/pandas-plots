@@ -182,13 +182,6 @@ def plot_box(
             fig.write_image(Path(png_path).as_posix())
 
     if summary:
-        # * if only series is provided, col name is None
-        if os.getenv("PDF") == "1":
-            from IPython.display import display
-            _res = print_summary(ser.to_frame(), show=False)
-            if _res:
-                display(pd.DataFrame([_res]))
-        else:
-            print_summary(ser.to_frame())
+        print_summary(ser.to_frame())
 
     return
