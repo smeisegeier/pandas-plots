@@ -46,9 +46,10 @@ def get_duckdb_filter_n(
     # --- Flag to track if the connection was created here ---
     connection_is_ephemeral = False
     
-    # * override if target is pdf
+    # ? override if target is pdf
     if os.getenv("PDF") == "1":
-        max_bar_length = 0
+        max_bar_length = 0          # hide bars, these dont align on pdf print
+        print_filter_str = False    # hide filter string, it takes too much room on pdf
 
     # Determine if bars should be shown based on the argument
     show_bars = max_bar_length > 0
