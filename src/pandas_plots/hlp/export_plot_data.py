@@ -53,7 +53,7 @@ def export_plot_data(df: pd.DataFrame, title: str | None = None, verbose: bool =
 
     os.makedirs("./data", exist_ok=True)
     filepath = f"./data/{name}.csv"
-    result.to_csv(filepath, index=False)
+    result.to_csv(filepath, index=False, sep=";")
     if verbose:
         print(f"💾 exported: {filepath}")
 
