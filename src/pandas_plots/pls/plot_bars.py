@@ -291,6 +291,12 @@ def plot_bars(
         height=height,
     )
 
+    # * set axis titles
+    if orientation == "v":
+        _fig.update_layout(xaxis_title="index", yaxis_title="value")
+    else:
+        _fig.update_layout(xaxis_title="value", yaxis_title="index")
+
     # hack for #79
     if ci_agg == "median":
         _fig.update_layout(
