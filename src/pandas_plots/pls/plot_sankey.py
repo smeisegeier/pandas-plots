@@ -213,6 +213,11 @@ def plot_sankey(
     # Set the date/order for invalid records back to missing so they are not included in sorting/overlap checks
     df_processed.loc[is_invalid_record, date_col_name] = missing_date_marker
 
+    # Re-collapse duplicates that only became identical after coercing missing dates to (NA) —
+    # mirrors the dedup already applied to rows that were blank/missing from the start, so an ID
+    # with several distinct events all missing a date doesn't get one (NA) node per such row.
+    df_processed = df_processed.drop_duplicates(subset=[id_col_name, date_col_name, event_col_name])
+
     # --- Now we only work with records that have valid IDs and event names ((NA) is now a valid name) ---
     df_processed = df_processed.dropna(subset=[id_col_name]).copy()
 
