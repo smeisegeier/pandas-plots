@@ -29,12 +29,16 @@ def plot_sankey(
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
     1. ID (string or integer)
-    2. Date (date, datetime, or string convertible to numeric)
+    2. Event Order (date, datetime, string convertible to a date, or a numeric value/string used as an explicit
+        ordering key, e.g. 1, 2, 3)
     3. Event Name (string)
 
+    **A default demo is shown if no DataFrame is provided.**
+    
     Nodes represent the order of events (e.g., "[1] op", "[2] syst").
-    A default demo is shown if no DataFrame is provided.
-    Id with missing date/events are also shown.
+
+    **Id with missing date/events are also shown.**
+
     Percentages are (x% | y%). x is the share of all id in total, y is the share of all id on this step
 
     Args:
@@ -128,21 +132,21 @@ def plot_sankey(
                 "op",
                 "syst",
                 "op",
-                "rad",
+                "st",
                 "op",  # Tumor 1
                 "syst",
                 "st",
                 "op",
-                "rad",  # Tumor 2
+                "st",  # Tumor 2
                 "op",
-                "rad",
+                "st",
                 "syst",
                 "op",  # Tumor 3
                 "st",
                 "syst",
                 "op",  # Tumor 4
                 "op",
-                "rad",  # Tumor 5
+                "st",  # Tumor 5
                 "syst",
                 "op",  # Tumor 6
                 "",
@@ -150,7 +154,7 @@ def plot_sankey(
                 "op",  # Tumor 8
                 "op",  # Tumor 9
                 "syst",  # Tumor 10
-                "rad",  # Tumor 11
+                "st",  # Tumor 11
                 "op",  # Tumor 12
             ],
         }
@@ -180,10 +184,22 @@ def plot_sankey(
         df_processed[event_col_name].astype(str).str.strip() == ""
     )
 
-    # 2. Convert date column to datetime, coercing errors to NaT
-    df_processed[date_col_name] = pd.to_datetime(df_processed[date_col_name], errors="coerce")
+    # 2. Convert the "date" column to either a numeric order key or a datetime, coercing errors to <NA>.
+    # If every non-blank value in the column parses as a number (int/float, or a numeric string),
+    # it is treated as an explicit ordering value rather than a calendar date.
+    date_col_raw = df_processed[date_col_name]
+    is_raw_blank = date_col_raw.isna() | (date_col_raw.astype(str).str.strip() == "")
+    numeric_dates = pd.to_numeric(date_col_raw, errors="coerce")
+    is_numeric_order = (~is_raw_blank).any() and numeric_dates[~is_raw_blank].notna().all()
 
-    # 3. Flag rows where date could not be parsed (NaT)
+    if is_numeric_order:
+        df_processed[date_col_name] = numeric_dates
+        missing_date_marker = float("nan")
+    else:
+        df_processed[date_col_name] = pd.to_datetime(date_col_raw, errors="coerce")
+        missing_date_marker = pd.NaT
+
+    # 3. Flag rows where date/order could not be parsed
     is_date_missing = df_processed[date_col_name].isna()
 
     # 4. Create a unified flag for invalid records
@@ -191,11 +207,11 @@ def plot_sankey(
 
     # 5. For invalid records, set the event name to '(NA)' and the date to a high date
     # This keeps the record, ensuring the ID is counted, but marks it clearly.
-    # The date is set to NaT for sequencing to work correctly later (it will be filtered out
+    # The date is set to NaT/NaN for sequencing to work correctly later (it will be filtered out
     # for overlap but grouped for first event).
     df_processed.loc[is_invalid_record, event_col_name] = NA_EVENT
-    # Set the date for invalid records back to NaT so they are not included in sorting/overlap checks
-    df_processed.loc[is_invalid_record, date_col_name] = pd.NaT
+    # Set the date/order for invalid records back to missing so they are not included in sorting/overlap checks
+    df_processed.loc[is_invalid_record, date_col_name] = missing_date_marker
 
     # --- Now we only work with records that have valid IDs and event names ((NA) is now a valid name) ---
     df_processed = df_processed.dropna(subset=[id_col_name]).copy()
@@ -347,20 +363,19 @@ def plot_sankey(
     if palette_na is None:
         palette_na = const.COLOR_NA
 
-    # Get unique link types for color assignment
-    link_types = []
+    # Get unique target events for color assignment (all links landing on the same
+    # event share a color, regardless of where they came from)
+    target_events = []
     for i, row in link_counts.iterrows():
         source_l = row["source_label"]
         target_l = row["ordered_event_label"]
         if NA_EVENT not in source_l and NA_EVENT not in target_l and source_l != "[0] start":
-            source_event_name = re.search(r"\] (.*)", source_l).group(1)
-            target_event_name = re.search(r"\] (.*)", target_l).group(1)
-            link_types.append((source_event_name, target_event_name))
+            target_events.append(re.search(r"\] (.*)", target_l).group(1))
 
-    # Assign colors to link types using assign_column_colors helper
-    unique_link_types = list(set(link_types))
-    link_type_colors = _assign_column_colors(
-        columns=unique_link_types,
+    # Assign colors to target events using assign_column_colors helper
+    unique_target_events = list(set(target_events))
+    event_colors = _assign_column_colors(
+        columns=unique_target_events,
         color_palette=palette_link,
         null_label="",
         first_col_grey=False,
@@ -379,10 +394,8 @@ def plot_sankey(
         elif source_l == "[0] start":
             link_colors.append(palette_start[0])
         else:
-            source_event_name = re.search(r"\] (.*)", source_l).group(1)
             target_event_name = re.search(r"\] (.*)", target_l).group(1)
-            link_type = (source_event_name, target_event_name)
-            link_colors.append(link_type_colors[link_type])
+            link_colors.append(event_colors[target_event_name])
 
     formatted_total_ids = f"{total_unique_ids:,}".replace(",", "_")
     total_rows = len(df_processed)
@@ -400,15 +413,15 @@ def plot_sankey(
     fig = go.Figure(
         data=[
             go.Sankey(
-                node=dict(
-                    pad=15,
-                    thickness=20,
-                    line={"color": node_line_color, "width": 0.5},
-                    label=display_labels,
-                    color="blue",
-                    align="left",
-                ),
-                link=dict(source=sources, target=targets, value=values, color=link_colors),
+                node={
+                    "pad": 15,
+                    "thickness": 20,
+                    "line": {"color": node_line_color, "width": 0.5},
+                    "label": display_labels,
+                    "color": "blue",
+                    "align": "left",
+                },
+                link={"source": sources, "target": targets, "value": values, "color": link_colors},
             )
         ]
     )
