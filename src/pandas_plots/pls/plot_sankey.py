@@ -30,7 +30,8 @@ def plot_sankey(
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
     1. ID (string or integer)
     2. Event Order (date, datetime, string convertible to a date, or a numeric value/string used as an explicit
-        ordering key, e.g. 1, 2, 3)
+        ordering key, e.g. 1, 2, 3). If multiple events for the same id share the same order value,
+        ties are broken alphabetically by event name.
     3. Event Name (string)
 
     **A default demo is shown if no DataFrame is provided.**
@@ -259,7 +260,10 @@ def plot_sankey(
     # --- Sort: Valid Date records first, then (NA) records (which have NaT) ---
     # Sorting by date naturally puts NaT (our (NA) records) at the end, which is fine
     # because event_order is calculated *after* sorting.
-    df_sorted = df_processed.sort_values(by=[id_col_name, date_col_name])
+    df_sorted = df_processed.sort_values(
+        by=[id_col_name, date_col_name, event_col_name],
+        kind="mergesort",  # stable, deterministic tie-break
+    )
 
     # --- Performance Optimization: Use vectorized operations instead of loops ---
     # Recalculate sequences based on remaining valid and (NA) records
