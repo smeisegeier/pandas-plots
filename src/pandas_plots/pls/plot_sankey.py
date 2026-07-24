@@ -25,6 +25,7 @@ def plot_sankey(
     palette_start=["#808080"],
     palette_na=const.COLOR_NA,
     alt_text: str = None,
+    debug: bool = False,
 ):
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
@@ -67,6 +68,8 @@ def plot_sankey(
         palette_na (list[str], optional): Color palette for (NA) links.
                                 Defaults to PALETTE_SANKEY_NA from helper.
         alt_text (str, optional): Custom alt text for accessibility. Defaults to chart title if not provided.
+        debug (bool): If True, skips plotting and returns the fully processed per-event DataFrame
+                                (id, date, event, event_order, ordered_event_label, source_label) instead.
     """
     # --- Example Usage with Enlarged Pandas DataFrame if no DataFrame is provided ---
     if df is None:
@@ -283,6 +286,10 @@ def plot_sankey(
 
     # Use a vectorized shift operation to create source and target columns
     df_sorted["source_label"] = df_sorted.groupby(id_col_name)["ordered_event_label"].shift(1)
+
+    if debug:
+        return df_sorted
+
     df_with_links = df_sorted.dropna(subset=["source_label"]).copy()
 
     # Create the start node and links if enabled
