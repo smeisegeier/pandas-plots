@@ -27,6 +27,7 @@ from .create_py_script import create_py_script
 from .setup_rendering import setup_rendering
 from .find_str_in_duckdb import find_str_in_duckdb
 from .export_plot_data import export_plot_data
+from .retrieve_file_from_gist import retrieve_file_from_gist
 
 __all__ = [
     "mean_confidence_interval",
@@ -52,6 +53,7 @@ __all__ = [
     "setup_rendering",
     "find_str_in_duckdb",
     "export_plot_data",
+    "retrieve_file_from_gist",
 ]
 
 pd.DataFrame.export_plot_data = export_plot_data

@@ -362,6 +362,7 @@ _df, _details = pls.plot_venn3(
 | `setup_rendering()` | triggers clean(er) rendering of plots and pandas tables to markdown |
 | `find_str_in_duckdb()` | finds a given string in all tables of a DuckDB database |
 | `export_plot_data()` | exports the dataframe used for a plot to ./data/<name>.csv |
+| `retrieve_file_from_gist()` | downloads a file from a github gist to the current directory |
 
 <br>
 
