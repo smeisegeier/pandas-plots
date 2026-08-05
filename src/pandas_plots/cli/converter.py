@@ -802,10 +802,39 @@ def _single_run(
     return os.path.join(output_dir, root + ".md")
 
 
+def _move_images_to_dir(output_dir: str, root: str, img_dir: str, markdown_filepath: str) -> None:
+    """
+    Moves the `{root}_files` / `{root}_files_dark` image folders into `{output_dir}/{img_dir}`
+    (creating it if missing) and rewrites the image references in the markdown file to match.
+    """
+    img_dir = img_dir.strip("/")
+    dest_dir = os.path.join(output_dir, img_dir)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    moved = False
+    for suffix in ("_files", "_files_dark"):
+        src_dir = os.path.join(output_dir, root + suffix)
+        if os.path.exists(src_dir):
+            dst_dir = os.path.join(dest_dir, root + suffix)
+            if os.path.exists(dst_dir):
+                shutil.rmtree(dst_dir)
+            shutil.move(src_dir, dst_dir)
+            moved = True
+
+    if moved:
+        with open(markdown_filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+        content = content.replace(root + "_files", f"{img_dir}/{root}_files")
+        with open(markdown_filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"└ ✅ moved images to {dest_dir} and updated markdown references.")
+
+
 def jupyter_to_md(
     path: str,
     to: Literal["markdown", "pdf"] = "markdown",
     output_dir: str = "./docs",
+    img_dir: str = "",
     no_input=True,
     execute=False,
     center_df=True,
@@ -828,6 +857,9 @@ def jupyter_to_md(
     Args:
         path (str): The path to the Jupyter notebook file.
         output_dir (str, optional): The directory where the Markdown file will be generated. Defaults to "./docs".
+        img_dir (str, optional): Subdirectory (relative to output_dir) to place the generated
+            `_files`/`_files_dark` image folders in, e.g. "img". Created if missing. Defaults to
+            "" (images stay directly in output_dir, next to the markdown file).
         no_input (bool, optional): Whether to remove input cells from the Markdown output. Defaults to False.
         execute (bool, optional): Whether to execute the notebook before conversion. Defaults to False.
         to (Literal["markdown", "pdf"], optional): The output format. Defaults to "markdown". ⚠️ `pdf` is experimental
@@ -977,6 +1009,9 @@ def jupyter_to_md(
 
     if is_german:
         _apply_german_translations(target_md_path)
+
+    if img_dir:
+        _move_images_to_dir(output_dir, root, img_dir, target_md_path)
 
 
 # * Keep the original function name as primary, alias if needed
