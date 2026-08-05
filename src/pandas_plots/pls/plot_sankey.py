@@ -1,5 +1,6 @@
 import os
 import re
+from typing import Literal
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -20,10 +21,13 @@ def plot_sankey(
     renderer=None,
     show_start_node=True,
     font_size=10,
-    palette_link="Pastel",
+    color_palette="Pastel",
     # palette_link=const.PALETTE_SANKEY_LINK,
-    palette_start=["#808080"],
-    palette_na=const.COLOR_NA,
+    color_start=["#808080"],
+    color_na=const.COLOR_NA,
+    color_mode: Literal["link", "node"] = "link",
+    node_color_uniform="blue",
+    link_color_uniform="lightgray",
     alt_text: str = None,
     debug: bool = False,
 ):
@@ -67,6 +71,13 @@ def plot_sankey(
                                 Defaults to PALETTE_SANKEY_START from helper.
         palette_na (list[str], optional): Color palette for (NA) links.
                                 Defaults to PALETTE_SANKEY_NA from helper.
+        color_mode (str): Which element the palette is applied to. One of:
+                                - "link" (default): links are colored per target event using `palette_link`;
+                                    all nodes share `node_color_uniform`.
+                                - "node": nodes are colored per event using `palette_link`; all links
+                                    share `link_color_uniform`.
+        node_color_uniform (str): Uniform node color used when `color_mode="link"`.
+        link_color_uniform (str): Uniform link color used when `color_mode="node"`.
         alt_text (str, optional): Custom alt text for accessibility. Defaults to chart title if not provided.
         debug (bool): If True, skips plotting and returns the fully processed per-event DataFrame
                                 (id, date, event, event_order, ordered_event_label, source_label) instead.
@@ -372,46 +383,72 @@ def plot_sankey(
     values = link_counts["value"].tolist()
 
     # Set default palettes if not provided
-    if palette_link is None:
-        palette_link = const.PALETTE_VIBRANT
-    if palette_start is None:
-        palette_start = const.PALETTE_SANKEY_START
-    if palette_na is None:
-        palette_na = const.COLOR_NA
+    if color_palette is None:
+        color_palette = const.PALETTE_VIBRANT
+    if color_start is None:
+        color_start = const.PALETTE_SANKEY_START
+    if color_na is None:
+        color_na = const.COLOR_NA
 
-    # Get unique target events for color assignment (all links landing on the same
-    # event share a color, regardless of where they came from)
-    target_events = []
-    for i, row in link_counts.iterrows():
-        source_l = row["source_label"]
-        target_l = row["ordered_event_label"]
-        if NA_EVENT not in source_l and NA_EVENT not in target_l and source_l != "[0] start":
-            target_events.append(re.search(r"\] (.*)", target_l).group(1))
+    if color_mode == "node":
+        # Nodes carry the palette (one color per event, stable across steps);
+        # links fall back to a single uniform color.
+        unique_node_events = [
+            e for e in unique_labels_df_sorted["event_name"].unique().tolist() if e not in ("start", NA_EVENT)
+        ]
+        event_colors = _assign_column_colors(
+            columns=unique_node_events,
+            color_palette=color_palette,
+            null_label="",
+            first_col_grey=False,
+            sort_columns=False,
+        )
 
-    # Assign colors to target events using assign_column_colors helper
-    unique_target_events = list(set(target_events))
-    event_colors = _assign_column_colors(
-        columns=unique_target_events,
-        color_palette=palette_link,
-        null_label="",
-        first_col_grey=False,
-        sort_columns=False,
-    )
+        node_colors = []
+        for _, row in unique_labels_df_sorted.iterrows():
+            if row["label"] == "[0] start":
+                node_colors.append(color_start[0])
+            elif row["event_name"] == NA_EVENT:
+                node_colors.append(color_na[0])
+            else:
+                node_colors.append(event_colors[row["event_name"]])
 
-    # Build link colors list
-    link_colors = []
-    for i, row in link_counts.iterrows():
-        source_l = row["source_label"]
-        target_l = row["ordered_event_label"]
+        link_colors = [link_color_uniform] * len(link_counts)
+    else:
+        # Links carry the palette (all links landing on the same event share a
+        # color, regardless of where they came from); nodes fall back to a
+        # single uniform color.
+        target_events = []
+        for i, row in link_counts.iterrows():
+            source_l = row["source_label"]
+            target_l = row["ordered_event_label"]
+            if NA_EVENT not in source_l and NA_EVENT not in target_l and source_l != "[0] start":
+                target_events.append(re.search(r"\] (.*)", target_l).group(1))
 
-        # Use a distinct color for links to/from (NA)
-        if NA_EVENT in source_l or NA_EVENT in target_l:
-            link_colors.append(palette_na[0])
-        elif source_l == "[0] start":
-            link_colors.append(palette_start[0])
-        else:
-            target_event_name = re.search(r"\] (.*)", target_l).group(1)
-            link_colors.append(event_colors[target_event_name])
+        unique_target_events = list(set(target_events))
+        event_colors = _assign_column_colors(
+            columns=unique_target_events,
+            color_palette=color_palette,
+            null_label="",
+            first_col_grey=False,
+            sort_columns=False,
+        )
+
+        node_colors = node_color_uniform
+
+        link_colors = []
+        for i, row in link_counts.iterrows():
+            source_l = row["source_label"]
+            target_l = row["ordered_event_label"]
+
+            # Use a distinct color for links to/from (NA)
+            if NA_EVENT in source_l or NA_EVENT in target_l:
+                link_colors.append(color_na[0])
+            elif source_l == "[0] start":
+                link_colors.append(color_start[0])
+            else:
+                target_event_name = re.search(r"\] (.*)", target_l).group(1)
+                link_colors.append(event_colors[target_event_name])
 
     formatted_total_ids = f"{total_unique_ids:,}".replace(",", "_")
     total_rows = len(df_processed)
@@ -434,7 +471,7 @@ def plot_sankey(
                     "thickness": 20,
                     "line": {"color": node_line_color, "width": 0.5},
                     "label": display_labels,
-                    "color": "blue",
+                    "color": node_colors,
                     "align": "left",
                 },
                 link={"source": sources, "target": targets, "value": values, "color": link_colors},

@@ -166,3 +166,4 @@ cython_debug/
 .local
 .notes.md
 **/**.duckdb
+filters.py
