@@ -54,6 +54,22 @@ PALETTE_VIBRANT = [
     "#DAA520",  # GoldenRod
 ]
 
+# derived from sankey diagram node colors (tableau/category20 order)
+PALETTE_TAB20 = [
+    "#1f77b4",  # blue - Multiple Myeloma
+    "#aec7e8",  # light blue - IMiD
+    "#ff7f0e",  # orange - PI
+    "#ffbb78",  # light orange - AntiCD38
+    "#2ca02c",  # green - BCMA
+    "#98df8a",  # light green - CAR-T
+    "#d62728",  # red - Transplant
+    "#ff9896",  # pink - IMiD+PI
+    "#9467bd",  # purple - PI+AntiCD38
+    "#c5b0d5",  # light purple - Investigational Therapy
+    "#8c564b",  # brown - IMiD+PI+AntiCD38
+    "#c49c94",  # light brown - IMiD+AntiCD38
+]
+
 # PALETTE_SANKEY_START = ["#808080"]  # Gray
 COLOR_NA = ["#D0D0D0"]
 COLOR_BLUE_LIGHT = ["#8cabe2"]
