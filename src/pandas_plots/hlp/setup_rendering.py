@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 from IPython import get_ipython
 
+from ._ensure_kaleido_chrome import _ensure_kaleido_chrome
+
 
 def setup_rendering(
     static: bool = True,
@@ -23,6 +25,11 @@ def setup_rendering(
     apply_dark_theme : bool, default=False
         If True, applies dark theme. This is not applied in conversion to markdown
 
+    to_pdf : bool, default=False
+        If True, targets PDF export — forces the SVG renderer and sets PDF=1,
+        and overrides apply_dark_theme to always use the light theme (dark theme
+        is not applied when rendering to PDF).
+
     Notes
     -----
     When static is True, the following environment variables are set:
@@ -33,6 +40,9 @@ def setup_rendering(
         RENDERER: empty string -> ie. plotly dynamic notebook renderer
         FONT_SIZE_TH: 0
         FONT_SIZE_TD: 0
+    When to_pdf is True, the following environment variables are set:
+        RENDERER: svg
+        PDF: 1
     """
 
     def apply_viz_settings():
@@ -85,3 +95,8 @@ def setup_rendering(
         os.environ["PDF"] = "1"
     else:
         os.environ.pop("PDF", None)
+
+    # * svg rendering goes through kaleido, which needs a Chrome binary - make sure
+    # * one is available (downloading it once if needed) instead of failing later
+    if os.environ.get("RENDERER") == "svg":
+        _ensure_kaleido_chrome()

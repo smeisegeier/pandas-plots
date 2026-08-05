@@ -374,6 +374,17 @@ _df, _details = pls.plot_venn3(
 
 > ⚠️ this package depends on `numpy<2.0.0` since `UpSetPlot` is still tied to the previous versions
 
+### static image export (kaleido)
+
+static rendering (`setup_rendering(static=True)`, svg/png export) uses `plotly` + `kaleido`. since `kaleido>=1`, chromium is no longer bundled with the package - kaleido needs a separate chrome binary to render images.
+
+`setup_rendering()` handles this automatically: the first time it's called in static mode, it checks whether chrome is available and, if not, downloads a private chrome-for-testing build (one-time, ~150 MB, cached inside the venv). all later renders in that environment reuse it - no manual steps needed.
+
+if the automatic download fails (e.g. no outbound network access on a locked-down company machine), you have two options:
+
+- install google chrome normally - it's auto-detected from its default install location
+- set the `BROWSER_PATH` environment variable to point at an existing chrome/chromium (or chromium-based) executable
+
 <br>
 
 ## 🤝 contributing
