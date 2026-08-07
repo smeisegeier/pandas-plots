@@ -26,8 +26,8 @@ def plot_sankey(
     color_start=["#808080"],
     color_na=const.COLOR_NA,
     color_mode: Literal["link", "node"] = "link",
-    node_color_uniform="blue",
-    link_color_uniform="lightgray",
+    color_node="blue",
+    color_stream="lightgray",
     alt_text: str = None,
     debug: bool = False,
     ignore_empty_events: bool = True,
@@ -74,11 +74,11 @@ def plot_sankey(
                                 Defaults to PALETTE_SANKEY_NA from helper.
         color_mode (str): Which element the palette is applied to. One of:
                                 - "link" (default): links are colored per target event using `palette_link`;
-                                    all nodes share `node_color_uniform`.
+                                    all nodes share `color_node`.
                                 - "node": nodes are colored per event using `palette_link`; all links
-                                    share `link_color_uniform`.
-        node_color_uniform (str): Uniform node color used when `color_mode="link"`.
-        link_color_uniform (str): Uniform link color used when `color_mode="node"`.
+                                    share `color_stream`.
+        color_node (str): Uniform node color used when `color_mode="link"`.
+        color_stream (str): Uniform link/stream color used when `color_mode="node"`.
         alt_text (str, optional): Custom alt text for accessibility. Defaults to chart title if not provided.
         debug (bool): If True, skips plotting and returns the fully processed per-event DataFrame
                                 (id, date, event, event_order, ordered_event_label, source_label) instead.
@@ -354,8 +354,17 @@ def plot_sankey(
         lambda x: "~Z_NA_LAST" if x == NA_EVENT else x
     )
 
-    # Sort primarily by order number, and secondarily by the custom sort key
-    unique_labels_df_sorted = unique_labels_df.sort_values(by=["event_order_num", "event_name_sort_key"])
+    # A node "branches" if it flows into more than one distinct downstream node.
+    # Non-branching nodes (straight-through or terminal) are sorted below branching
+    # ones within the same step, so branching streams read as the top of the diagram.
+    out_degree = link_counts.groupby("source_label")["ordered_event_label"].nunique()
+    unique_labels_df["is_non_branching"] = ~(unique_labels_df["label"].map(out_degree).fillna(0) > 1)
+
+    # Sort primarily by order number, then branching before non-branching nodes,
+    # and finally by the custom name sort key
+    unique_labels_df_sorted = unique_labels_df.sort_values(
+        by=["event_order_num", "is_non_branching", "event_name_sort_key"]
+    )
 
     unique_unformatted_labels_sorted = unique_labels_df_sorted["label"].tolist()
 
@@ -439,7 +448,7 @@ def plot_sankey(
             else:
                 node_colors.append(event_colors[row["event_name"]])
 
-        link_colors = [link_color_uniform] * len(link_counts)
+        link_colors = [color_stream] * len(link_counts)
     else:
         # Links carry the palette (all links landing on the same event share a
         # color, regardless of where they came from); nodes fall back to a
@@ -460,7 +469,7 @@ def plot_sankey(
             sort_columns=False,
         )
 
-        node_colors = node_color_uniform
+        node_colors = color_node
 
         link_colors = []
         for i, row in link_counts.iterrows():
