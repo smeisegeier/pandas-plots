@@ -30,6 +30,7 @@ def plot_sankey(
     link_color_uniform="lightgray",
     alt_text: str = None,
     debug: bool = False,
+    ignore_empty_events: bool = True,
 ):
     """
     Generates a Sankey diagram from a Pandas DataFrame, assuming the column order is:
@@ -81,6 +82,11 @@ def plot_sankey(
         alt_text (str, optional): Custom alt text for accessibility. Defaults to chart title if not provided.
         debug (bool): If True, skips plotting and returns the fully processed per-event DataFrame
                                 (id, date, event, event_order, ordered_event_label, source_label) instead.
+        ignore_empty_events (bool): If True (default), rows with a NULL/empty order (date) or name (event)
+                                are completely ignored and not counted. If an ID is left with no valid
+                                events at all, it is still shown in the diagram with a single '(NA)'
+                                node as its 1st (and only) event. If False, such rows are kept and
+                                coerced to a '(NA)' event instead of being dropped.
     """
     # --- Example Usage with Enlarged Pandas DataFrame if no DataFrame is provided ---
     if df is None:
@@ -220,13 +226,33 @@ def plot_sankey(
     # 4. Create a unified flag for invalid records
     is_invalid_record = is_event_missing | is_date_missing
 
-    # 5. For invalid records, set the event name to '(NA)' and the date to a high date
-    # This keeps the record, ensuring the ID is counted, but marks it clearly.
-    # The date is set to NaT/NaN for sequencing to work correctly later (it will be filtered out
-    # for overlap but grouped for first event).
-    df_processed.loc[is_invalid_record, event_col_name] = NA_EVENT
-    # Set the date/order for invalid records back to missing so they are not included in sorting/overlap checks
-    df_processed.loc[is_invalid_record, date_col_name] = missing_date_marker
+    if ignore_empty_events:
+        # Drop invalid rows entirely - they are not counted at all. IDs that are
+        # left with zero valid rows still need to appear in the diagram, so give
+        # each of them a single (NA) row, which naturally becomes their 1st event.
+        ids_with_valid_events = set(df_processed.loc[~is_invalid_record, id_col_name].dropna().unique())
+        all_ids = set(df_processed[id_col_name].dropna().unique())
+        ids_without_valid_events = all_ids - ids_with_valid_events
+
+        df_processed = df_processed.loc[~is_invalid_record].copy()
+
+        if ids_without_valid_events:
+            na_rows = pd.DataFrame(
+                {
+                    id_col_name: list(ids_without_valid_events),
+                    date_col_name: missing_date_marker,
+                    event_col_name: NA_EVENT,
+                }
+            )
+            df_processed = pd.concat([df_processed, na_rows], ignore_index=True)
+    else:
+        # 5. For invalid records, set the event name to '(NA)' and the date to a high date
+        # This keeps the record, ensuring the ID is counted, but marks it clearly.
+        # The date is set to NaT/NaN for sequencing to work correctly later (it will be filtered out
+        # for overlap but grouped for first event).
+        df_processed.loc[is_invalid_record, event_col_name] = NA_EVENT
+        # Set the date/order for invalid records back to missing so they are not included in sorting/overlap checks
+        df_processed.loc[is_invalid_record, date_col_name] = missing_date_marker
 
     # Re-collapse duplicates that only became identical after coercing missing dates to (NA) —
     # mirrors the dedup already applied to rows that were blank/missing from the start, so an ID
