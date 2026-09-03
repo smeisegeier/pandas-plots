@@ -42,7 +42,10 @@ def plot_sankey(
 
     **A default demo is shown if no DataFrame is provided.**
     
-    Nodes represent the order of events (e.g., "[1] op", "[2] syst").
+    Nodes represent the order of events (e.g., "[1] op", "[2] syst"). Within each step
+    they are stacked top-to-bottom by how the stream continues: nodes that branch into
+    several downstream events first, then straight-through nodes, then dead ends (no
+    follow-up), with "(NA)" always last. Node positions are pinned so this order holds.
 
     **Id with missing date/events are also shown.**
 
@@ -63,14 +66,19 @@ def plot_sankey(
                                 never overlapped. Use this when an overlap makes the whole ID's timeline
                                 untrustworthy. Only real dates are checked; '(NA)' rows (missing/invalid)
                                 are never counted as overlaps. Takes precedence over `exclude_overlap_event`
-                                when both are True.
+                                when both are True. The title's "n=... id" count plus every percentage are
+                                recomputed on the surviving cohort - that count is the only signal that
+                                anything was dropped (the removed rows are available via `debug=True`).
         exclude_overlap_event (bool): The gentler alternative to `exclude_overlap_id`. If True, only the
                                 tied events themselves are removed; the ID stays in the diagram with its
                                 remaining, unambiguous events re-sequenced around the gap. Example: an ID
                                 with events A(Jan 1), B(Feb 1)+C(Feb 1), D(Mar 1) becomes A -> D (B and C
                                 are dropped because they collide, A and D are kept). Use this when you
                                 want to keep as much of each timeline as possible. Ignored if
-                                `exclude_overlap_id` is also True.
+                                `exclude_overlap_id` is also True. An ID whose events were *all* tied
+                                still drops out completely; the title's "n=... id" count plus percentages
+                                are recomputed on the survivors, and the removed rows show up under
+                                `debug=True`.
         renderer (str, optional): The renderer to use for displaying the plot. Options include
                                 'browser', None, 'json', 'png', 'svg', 'jpeg', 'webp', or 'pdf'.
                                 If None, plotly's default renderer is used.
@@ -92,8 +100,9 @@ def plot_sankey(
         color_node (str): Uniform node color used when `color_mode="link"`.
         color_stream (str): Uniform link/stream color used when `color_mode="node"`.
         alt_text (str, optional): Custom alt text for accessibility. Defaults to chart title if not provided.
-        debug (bool): If True, skips plotting and returns the fully processed per-event DataFrame
-                                (id, date, event, event_order, ordered_event_label, source_label) instead.
+        debug (bool): If True, the diagram is still drawn, and the function additionally returns the
+                                fully processed per-event DataFrame
+                                (id, date, event, event_order, ordered_event_label, source_label).
         ignore_empty_events (bool): If True (default), rows with a NULL/empty order (date) or name (event)
                                 are completely ignored and not counted. If an ID is left with no valid
                                 events at all, it is still shown in the diagram with a single '(NA)'
@@ -142,7 +151,7 @@ def plot_sankey(
                 "2011-02-01",
                 "2012-03-01",
                 "2013-04-01",  # Tumor 2
-                "2015-01-01",
+                "2016-02-01",
                 "2016-02-01",
                 "2017-03-01",
                 "2018-04-01",  # Tumor 3
@@ -285,6 +294,9 @@ def plot_sankey(
     # Temporarily filter out (NA) events for overlap checks, as they don't have a valid date
     df_overlap_check = df_processed[df_processed[event_col_name] != NA_EVENT].copy()
 
+    # Raw rows removed by the overlap step, kept aside for the debug DataFrame.
+    df_overlap_excluded = df_processed.iloc[0:0].copy()
+
     if exclude_overlap_id and not df_overlap_check.empty:
         overlapping_ids = (
             df_overlap_check.groupby([id_col_name, date_col_name])
@@ -293,8 +305,10 @@ def plot_sankey(
             .index.get_level_values(id_col_name)
             .unique()
         )
-        # Exclude IDs from the main dataframe
-        df_processed = df_processed[~df_processed[id_col_name].isin(overlapping_ids)].copy()
+        # Exclude every event of an overlapping ID from the main dataframe
+        drop_mask = df_processed[id_col_name].isin(overlapping_ids)
+        df_overlap_excluded = df_processed[drop_mask].copy()
+        df_processed = df_processed[~drop_mask].copy()
         overlap_title_part = ", overlap ids excluded"
     elif exclude_overlap_event and not df_overlap_check.empty:
         overlapping_event_set = set(
@@ -307,8 +321,17 @@ def plot_sankey(
         overlap_mask = pd.MultiIndex.from_arrays(
             [df_processed[id_col_name], df_processed[date_col_name]]
         ).isin(overlapping_event_set)
-        df_processed = df_processed[~(non_na_mask & overlap_mask)].copy()
+        drop_mask = non_na_mask & overlap_mask
+        df_overlap_excluded = df_processed[drop_mask].copy()
+        df_processed = df_processed[~drop_mask].copy()
         overlap_title_part = ", overlap events excluded"
+
+    # Overlap exclusion can drop whole IDs (always for exclude_overlap_id, and for
+    # exclude_overlap_event when every one of an ID's events was tied). Re-sync the
+    # cohort so the title's "n=... id", the start node count, and all percentages
+    # reflect what is actually drawn. The only user-facing signal is that "n=... id".
+    if overlap_title_part:
+        total_unique_ids = df_processed[id_col_name].dropna().nunique()
 
     # --- Sort: Valid Date records first, then (NA) records (which have NaT) ---
     # Sorting by date naturally puts NaT (our (NA) records) at the end, which is fine
@@ -337,9 +360,6 @@ def plot_sankey(
     # Use a vectorized shift operation to create source and target columns
     df_sorted["source_label"] = df_sorted.groupby(id_col_name)["ordered_event_label"].shift(1)
 
-    if debug:
-        return df_sorted
-
     df_with_links = df_sorted.dropna(subset=["source_label"]).copy()
 
     # Create the start node and links if enabled
@@ -367,21 +387,39 @@ def plot_sankey(
         lambda x: "~Z_NA_LAST" if x == NA_EVENT else x
     )
 
-    # A node "branches" if it flows into more than one distinct downstream node.
-    # Non-branching nodes (straight-through or terminal) are sorted below branching
-    # ones within the same step, so branching streams read as the top of the diagram.
+    # Rank each node by how its stream continues, so that within one step the
+    # branching streams sit on top and the dead ends sink to the bottom:
+    #   0 = branches (feeds >= 2 distinct downstream nodes)
+    #   1 = passes straight through (feeds exactly 1)
+    #   2 = leaf / no follow-up at all
     out_degree = link_counts.groupby("source_label")["ordered_event_label"].nunique()
-    unique_labels_df["is_non_branching"] = ~(unique_labels_df["label"].map(out_degree).fillna(0) > 1)
+    _deg = unique_labels_df["label"].map(out_degree).fillna(0)
+    unique_labels_df["flow_rank"] = _deg.apply(lambda d: 0 if d >= 2 else (2 if d == 0 else 1))
 
-    # Sort primarily by order number, then branching before non-branching nodes,
+    # Sort primarily by order number, then by flow rank (branches -> through -> leaf),
     # and finally by the custom name sort key
     unique_labels_df_sorted = unique_labels_df.sort_values(
-        by=["event_order_num", "is_non_branching", "event_name_sort_key"]
+        by=["event_order_num", "flow_rank", "event_name_sort_key"]
     )
 
     unique_unformatted_labels_sorted = unique_labels_df_sorted["label"].tolist()
 
     label_to_index = {label: i for i, label in enumerate(unique_unformatted_labels_sorted)}
+
+    # Pin explicit node positions. Without this, plotly's default "snap" arrangement
+    # re-optimises the vertical order to minimise link crossings and floats the leaf
+    # nodes back up; giving every node an (x, y) from its step and its rank within the
+    # step above makes the ordering stick. Values are kept just inside (0, 1).
+    max_order = unique_labels_df_sorted["event_order_num"].max()
+    rank_in_step = unique_labels_df_sorted.groupby("event_order_num").cumcount()
+    step_size = unique_labels_df_sorted["event_order_num"].map(
+        unique_labels_df_sorted["event_order_num"].value_counts()
+    )
+    node_x = [
+        0.001 if not max_order else min(max(o / max_order, 0.001), 0.999)
+        for o in unique_labels_df_sorted["event_order_num"]
+    ]
+    node_y = [(r + 1) / (n + 1) for r, n in zip(rank_in_step, step_size)]
 
     # Calculate node counts and step totals for percentage calculation
     node_counts = df_sorted["ordered_event_label"].value_counts()
@@ -514,6 +552,7 @@ def plot_sankey(
     fig = go.Figure(
         data=[
             go.Sankey(
+                arrangement="snap",
                 node={
                     "pad": 15,
                     "thickness": 20,
@@ -521,6 +560,8 @@ def plot_sankey(
                     "label": display_labels,
                     "color": node_colors,
                     "align": "left",
+                    "x": node_x,
+                    "y": node_y,
                 },
                 link={"source": sources, "target": targets, "value": values, "color": link_colors},
             )
@@ -537,3 +578,14 @@ def plot_sankey(
     alt_text = alt_text or chart_title
     _add_alt_text(alt_text)
     fig.show(renderer=renderer or os.getenv("RENDERER"), width=width, height=height)
+
+    if debug:
+        # Surviving events, plus the raw rows the overlap step removed (if any),
+        # flagged by `overlap_excluded`; the excluded rows carry no sequence info.
+        df_debug = df_sorted.assign(overlap_excluded=False)
+        if not df_overlap_excluded.empty:
+            df_debug = pd.concat(
+                [df_debug, df_overlap_excluded.assign(overlap_excluded=True)],
+                ignore_index=True,
+            )
+        return df_debug
